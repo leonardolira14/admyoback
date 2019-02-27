@@ -5,7 +5,7 @@ use Restserver\libraries\REST_Controller;
 /**
  * 
  */
-class Productos extends REST_Controller
+class Servicio extends REST_Controller
 {
 	
 	function __construct()
