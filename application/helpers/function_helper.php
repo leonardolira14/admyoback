@@ -112,7 +112,7 @@ if(!function_exists('_increment'))
 		$num=0;
 		$_data=[];
 		
-		if(bccomp($a, $b)===0){
+		if((float)$a===0 && (float)$b===0){
 			$num=0;
 		}else if((int)$b===0){
 			$num=100;
