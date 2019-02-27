@@ -35,10 +35,10 @@ $route['update']='usuario/update';
 $route['saveususer']="usuario/saveususer";
 $route['master']="usuario/master";
 
-$route['getallprducts']="productos/getall";
-$route['saveprducts']="productos/save";
-$route['updateprducts']="productos/update";
-$route['deleteprducts']="productos/delete";
+$route['getallprducts']="Productos/getall";
+$route['saveprducts']="Productos/save";
+$route['updateprducts']="Productos/update";
+$route['deleteprducts']="Productos/delete";
 
 $route["getallnorma"]="norma/getall";
 

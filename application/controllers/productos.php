@@ -105,8 +105,7 @@ class Productos extends REST_Controller
 		
 	}
 	//funcion para obtener los productos o serviciode una empresa
-	public function getall_post(){
-		
+	public function getall_post(){	
 		$datos=$this->post();
 		//vdebug($datos);
 		$_Token=$datos["token"];
