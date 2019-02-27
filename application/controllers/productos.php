@@ -28,7 +28,6 @@ class Productos extends REST_Controller
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
-			
 			$this->Model_Producto->delete($datos["IDProducto"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
