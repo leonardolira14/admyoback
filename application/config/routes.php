@@ -41,4 +41,31 @@ $route['updateprducts']="Servicio/update";
 $route['deleteprducts']="Servicio/delete";
 
 $route["getallnorma"]="norma/getall";
+$route["savenorma"]="norma/save";
+$route["updatenorma"]="norma/update";
+$route["deletenorma"]="norma/delete";
 
+$route["getallcamara"]="camaras/getall";
+$route["savecamara"]="camaras/save";
+$route["updatecamara"]="camaras/update";
+$route["deletecamara"]="camaras/delete";
+
+$route["visitas"]="Visitas/Visitasg";
+
+$route["getallfollow"]="Follow/getallfollow";
+$route["olvidarfollow"]="Follow/olvidarfollow";
+
+$route["perfil"]="Busqueda/perfil";
+
+$route["cerrarsession"]="DatosGenerales/cerrarsession";
+
+$route["getimagen"]="imagen/getImagen";
+$route["detallesimagen"]="imagen/detalle";
+
+$route["getriesgo"]="Riesgo/getriesgo";
+
+$route["getaresumen"]="ClieProv/getaresumen";
+$route["getlista"]="ClieProv/getlista";
+
+$route["getallrealizadas"]="Calificaciones/getallrealizadas";
+$route["detallescalificacion"]="Calificaciones/detalles";

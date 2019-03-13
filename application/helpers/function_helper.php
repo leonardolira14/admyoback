@@ -323,3 +323,164 @@ if(!function_exists("_is_respcorrect"))
 		}
 	}	
 }
+if(!function_exists("token1")){
+	 function token1($pass){
+		$fecha = date_create();
+		$time = date_timestamp_get($fecha)/30;
+		$key=$pass;
+		//"GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";
+		$key=decode($key);
+		//$time=44376117.366667;
+		$x=dechex(floor($time)-1);
+		
+		while (strlen($x)<16){
+			$x="0".$x;
+		}
+		$y=str_split($x,2);
+		for ($a=0;$a<count($y);$a++){
+			$y[$a]=hexdec($y[$a]);
+		}
+		
+		$cad="";
+		for ($a=0;$a<count($y);$a++){
+			$cad.=chr($y[$a]);
+		}
+		$hm=hash_hmac("sha1",$cad,$key);
+		$hmac=unpack("C*",pack("H*", $hm));
+		$bin=substr($hm,-1);
+		$offset=hexdec($bin); // mask 0xf
+		$part1 = substr($hm,0, ($offset * 2));
+		$part2 = substr($hm,($offset * 2),8);
+		$part3 = substr($hm,($offset * 2)+8,strlen($hm)-$offset);
+        $top=(hexdec(substr($hm,($offset * 2), 8)) & hexdec('7fffffff'));
+		$otp = substr($top,strlen($top) - 6, 6);
+		return $otp;
+	}
+}
+if(!function_exists("token")){
+	function token($pass){
+		$fecha = date_create();
+
+		$time = date_timestamp_get($fecha)/30;
+
+		$key=$pass;
+		//"GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";
+		$key=decode($key);
+
+		//$time=44376117.366667;
+		$x=dechex(floor($time));
+		while (strlen($x)<16){
+			$x="0".$x;
+		}
+
+		$y=str_split($x,2);
+
+		for ($a=0;$a<count($y);$a++){
+			$y[$a]=hexdec($y[$a]);
+		}
+		
+		$cad="";
+		for ($a=0;$a<count($y);$a++){
+			$cad.=chr($y[$a]);
+		}
+
+		$hm=hash_hmac("sha1",$cad,$key);
+		$hmac=unpack("C*",pack("H*", $hm));
+		$bin=substr($hm,-1);
+		$offset=hexdec($bin); // mask 0xf
+		$part1 = substr($hm,0, ($offset * 2));
+		$part2 = substr($hm,($offset * 2),8);
+		$part3 = substr($hm,($offset * 2)+8,strlen($hm)-$offset);
+        $top=(hexdec(substr($hm,($offset * 2), 8)) & hexdec('7fffffff'));
+		$otp = substr($top,strlen($top) - 6, 6);
+		return $otp;
+	}
+}
+if(!function_exists("encode")){
+	function encode($string)
+	    {
+	    	$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=';
+	        if (strlen($string) == 0) {
+	            // Gives an empty string
+	            return '';
+	        }
+	        // Convert string to binary
+	        $binaryString = '';
+	        foreach (str_split($string) as $s) {
+	            // Return each character as an 8-bit binary string
+	            $binaryString .= sprintf('%08b', ord($s));
+	        }
+	        // Break into 5-bit chunks, then break that into an array
+	        $binaryArray = chunk($binaryString, 5);
+	        // Pad array to be divisible by 8
+	        while (count($binaryArray) % 8 !== 0) {
+	            $binaryArray[] = null;
+	        }
+	        $base32String = '';
+	        // Encode in base32
+	        foreach ($binaryArray as $bin) {
+	            $char = 32;
+	            if (!is_null($bin)) {
+	                // Pad the binary strings
+	                $bin = str_pad($bin, 5, 0, STR_PAD_RIGHT);
+	                $char = bindec($bin);
+	            }
+	            // Base32 character
+	            $base32String .= $alphabet[$char];
+	        }
+	        return $base32String;
+	    }
+}
+
+ function decode($base32String)    {
+        // Only work in upper cases
+		$alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=';
+        $base32String = strtoupper($base32String);
+        // Remove anything that is not base32 alphabet
+        $pattern = '/[^A-Z2-7]/';
+
+        $base32String = preg_replace($pattern, '', $base32String);
+
+        if (strlen($base32String) == 0) {
+            // Gives an empty string
+            return '';
+        }
+        $base32Array = str_split($base32String);
+
+        $string = '';
+        foreach ($base32Array as $str) {
+            $char = strpos($alphabet, $str);
+           
+            // Ignore the padding character
+            if ($char !== 32) {
+                $string .= sprintf('%05b', $char);
+            }
+
+        }
+        while (strlen($string) %8 !== 0) {
+            $string = substr($string, 0, strlen($string)-1);
+        }
+
+        $binaryArray = chunk($string, 8);
+
+        $realString = '';
+
+        foreach ($binaryArray as $bin) {
+            // Pad each value to 8 bits
+            $bin = str_pad($bin, 8, 0, STR_PAD_RIGHT);
+
+            // Convert binary strings to ASCII
+            $realString .= chr(bindec($bin));
+
+        }
+
+        return $realString;
+    }
+    function chunk($binaryString, $bits)    {
+        $binaryString = chunk_split($binaryString, $bits, ' ');
+        if (substr($binaryString, (strlen($binaryString)) - 1)  == ' ') {
+            $binaryString = substr($binaryString, 0, strlen($binaryString)-1);
+        }
+        return explode(' ', $binaryString);
+    }	
+

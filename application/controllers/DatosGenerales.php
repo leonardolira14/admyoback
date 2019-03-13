@@ -24,6 +24,38 @@ class DatosGenerales extends REST_Controller
     	$this->load->model("Model_Marcas");
 	}
 
+	public function cerrarsession_post(){
+		$datos=$this->post();
+		$_ID_Empresa=$datos["empresa"];
+		$_Token=$datos["token"];
+		$bandera=false;
+		//verifico que el token sea valido si no lo saco de la session 
+		$_datos_Tocken=$this->Model_Usuario->checktoken($_Token);
+		$_datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
+		if($_datos_Tocken===false){
+			$_data["code"]=1990;
+			$_data["ok"]="ERROR";
+			$_data["reult"]="Error de sesión";
+			$bandera=true;
+		}
+		if($_datos_empresa===false){
+			$_data["code"]=1990;
+			$_data["ok"]="ERROR";
+			$_data["reult"]="Error de empresa";
+			$bandera=true;
+		}
+		if($bandera===false){
+			$this->Model_Usuario->cerrar($_Token);
+			$_data["code"]=0;
+			$_data["ok"]="SUCCES";
+		}
+		$data["response"]=$_data;
+		$this->response($data);
+
+
+
+
+	}
 	//funcion para obtener los todos los sectores
 	public function getSector_get(){
 		try{
@@ -100,8 +132,8 @@ class DatosGenerales extends REST_Controller
 			$Notificaciones=$this->Model_Notificaciones->getten($_ID_Empresa,1);
 			//obtengo la imagen como cliente
 
-			$datos["imagencliente"]=$this->Model_Imagen->imgcliente($_ID_Empresa,"A","Cliente",$resumen=FALSE);
-			$datos["imagenproveedor"]=$this->Model_Imagen->imgcliente($_ID_Empresa,"A","Proveedor",$resumen=FALSE);
+			$datos["imagencliente"]=$this->Model_Imagen->imgcliente($_ID_Empresa,"A","cliente",$resumen=FALSE);
+			$datos["imagenproveedor"]=$this->Model_Imagen->imgcliente($_ID_Empresa,"A","proveedor",$resumen=FALSE);
 			$datos["empresa"]=$_datos_empresa;
 			$datos["notificaciones"]=$Notificaciones;
 			$datos["follow"]=$Follow;

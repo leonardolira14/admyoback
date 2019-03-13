@@ -90,5 +90,14 @@ class Model_Usuario extends CI_Model
 		$this->db->where("IDUsuario='$_ID_Usuario'")->update("usuarios",$array);
 
 	}
+	public function GetMaster($_ID_Empresa){
+		$sql=$this->db->select("*")->where("Tipo_Usuario='Master' and IDEmpresa='$_ID_Empresa'")->get("usuarios");
+		return $sql->result_array();
+	}
+	public function cerrar($_Token){
+		$array=array("Estatus"=>1,"FechaFin"=>date('Y-m-d'));
+		$sql=$this->db->where("Token='$_Token'")->get("accesos");
+	
+	}
 
 }
