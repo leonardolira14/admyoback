@@ -21,4 +21,16 @@ class Model_Follow extends CI_Model
 	public function olvidar($_IDFollow){
 		$this->db->where("IDFollow='$_IDFollow'")->delete('tb_follow_empresas');
 	}
+	public function get_num($IDEmpresa){
+		$respuesta=$this->db->select('count(*) as num')->where("IDEmpresaA='$IDEmpresa'")->get("tb_follow_empresas");
+		return $respuesta->row_array()["num"];
+	}
+	public function tb_follow_empresas($IDEmpresa,$IDEmpresaB){
+		$respu=$this->db->select('*')->where("IDEmpresaA='$IDEmpresa' and IDEmpresaSeguida='$IDEmpresaB'")->get("tb_follow_empresas");
+		if($respu->num_rows()===0){
+			$array=array("IDEmpresaA"=>$IDEmpresa,"IDEmpresaSeguida"=>$IDEmpresaB,"Status"=>1);
+			$this->db->insert('tb_follow_empresas',$array);
+		}
+		
+	}
 }

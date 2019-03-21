@@ -4,12 +4,12 @@ RewriteBase /
 # Removes index.php from ExpressionEngine URLs
 #RewriteCond %{THE_REQUEST} ^GET.*index\.php [NC]
 #RewriteCond %{REQUEST_URI} !/system/.* [NC]
-RewriteRule (.*?)admyo_web/back/index\.php/*(.*) $1$2 [R=301,NE,L]
-#RewriteRule (.*?)back/index\.php/*(.*) $1$2 [R=301,NE,L]
+#RewriteRule (.*?)admyo_web/back/index\.php/*(.*) $1$2 [R=301,NE,L]
+RewriteRule (.*?)back/index\.php/*(.*) $1$2 [R=301,NE,L]
 # Directs all EE web requests through the site index file
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ admyo_web/back/index.php?/$1 [L]
-#RewriteRule ^(.*)$ back/index.php?/$1 [L]
+#RewriteRule ^(.*)$ admyo_web/back/index.php?/$1 [L]
+RewriteRule ^(.*)$ back/index.php?/$1 [L]
 </IfModule>
 php_value short_open_tag 1

@@ -103,6 +103,17 @@ if(!function_exists("_media_puntos"))
 		return $_data;
 	}
 }
+if(!function_exists('in_array_r')){
+	function in_array_r($needle, $haystack, $strict = false) {
+		foreach ($haystack as $item) {
+			if (($strict ? $item === $needle : $item == $needle) || (is_array($item) && in_array_r($needle, $item, $strict))) {
+				return true;
+			}
+		}
+	
+		return false;
+	}
+}
 if(!function_exists('_increment'))
 {
 	function _increment($a,$b,$c)
@@ -112,17 +123,17 @@ if(!function_exists('_increment'))
 		$num=0;
 		$_data=[];
 		
-		if((float)$a===0 && (float)$b===0){
+		if(bccomp($a, $b) == 0){
 			$num=0;
-		}else if((int)$b===0){
+		}else if(round($b, 2)==0){
 			$num=100;
-		}else if((int)$a===0){
+		}else if(round($a, 2)==0){
 			$num=-100;
-		}else{
 			
+		}else{
 			$num=round((((float)$a-(float)$b)/(float)$b)*100,2);
 		}
-
+		
 		if($c==="imagen"){
 			if($num===0){
 				$_data["class"]="neutro";
@@ -132,7 +143,6 @@ if(!function_exists('_increment'))
 				$_data["class"]="red";
 			}
 			$_data["num"]=$num."%";
-
 		}else{
 			if($num===0){
 				$_data["class"]="neutro";
@@ -142,7 +152,6 @@ if(!function_exists('_increment'))
 				$_data["class"]="red";
 			}
 			$_data["num"]=$num."%";
-
 		}
 		
 		return $_data;

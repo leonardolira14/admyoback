@@ -61,6 +61,31 @@ class Follow extends REST_Controller
 		$data["response"]=$_data;
 		$this->response($data);
 	}
+	public function addfllow_post(){
+		$datos=$this->post();
+		$_Empresa=$datos["IDEmpresa"];
+		$_EmpresaB=$datos["IDEmpresaB"];
+		//primero traigo los datos de la empresa
+		$_datos_empresa=$this->Model_Empresa->getempresa($_Empresa);
+		//ahora traigo los datos del numero de seguidas
+		$_num=$this->Model_Follow->get_num($_Empresa);
+		if($_Empresa===$_EmpresaB){
+			$_data["code"]=2;
+			$dat["datos"]="iguales";
+		}else if($_datos_empresa["TipoCuenta"]==="basic" && $_num<=10){
+			$_data["code"]=0;
+			$dat["datos"]=$this->Model_Follow->tb_follow_empresas($_Empresa,$_EmpresaB);
+		}else{
+			$_data["code"]=1;
+			$dat["datos"]="Aumentar";
+		}
+
+			
+			$_data["ok"]="SUCCESS";
+			$_data["result"]=$dat;
+			$data["response"]=$_data;
+		    $this->response($data);
+	}
 	function checksession($_Token,$_Empresa){
 		//primerocheco el token
 		$_datos_Tocken=$this->Model_Usuario->checktoken($_Token);

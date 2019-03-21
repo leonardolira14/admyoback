@@ -24,9 +24,46 @@ class Busqueda extends REST_Controller
         $this->load->model("Model_Giros");
         $this->load->model("Model_Producto");
         $this->load->model("Model_Imagen");
+        $this->load->model("Model_General");
 
 	}
+    // funcion para buscar con filtros
+    public function busquedas_post(){
+        $datos=$this->post();
+        $_Empresa_Emisora=$this->Model_Empresa->getempresa($datos["IDEmpresaEmisora"]);
 
+        if(isset($datos["Orden"])){
+            $orden=$datos["Orden"];
+        }else{
+            $orden="";
+        }
+        if(isset($datos["Ubicacion"])){
+            $Estado=$datos["Ubicacion"];
+        }else{
+            $Estado="";
+        }
+        if(isset($datos["calificacion"])){
+            $calificaciones=$datos["calificacion"];
+        }else{
+            $calificaciones="";
+        }
+        if(isset($datos["Asociaciones"])){
+            $Asociacion=$datos["Asociaciones"];
+        }else{
+            $Asociacion="";
+        }
+        if(isset($datos["Certificaciones"])){
+            $Certificado=$datos["Certificaciones"];
+        }else{
+            $Certificado="";
+        }
+        
+        //ahora obtengo los resultados deacuerdo a lo que se haya solicitado
+        $_data["resultados"]=$this->Model_Buscar->busquda_Filtro($datos["Palabra"],$orden,$Estado,$calificaciones,$Certificado,$Asociacion);
+        $_data["estados"]=$datos["Estados"]=$this->Model_General->getEstados('42');
+        $_data["numeroresultados"]=count( $_data["resultados"]);
+        $this->response($_data);
+    }
 
 
     //funcion para buscar
