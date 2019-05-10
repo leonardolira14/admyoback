@@ -99,5 +99,39 @@ class Model_Usuario extends CI_Model
 		$sql=$this->db->where("Token='$_Token'")->get("accesos");
 	
 	}
+	public function DatosUsuario($Correo){
+		$respu=$this->db->select('*')->where("IDUsuario='$Correo'")->get('usuarios');
+		if($respu->num_rows()==0){
+			return false;
+		}else{
+			return $respu->row_array();
+		}
+	}
+	public function DatosUsuarioCorreo($Correo){
+		$respu=$this->db->select('*')->where("Correo='$Correo'")->get('usuarios');
+		if($respu->num_rows()==0){
+			return false;
+		}else{
+			return $respu->row_array();
+		}
+	}
+	public function Preusuario($correo,$IDEmpresa){
+		$sql="Correo='$correo'";
+		$this->db->select('*');
+		$this->db->from('usuarios');
+		$this->db->where($sql);
+		$respu=$this->db->get();
+		
+		if($respu->num_rows()===0){
+			$token=md5(date('Y-m-d').$IDEmpresa.$correo);
+			$clave=md5('PGEG243%'.$this->constant).":".$this->constant;
+			$array=array("Tipo_Usuario"=>"Master","Correo"=>$correo,"IDEmpresa"=>$IDEmpresa,"Fecha_Alta"=>date('Y-m-d H:i:s'),"Token_Activar"=>$token);
+			$this->db->insert("usuarios",$array);
+			return $token;
+		}else{
+			return false;
+		}
+
+	}
 
 }

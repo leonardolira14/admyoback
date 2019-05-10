@@ -173,4 +173,23 @@ class Empresa extends REST_Controller
 			return true;
 		}
 	}
+	//funcion para obtener todas las empresas para calificarlas
+	public function getall_get(){
+		
+		$_data["code"]=0;
+		$_data["ok"]="SUCCESS";
+		$_data["result"]=$this->Model_Empresa->getempresa_calificar();
+		$data["response"]=$_data;
+		$this->response($data);
+	}
+	public function addRelacion($IDEmpresaP,$IDEmpresaB,$Tipo){
+		$tp=$this->db->select('*')->where("IDEmpresaB=$IDEmpresaB and IDEmpresaP=$IDEmpresaP and Tipo='".$Tipo."'")->get("tbrelacion");
+		if($tp->num_rows()===0){
+			$datos= array('IDEmpresaP' =>$IDEmpresaP,"IDEmpresaB"=>$IDEmpresaB,"Tipo"=>$Tipo);
+			$this->db->insert("tbrelacion",$datos);
+		}
+		
+	}
+	
+	
 }

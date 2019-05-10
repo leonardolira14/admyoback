@@ -22,10 +22,20 @@ class Model_Empresa extends CI_Model
 		}
 
 	}
+	//funcion para obter los daros de la empresa 
+	public function getempresaRFC($RFC_Empresa){
+		$respuesta=$this->db->select("*")->where("RFC='$RFC_Empresa'")->get("empresa");
+		if($respuesta->num_rows()===0){
+			return false;
+		}else{
+			return $respuesta->row_array();
+		}
+
+	}
 	//funcion para agregar una empresa en la tabla de admyo
 	public function preaddempresa($_Tipo_Persona,$_Razon_Social,$_Nombre_Comercial,$_RFC,$_Tipo_Cuenta,$_Status){
 		$tokenApi=md5($_Razon_Social.$_Nombre_Comercial.$_RFC);
-		$array=array("Persona"=>$_Tipo_Persona,"Razon_Social"=>$_Razon_Social,"Nombre_Comer"=>$_Nombre_Comercial,"RFC"=>$_RFC,"TipoCuenta"=>$_Tipo_Cuenta,"DiasPago"=>date('d'),"Esta"=>$_Status,"Token_API"=>$tokenApi);
+		$array=array("Persona"=>$_Tipo_Persona,"Razon_Social"=>$_Razon_Social,"Nombre_Comer"=>$_Nombre_Comercial,"RFC"=>$_RFC,"TipoCuenta"=>$_Tipo_Cuenta,"DiasPago"=>date('d/m/Y'),"Esta"=>$_Status,"Token_API"=>$tokenApi);
 		$this->db->insert("empresa",$array);
 		return $this->db->insert_id();
 	}
@@ -70,6 +80,55 @@ class Model_Empresa extends CI_Model
 		$array=array("Numero"=>$numero,"Tipo_Numero"=>$tipo);
 		$this->db->where("IDTel='$_ID_Tel'")->update("telefonos",$array);
 	}
+	//funcion para obtener las empresas para calificarlas
+	public function getempresa_calificar(){
+		$emrpesas=$this->db->select("IDEmpresa,Razon_Social,RFC")->get("empresa");
+		return $emrpesas->result_array();
+	}
+	public function datosRFCEm($rfc){
+		$respu=$this->db->select('*')->where('RFC',$rfc)->get('empresa');
+		if($respu->num_rows()==0){
+			return false;
+		}else{
+			return $respu->row_array();
+		}
+		
+	}
+	//funcion para saber el giro principal de la empresa
+	public function Get_Giro_Principal($_ID_Empresa){
+		$_registro=$this->db->select("IDGiro")->where("IDEmpresa=$_ID_Empresa and Principal='1'")->get("giroempresa");
+		return $_registro->row_array();
 
+	}
+	public function addRelacion($IDEmpresaP,$IDEmpresaB,$Tipo){
+		$tp=$this->db->select('*')->where("IDEmpresaB=$IDEmpresaB and IDEmpresaP=$IDEmpresaP and Tipo='".$Tipo."'")->get("tbrelacion");
+		if($tp->num_rows()===0){
+			$datos= array('IDEmpresaP' =>$IDEmpresaP,"IDEmpresaB"=>$IDEmpresaB,"Tipo"=>$Tipo);
+			$this->db->insert("tbrelacion",$datos);
+		}
+		
+	}
+	public function  AddEmpresa($persona='PFAE',$rz,$nc,$rfc,$n1,$n2,$n3,$estado="",$tipocuenta='basic',$esta='3',$idioma='esl',$pais="MX"){
+		
+		$array=array("Razon_Social"=>$rz,"RFC"=>$rfc,"Persona"=>$persona,
+			"Estado"=>$estado,
+			"Nombre_Comer"=>$nc,
+			"Esta"=>$esta,
+			"TipoCuenta"=>$tipocuenta,
+			"Idioma"=>$idioma,
+			"Pais"=>$pais
+		);
+		$this->db->insert("empresa",$array);
+		$select="RFC='$rfc'";
+		$this->db->where($select);
+		$resp=$this->db->get("empresa");
+		$IDempresa= $resp->result()[0]->IDEmpresa; 
+		$this->AddGiro($IDempresa,$n1,$n2,$n3);
+		return $IDempresa;
+	}
+	public function AddGiro($IDEmpresa,$n1,$n2,$n3){
+		$array=array("IDEmpresa"=>$IDEmpresa,"IDGiro"=>$n1,"Principal"=>'0',"IDGiro2"=>$n2,"IDGiro3"=>$n3);
+		return $this->db->insert('giroempresa', $array);
+	}
 	
 }

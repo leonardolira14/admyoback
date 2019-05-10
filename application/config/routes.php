@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-
+$route["getallempresas"]="Empresa/getall";
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
@@ -71,3 +71,7 @@ $route["getlista"]="ClieProv/getlista";
 
 $route["getallrealizadas"]="Calificaciones/getallrealizadas";
 $route["detallescalificacion"]="Calificaciones/detalles";
+
+//rutas para las calificaciones
+$route["getcuestionario"]="Calificaciones/calificar";
+$route["calificar"]="Calificaciones/calificarfinal";

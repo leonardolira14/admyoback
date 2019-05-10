@@ -125,10 +125,8 @@ class Model_Email extends CI_Model
 		$this->email->to($_Correo_envio);
 		$this->email->subject("¡Ha Realizado una Calificación en ADMYO!");
 		$html="";
-		$linea=explode("|*|",$_Preguntas);
-		for ($i=1; $i < count($linea); $i++) { 
-			$datos=explode("|",$linea[$i]);
-			$html.='<tr><td>'.$datos[0].'</td><td style="text-align:center;">'.$datos[1].'</td></tr>';
+		foreach ($_Preguntas as $key ){ 
+			$html.='<tr><td>'.$key["Pregunta"].'</td><td style="text-align:center;">'.$key["Respuesta"].'</td></tr>';
 		}
 		($_Tipo_valoracion==="cliente") ? $_Tipo_contrario="proveedor" : $_Tipo_contrario="cliente";
 		$body = 
@@ -282,10 +280,8 @@ class Model_Email extends CI_Model
 		$this->email->to($_Correo_envio);
 		$this->email->subject("¡Ha Recibido una Calificación en ADMYO!");
 		$html="";
-		$linea=explode("|*|",$_Preguntas);
-		for ($i=1; $i < count($linea); $i++) { 
-			$datos=explode("|",$linea[$i]);
-			$html.='<tr><td>'.$datos[0].'</td><td style="text-align:center;">'.$datos[1].'</td></tr>';
+		foreach ($_Preguntas as $key ){ 
+			$html.='<tr><td>'.$key["Pregunta"].'</td><td style="text-align:center;">'.$key["Respuesta"].'</td></tr>';
 		}
 		($_Tipo_valoracnon==="cliente") ? $_Tipo_contrario="proveedor" : $_Tipo_contrario="cliente";
 		$body = 
@@ -431,7 +427,6 @@ class Model_Email extends CI_Model
 		</html>';
 		$this->email->message($body);
 		$this->email->send();
-
 	}
 	//funcion para enviar el correo electronico de preregistro de un usuario
 	public function invitar_usuario($Razon_Social,$Correo,$pass,$Token)

@@ -150,6 +150,7 @@ class Model_Calificaciones extends CI_Model{
 	 	
 	 			foreach ($sql->result() as $valoracion)
 	 			{
+					 
 	 				
 	 				//Datos de la empresa
 	 				 $datosempresa=$this->DatosEmpresa($valoracion->IDEmpresaReceptor);
@@ -157,10 +158,25 @@ class Model_Calificaciones extends CI_Model{
 	 				 $datosuario=$this->DatosUsuario($valoracion->IDUsuarioReceptor);
 	 				 //datos del usuario emisor
 	 				 $datosuario2=$this->DatosUsuario($valoracion->IDUsuarioEmisor);
-	 				 
 	 				 ($valoracion->FechaModificacion==="0000-00-00") ? $fechamod="-" :$fechamod=$valoracion->FechaModificacion;
-	 				($valoracion->FechaPuesta==="0000-00-00") ? $fechapuesta="-" : $fechapuesta=$valoracion->FechaPuesta;
-	 				array_push($listascalificaciones,array("IDValora"=>$valoracion->IDCalificacion,"num_empresa_receptora"=>$datosempresa->IDEmpresa,"Logo"=>$datosempresa->Logo,"Nombre_comer"=>$datosempresa->Nombre_Comer,'Razon_Social' =>$datosempresa->Razon_Social,"UsuarioReceptor"=>$datosuario->Nombre." ".$datosuario->Apellidos,"CorreoReceptor"=>$datosuario->Correo,"UsuarioEmisor"=>$datosuario2->Nombre." ".$datosuario2->Apellidos,"CorreoEmisor"=>$datosuario2->Correo,"Status"=>$valoracion->Status,"Fecha"=>$valoracion->FechaRealizada,"FechaModificacion"=>$fechamod,"FechaPuesta"=>$fechapuesta));
+	 				($valoracion->FechaPuesta==="0000-00-00") ? $fechapuesta="-" : $fechapuesta=$valoracion->FechaPuesta; 
+					if(isset($datosempresa->IDEmpresa)){
+						array_push($listascalificaciones,array(
+							"IDValora"=>$valoracion->IDCalificacion,
+							"num_empresa_receptora"=>$datosempresa->IDEmpresa,
+							"Logo"=>$datosempresa->Logo,
+							"Nombre_comer"=>$datosempresa->Nombre_Comer,
+							'Razon_Social' =>$datosempresa->Razon_Social,
+							"UsuarioReceptor"=>$datosuario->Nombre." ".$datosuario->Apellidos,
+							"CorreoReceptor"=>$datosuario->Correo,
+							"UsuarioEmisor"=>$datosuario2->Nombre." ".$datosuario2->Apellidos,
+							"CorreoEmisor"=>$datosuario2->Correo,
+							"Status"=>$valoracion->Status,
+							"Fecha"=>$valoracion->FechaRealizada,
+							"FechaModificacion"=>$fechamod,
+							"FechaPuesta"=>$fechapuesta));
+					}
+					
 	 				
 	 			}
 	 			
@@ -256,51 +272,8 @@ class Model_Calificaciones extends CI_Model{
 		$respu=$this->db->get();
 		return $respu->result()[0]->IDValora;
 	}
-	public function AddDetalleValoracion2($_ID_Valoracion,$_ID_Pregunta,$_Respuesta){
-		$_Datos_pregunta=$this->detpreguntas($_ID_Pregunta);
-		$_Respuesta_correcta=$_Datos_pregunta->Condicion;
-		$_Puntos_Posibles=$_Datos_pregunta->PorTotal;
-		$_Puntos_obtenidos=0;
-		if($_Puntos_Posibles!="F1")
-		{
-			if($_Respuesta_correcta===$_Respuesta){
-				$_Puntos_obtenidos=$_Puntos_Posibles;
-			}
-		}
-		else
-		{
-			$_Puntos_Posibles=0;
-			$_Puntos_obtenidos=$_Datos_pregunta->PorDesc/(pow(arg(3.005),$_Respuesta));
-		}
-		$_array=array(
-			"IDCalificacion"=>$_ID_Valoracion,
-			"IDPregunta"=>$_ID_Pregunta,
-			"Respuesta"=>$_Respuesta,
-			"PuntosObtenidos"=>$_Puntos_obtenidos,
-			"PuntosPosibles"=>$_Puntos_Posibles
-		);
-		$_data["PuntosPosibles"]=$_Puntos_Posibles;
-		$_data["PuntosObtenidos"]=$_Puntos_obtenidos;
-		$_data["Pregunta"]=$_Datos_pregunta->Pregunta;
-		$_data["Respuesta"]=$_Respuesta;
-		$this->db->insert("tbdetallescalificaciones",$_array);
-		return $_data;
-	}
-	public function AddValoracion($_ID_Usuario_Emisor,$_ID_Empresa_emisora,$_ID_Giro_emisor,$_ID_Usuario_receptor,$_ID_Empresa_receptor,$_ID_Giro_receptor,$_Status,$_Emitido_para){
-		$_array=array(
-			"IDUsuarioEmisor"=>$_ID_Usuario_Emisor,
-			"IDEmpresaEmisor"=>$_ID_Empresa_emisora,
-			"IDGrioEmisor"=>$_ID_Giro_emisor,
-			"IDUsuarioReceptor"=>$_ID_Usuario_receptor,
-			"IDEmpresaReceptor"=>$_ID_Empresa_receptor,
-			"IDGiroReceptor"=>$_ID_Giro_receptor,
-			"Status"=>$_Status,
-			"Emitidopara"=>$_Emitido_para
-		);
 
-		$this->db->insert("tbcalificaciones",$_array);
-		return $this->db->insert_id();
-	}
+	
 	public function addDetallevaloracion($tipo,$respuestas,$IDEmpresa,$IDEmpresa_Valorada,$correo,$IDUsuario,$IDGiro){
 		$resp=$this->cuestionario($tipo);
 		$existe=[];
@@ -565,4 +538,138 @@ class Model_Calificaciones extends CI_Model{
 		
 
 	}
+	public function cuestionario_calificar($Tipo,$_ID_Empresa_emisora,$_ID_Empresa_receptor,$Nivel){
+		$respu=$this->db->select('*')->where("IDNivel2='$Nivel' and Tipo='$Tipo'")->get('tbconfigcuestionarios');
+		$cuestionario_calidad=[];
+		$cuestionario_cumplimiento=[];
+		$cuestionario_recomendacion=[];
+		$cuestionario_oferta=[];
+		$total=0;
+		$nomenltura=$respu->row_array();
+		$_listas_dependencias=[];
+		$flag=TRUE;
+
+		//ahora obtengo los datos de cada una de las categorias
+		//empiezo con calidad
+		$cuestionarioIDS=explode(",",$nomenltura["Calidad"]);
+		foreach ($cuestionarioIDS as $key) {
+			$respu=$this->detpreguntas($key);
+			array_push($cuestionario_calidad,array("Pregunta"=>$respu->Pregunta,"Forma"=>trim($respu->Forma),"Nump"=>$respu->IDPregunta,"respuesta"=>$respu->Condicion,"dependecia"=>$respu->Dependencia,"PreguntaDependencia"=>$respu->PreguntaDependencia,"RespuestaDepen"=>$respu->RespuestaDepen,"Respuesta_usuario"=>''));
+				
+			if($respu->Dependencia==="SI"){
+					array_push($_listas_dependencias,array("ID_Pregunta"=>$respu->PreguntaDependencia,"Respuesta"=>$respu->RespuestaDepen,"S_ID_Pregunta"=>$respu->IDPregunta));
+			}
+		}
+		//empiezo con Cumplimiento
+		$cuestionarioIDS=explode(",",$nomenltura["Cumplimiento"]);
+		foreach ($cuestionarioIDS as $key) {
+			$respu=$this->detpreguntas($key);
+			array_push($cuestionario_cumplimiento,array("Pregunta"=>$respu->Pregunta,"Forma"=>trim($respu->Forma),"Nump"=>$respu->IDPregunta,"respuesta"=>$respu->Condicion,"dependecia"=>$respu->Dependencia,"PreguntaDependencia"=>$respu->PreguntaDependencia,"RespuestaDepen"=>$respu->RespuestaDepen,"Respuesta_usuario"=>''));
+			if($respu->Dependencia==="SI"){
+					array_push($_listas_dependencias,array("ID_Pregunta"=>$respu->PreguntaDependencia,"Respuesta"=>$respu->RespuestaDepen,"S_ID_Pregunta"=>$respu->IDPregunta));
+			}
+		}
+		//empiezo con oferta solo para los proveedores
+		if($Tipo==="Proveedor"){
+			$cuestionarioIDS=explode(",",$nomenltura["Oferta"]);
+			foreach ($cuestionarioIDS as $key) {
+				$respu=$this->detpreguntas($key);
+				array_push($cuestionario_oferta,array("Pregunta"=>$respu->Pregunta,"Forma"=>trim($respu->Forma),"Nump"=>$respu->IDPregunta,"respuesta"=>$respu->Condicion,"dependecia"=>$respu->Dependencia,"PreguntaDependencia"=>$respu->PreguntaDependencia,"RespuestaDepen"=>$respu->RespuestaDepen,"Respuesta_usuario"=>''));
+					if($respu->Dependencia==="SI"){
+						array_push($_listas_dependencias,array("ID_Pregunta"=>$respu->PreguntaDependencia,"Respuesta"=>$respu->RespuestaDepen,"S_ID_Pregunta"=>$respu->IDPregunta));
+				}
+			}
+		}
+		
+		//empiezo con calidad
+		$cuestionarioIDS=explode(",",$nomenltura["Recomendacion"]);
+		foreach ($cuestionarioIDS as $key) {
+			$respu=$this->detpreguntas($key);
+			if($respu->IDPregunta=="153" || $respu->IDPregunta=="145"){
+				//verificamos que no se haya realizado esta pregunta que son las de recomendacion
+				$sql=$this->db->select("*")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("IDEmpresaEmisor='$_ID_Empresa_emisora' and IDEmpresaReceptor='$_ID_Empresa_receptor' and IDPregunta='$respu->IDPregunta'")->get();
+				if($sql->num_rows()!=0){
+					$flag=FALSE;
+				}
+			}
+			
+			if($respu->IDPregunta==="137" || $respu->IDPregunta==="116"){
+
+				//verificamos que no se haya realizado esta pregunta que son las de recomendacion
+				$sql=$this->db->select("*")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("IDEmpresaEmisor='$_ID_Empresa_emisora' and IDEmpresaReceptor='$_ID_Empresa_receptor' and IDPregunta='$respu->IDPregunta'")->get();
+				
+				if($sql->num_rows()!=0)
+				{
+					(restar_fecha(date("Y-m-d"),$sql->row()->FechaRealizada)<=31) ? $flag=FALSE : $flag=TRUE;	
+				}
+			}
+			if($flag===TRUE){
+				array_push($cuestionario_recomendacion,array("Pregunta"=>$respu->Pregunta,"Forma"=>trim($respu->Forma),"Nump"=>$respu->IDPregunta,"respuesta"=>$respu->Condicion,"dependecia"=>$respu->Dependencia,"PreguntaDependencia"=>$respu->PreguntaDependencia,"RespuestaDepen"=>$respu->RespuestaDepen,"Respuesta_usuario"=>''));
+				if($respu->Dependencia==="SI"){
+					array_push($_listas_dependencias,array("ID_Pregunta"=>$respu->PreguntaDependencia,"Respuesta"=>$respu->RespuestaDepen,"S_ID_Pregunta"=>$respu->IDPregunta));
+				}		
+			}
+			$flag=TRUE;
+		
+			//$total=$total+$respu->result()[0]->PorTotal;
+		}
+		$data["Preguntas"]=array("Calidad"=>$cuestionario_calidad,"Cumplimiento"=>$cuestionario_cumplimiento,"Oferta"=>$cuestionario_oferta,"Recomendacion"=>$cuestionario_recomendacion);
+		$data["listas_dependencias"]=$_listas_dependencias;
+		return $data;
+		
+	}
+	public function addCalificacion($_ID_UsuarioEmisor,$_ID_EmpresaEmisor,$_ID_Grio_Emisor,$_ID_Usuario_Receptor,$_ID_Empresa_Receptor,$_IDGiro_Receptor,$_Emitido_para){
+		$datos=array(
+			'IDUsuarioEmisor'=>$_ID_UsuarioEmisor,
+			'IDEmpresaEmisor'=>$_ID_EmpresaEmisor,
+			"IDGrioEmisor"=>$_ID_Grio_Emisor,
+			"IDUsuarioReceptor"=>$_ID_Usuario_Receptor,
+			"IDEmpresaReceptor"=>$_ID_Empresa_Receptor,
+			"IDGiroReceptor"=>$_IDGiro_Receptor,
+			"Status"=>"ACTIVA",
+			"Emitidopara"=>$_Emitido_para
+		);
+		$this->db->insert("tbcalificaciones",$datos);
+		return $this->db->insert_id();
+	}
+	public function AddDetalleValoracion2($_ID_Valoracion,$_ID_Pregunta,$_Respuesta){
+		$_Datos_pregunta=$this->detpreguntas($_ID_Pregunta);
+		
+		$_Respuesta_correcta=$_Datos_pregunta->Condicion;
+		
+		$_Puntos_Posibles=$_Datos_pregunta->PorTotal;
+		$_Puntos_obtenidos=0;
+		
+		if($_Puntos_Posibles!="F1")
+		{
+			if($_Respuesta_correcta===$_Respuesta){
+				$_Puntos_obtenidos=$_Puntos_Posibles;
+			}elseif($_Respuesta==="NA"){
+				$_Puntos_obtenidos=0;
+				$_Puntos_Posibles=0;
+			}
+		}
+		else
+		{
+			
+			($_Respuesta==="")?$_Respuesta=0:$_Respuesta=$_Respuesta;
+			$_Puntos_Posibles=0;
+			$_Puntos_obtenidos=$_Datos_pregunta->PorDesc/(pow(3.005,$_Respuesta));
+		}
+		$_array=array(
+			"IDCalificacion"=>$_ID_Valoracion,
+			"IDPregunta"=>$_ID_Pregunta,
+			"Respuesta"=>$_Respuesta,
+			"PuntosObtenidos"=>$_Puntos_obtenidos,
+			"PuntosPosibles"=>$_Puntos_Posibles
+		);
+		$_data["PuntosPosibles"]=$_Puntos_Posibles;
+		$_data["PuntosObtenidos"]=$_Puntos_obtenidos;
+		$_data["Pregunta"]=$_Datos_pregunta->Pregunta;
+		$_data["Respuesta"]=$_Respuesta;
+		$this->db->insert("tbdetallescalificaciones",$_array);
+		return $_data;
+	}
+	
+
 }
