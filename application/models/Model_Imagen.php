@@ -716,7 +716,7 @@ class Model_Imagen extends CI_Model
 				$totalprimero=$total;
 				$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
 				($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
-				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
+				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual(%)"),array("data"=>[$totalsegundo],"label"=>"Pasado(%)")]));
 			}		
 		}
 		$_data["listCumplimiento"]=$listadatosp;
@@ -739,7 +739,7 @@ class Model_Imagen extends CI_Model
 					$totalprimero=$total;
 					$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
 					($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
-					array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
+					array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual(%)"),array("data"=>[$totalsegundo],"label"=>"Pasado(%)")]));
 				}		
 			}
 			$_data["listOferta"]=$listadatosp;
