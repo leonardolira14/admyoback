@@ -5,6 +5,8 @@ class Model_Calificaciones extends CI_Model{
 		parent::__construct();
 		$this->load->database();
 		$this->load->helper('selec_Titulo');
+		$this->load->model("Model_Empresa");
+		$this->load->model("Model_Usuario");
 	} 
 	public function devcorreoempresa($IDEmpresa){
 		$sql="IDEmpresa='$IDEmpresa' and Tipo_Usuario='Master'";
@@ -144,9 +146,39 @@ class Model_Calificaciones extends CI_Model{
 	 	//primero obtengo las calificaciones en bruto
 	 	if($Forma==="Recibida"){
 	 		$sql=$this->db->select("*")->where("tbcalificaciones.IDEmpresaReceptor='$IDEmpresa' $rango $status $cliente and Emitidopara='$Tipo'")->get("tbcalificaciones");
-	 		
+	 		foreach ($sql->result() as $valoracion)
+	 			{
+					 	 				
+	 				//Datos de la empresa
+	 				 $datosempresa=$this->DatosEmpresa($valoracion->IDEmpresaEmisor);
+	 				//datos del usuario receptor
+	 				 $datosuario=$this->DatosUsuario($valoracion->IDUsuarioReceptor);
+	 				 //datos del usuario emisor
+	 				 $datosuario2=$this->DatosUsuario($valoracion->IDUsuarioEmisor);
+	 				 ($valoracion->FechaModificacion==="0000-00-00") ? $fechamod="-" :$fechamod=$valoracion->FechaModificacion;
+	 				($valoracion->FechaPuesta==="0000-00-00") ? $fechapuesta="-" : $fechapuesta=$valoracion->FechaPuesta; 
+					if(isset($datosempresa->IDEmpresa)){
+						array_push($listascalificaciones,array(
+							"IDValora"=>$valoracion->IDCalificacion,
+							"num_empresa_receptora"=>$datosempresa->IDEmpresa,
+							"Logo"=>$datosempresa->Logo,
+							"Nombre_comer"=>$datosempresa->Nombre_Comer,
+							'Razon_Social' =>$datosempresa->Razon_Social,
+							"UsuarioReceptor"=>$datosuario->Nombre." ".$datosuario->Apellidos,
+							"CorreoReceptor"=>$datosuario->Correo,
+							"UsuarioEmisor"=>$datosuario2->Nombre." ".$datosuario2->Apellidos,
+							"CorreoEmisor"=>$datosuario2->Correo,
+							"Status"=>$valoracion->Status,
+							"Fecha"=>$valoracion->FechaRealizada,
+							"FechaModificacion"=>$fechamod,
+							"FechaPuesta"=>$fechapuesta));
+					}
+					
+	 				
+	 			}
 	 	}else{
 	 		$sql=$this->db->select("*")->where("tbcalificaciones.IDEmpresaEmisor='$IDEmpresa' $rango $status $cliente and Emitidopara='$Tipo'")->get("tbcalificaciones");
+	 	
 	 	
 	 			foreach ($sql->result() as $valoracion)
 	 			{
@@ -179,12 +211,7 @@ class Model_Calificaciones extends CI_Model{
 					
 	 				
 	 			}
-	 			
-	 			
-	 		
-	 		
-	 		
-	 	}
+			}
 	 	return $listascalificaciones;
 		
 	}
@@ -422,6 +449,7 @@ class Model_Calificaciones extends CI_Model{
 	}
 	public function detallescalif($num){
 		$sql=$this->db->select("Pregunta,Respuesta as calificacion")->from("tbdetallescalificaciones")->join('preguntas_val',"preguntas_val.IDPregunta=tbdetallescalificaciones.IDPregunta")->where("IDCalificacion='$num'")->get();
+
 		return($sql->result());
 	}
 	public function detalletotalcuestionario($num){
@@ -670,6 +698,25 @@ class Model_Calificaciones extends CI_Model{
 		$this->db->insert("tbdetallescalificaciones",$_array);
 		return $_data;
 	}
-	
+	//funcion para ppner en pendiente de resolucion una valoracion
+	public function cambio_status($IDValora,$Motivo){
+		($Motivo==="sr")?$status="Pendiente":$status="PendienteA";
+		$datos=array("Status"=>$status,"FechaPuesta"=>date("Y-m-d"),"Motivo"=>$Motivo);
+		$this->db->where("IDCalificacion='$IDValora'")->update("tbcalificaciones",$datos);
+		
+		$sql=$this->db->select("*")->where("IDCalificacion='$IDValora'")->get("tbcalificaciones");
+		$datos=$sql->row_array();
+		//ahora notifico a las dos partes 
+		//primero al que emitio la valoracion
+		
+		$datosEmpresa_Emisora=$this->Model_Empresa->getempresa($datos["IDEmpresaEmisor"]);
+		$datos_usuario_emisor=$this->Model_Usuario->DatosUsuario($datos["IDUsuarioEmisor"]);
+		//datos receptor
+		$datos_Empresa_receptora=$this->Model_Empresa->getempresa($datos["IDEmpresaReceptor"]);
+		$datos_usuario_recepor=$this->Model_Usuario->DatosUsuario($datos["IDUsuarioReceptor"]);
+
+		//ahora mando los correos
+		$this->Model_Email->cambio_de_valoracion_emisora($datos_Empresa_receptora["Razon_Social"],$datos_usuario_emisor["Correo"],$datos["FechaRealizada"]);
+	}
 
 }

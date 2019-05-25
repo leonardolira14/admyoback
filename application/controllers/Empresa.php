@@ -29,6 +29,7 @@ class Empresa extends REST_Controller
 		$T_empresa=$datos["tempresa"];
 		$_Empleados=$datos["nempleados"];
 		$_Fac_Anual=$datos["facanual"];
+		$_dias_pago_empresa=$datos["diaspagoempresa"];
 		$_perfil=$datos["perfil"];
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
@@ -53,7 +54,7 @@ class Empresa extends REST_Controller
 				}
 			}
 			//ahora actualizo los datos
-			$this->Model_Empresa->update($_ID_Empresa,$_Razon_Social,$Nombre_Comercial,$rfc,$T_empresa,$_Empleados,$_Fac_Anual,$_perfil,$logo,$banner);
+			$this->Model_Empresa->update($_ID_Empresa,$_Razon_Social,$Nombre_Comercial,$rfc,$T_empresa,$_Empleados,$_Fac_Anual,$_perfil,$logo,$banner,$_dias_pago_empresa);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$datas["empresa"]=$this->Model_Empresa->getempresa($_ID_Empresa);

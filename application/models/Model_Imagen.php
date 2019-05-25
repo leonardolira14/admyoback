@@ -106,7 +106,9 @@ class Model_Imagen extends CI_Model
 		}
 			//traigo los registros de la tabla de imagen_cliente
 			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get($tb);
-			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get($tb);		
+			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get($tb);
+			//ahora obtenemos para calidad
+
 	
 		if($promedios_pasadas->result()[0]->mediageneral!==NULL)
 			{
@@ -144,6 +146,9 @@ class Model_Imagen extends CI_Model
 				$evolucion=[];
 				$evolucionlabel=[];
 				$_evolucion_media=[];
+				$_evolucion_media_calidad=[];
+				$_evolucion_media_cumplimiento=[];
+				$_evolucion_media_oferta=[];
 				$_evolucion_media_label=[];
 				foreach ($fechas_rango as $fechacom) {
 					$datos=explode("-", $fechacom);
@@ -153,7 +158,18 @@ class Model_Imagen extends CI_Model
 					$cuantas=$this->Media_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
 					array_push($_evolucion_media_label,da_mes($datos[1])."-".$datos[0]);
 					array_push($_evolucion_media,(float)$cuantas);
-				}			
+					//ahora vamos a llenar los arrays para las evoluciones de las graficas
+					$calidad=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Calidad');
+					array_push($_evolucion_media_calidad,$calidad);
+					$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
+					array_push($_evolucion_media_cumplimiento,$cumplimiento);
+					if($tipo_persona==="Proveedor"):
+						$oferta=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Oferta');
+						array_push($_evolucion_media_oferta,$oferta);
+					endif;
+					
+				}
+
 			}
 			
 				if($tipo_fecha==="M"){
@@ -161,7 +177,9 @@ class Model_Imagen extends CI_Model
 					$evolucionlabel=[];
 					$_evolucion_media=[];
 					$_evolucion_media_label=[];	
-
+					$_evolucion_media_calidad=[];
+					$_evolucion_media_cumplimiento=[];
+					$_evolucion_media_oferta=[];
 					while($inicio<=$para){
 						if($inicio===31){
 							$para=date("d");
@@ -175,6 +193,15 @@ class Model_Imagen extends CI_Model
 							$cuantas=$this->Media_calificaciones($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona);
 							array_push($_evolucion_media_label,$inicio."-".da_mes($mes));
 							array_push($_evolucion_media,(float)$cuantas);
+							//ahora vamos a llenar los arrays para las evoluciones de las graficas
+							$calidad=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Calidad');
+							array_push($_evolucion_media_calidad,$calidad);
+							$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Cumplimiento');
+							array_push($_evolucion_media_cumplimiento,$cumplimiento);
+							if($tipo_persona==="Proveedor"):
+								$oferta=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Oferta');
+								array_push($_evolucion_media_oferta,$oferta);
+							endif;
 						}else{
 							$fechacom=$anio."-".$mes;
 							$cuantas=$this->Total_calificaciones($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona);
@@ -185,15 +212,28 @@ class Model_Imagen extends CI_Model
 							$cuantas=$this->Media_calificaciones($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona);
 							array_push($_evolucion_media_label,$inicio."-".da_mes($mes));
 							array_push($_evolucion_media,(float)$cuantas);
+							//ahora vamos a llenar los arrays para las evoluciones de las graficas
+							$calidad=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Calidad');
+							array_push($_evolucion_media_calidad,$calidad);
+							$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Cumplimiento');
+							array_push($_evolucion_media_cumplimiento,$cumplimiento);
+							if($tipo_persona==="Proveedor"):
+								$oferta=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Oferta');
+								array_push($_evolucion_media_oferta,$oferta);
+							endif;
 							$inicio++;
 						}
 					}
 				}
 				$_data["serievolucion"]=array("data"=>array("data"=>$evolucion,"label"=>"No de calificaciones"),"label"=>$evolucionlabel);
 				$_data["evolucionmedia"]=array("data"=>array("data"=>$_evolucion_media,"label"=>"Media de calificaciones"),"label"=>$_evolucion_media_label);	
+				$_data["evolucion_calidad"]=array("data"=>array("data"=>$_evolucion_media_calidad,"label"=>"Media de calificaciones Calidad"),"label"=>$_evolucion_media_label);
+				$_data["evolucion_cumplimiento"]=array("data"=>array("data"=>$_evolucion_media_cumplimiento,"label"=>"Media de calificaciones Cumplimiento"),"label"=>$_evolucion_media_label);
+				if($tipo_persona==="proveedor"):
+					$_data["evolucion_oferta"]=array("data"=>array("data"=>$_evolucion_media_oferta,"label"=>"Media de calificaciones Oferta"),"label"=>$_evolucion_media_label);
+				endif;
 			}
-			
-						
+				
 			return $_data;
 	}
 	public function Total_calificaciones($_fecha_inicio,$_fecha_fin,$IDEmpresa,$forma){
@@ -222,9 +262,32 @@ class Model_Imagen extends CI_Model
 			return $sql->result()[0]->mediageneral;
 		}
 	}
-	/*
-	resumen de imagen para las empresas seguidas
-	*/
+	public function Media_calificaciones_tipo($_fecha_inicio,$_fecha_fin,$IDEmpresa,$forma,$_Tipo){
+		switch ($_Tipo) {
+			case 'Calidad':
+				$sql='round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) as media';
+				break;
+			case 'Cumplimiento':
+				$sql='round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as media';
+				break;
+			case 'Oferta':
+				$sql='round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as media';
+				break;
+			
+		}
+		if($forma==="Cliente"){
+			$sql=$this->db->select($sql)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_cliente');
+		}else{
+			$sql=$this->db->select($sql)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_proveedor');
+		}
+		//vdebug($sql->result()[0]);
+		if($sql->num_rows()===0){
+			return 0;
+		}else{
+			return ($sql->result()[0]->media=== null)? 0: $sql->result()[0]->media;
+			
+		}
+	}
 	public function resumenImagen($IDEmpresa,$_tipo_usuario,$forma)
 	{
 		$fechas=docemeces();
@@ -619,21 +682,24 @@ class Model_Imagen extends CI_Model
 		$listadatosp=[];
 		
 		$listapreguntascalidad=explode(",",$listapreguntascalidad->Calidad);
+		//vdebug($listapreguntascalidad);
 		foreach ($listapreguntascalidad as $preguntacalidad) { 
 			//primero vamos con calidad
 			$totalprimero=0;
 			$totalsegundo=0;
 			$numeroclientesevaluados=0;
+			$respuesta="";
 			$datospregunta=$this->datos_preguntaID($preguntacalidad);
 			
 			if($datospregunta["Forma"]!="AB" || $datospregunta["Forma"]!="OP"){
 				$total=$this->cuantaspreguntascorrectas($IDEmpresa,$fech1,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-				$totalprimero=$totalprimero+$total;
-				$totalsegundo=$totalsegundo+$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-				
-				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$datospregunta["Condicion"],"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
+				$totalprimero=$total;
+				$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
+				($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
+				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
 			}		
 		}
+
 		$_data["listCalidad"]=$listadatosp;
 		$listadatosp=[];
 		
@@ -643,12 +709,14 @@ class Model_Imagen extends CI_Model
 			$totalprimero=0;
 			$totalsegundo=0;
 			$numeroclientesevaluados=0;
+			$respuesta="";
 			$datospregunta=$this->datos_preguntaID($preguntacalidad);
 			if($datospregunta["Forma"]!="AB" || $datospregunta["Forma"]!="OP"){
 				$total=$this->cuantaspreguntascorrectas($IDEmpresa,$fech1,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-				$totalprimero=$totalprimero+$total;
-				$totalsegundo=$totalsegundo+$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$datospregunta["Condicion"],"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
+				$totalprimero=$total;
+				$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
+				($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
+				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
 			}		
 		}
 		$_data["listCumplimiento"]=$listadatosp;
@@ -659,17 +727,19 @@ class Model_Imagen extends CI_Model
 			$listapreguntasoferta=explode(",",$listapreguntasoferta->Oferta);
 			foreach ($listapreguntasoferta as $preguntacalidad) 
 			{ 
-				//primero vamos con calidad
+				
 				$totalprimero=0;
 				$totalsegundo=0;
 				$numeroclientesevaluados=0;
+				$respuesta="";
 				$datospregunta=$this->datos_preguntaID($preguntacalidad);
 				if($datospregunta["Forma"]!="AB" || $datospregunta["Forma"]!="OP")
 				{
 					$total=$this->cuantaspreguntascorrectas($IDEmpresa,$fech1,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-					$totalprimero=$totalprimero+$total;
-					$totalsegundo=$totalsegundo+$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-					array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$datospregunta["Condicion"],"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
+					$totalprimero=$total;
+					$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
+					($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
+					array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual"),array("data"=>[$totalsegundo],"label"=>"Pasado")]));
 				}		
 			}
 			$_data["listOferta"]=$listadatosp;
@@ -681,13 +751,16 @@ class Model_Imagen extends CI_Model
 	//funcion para saber cuantos contestaron esa pregunta la respuesta correcta
 	public function cuantaspreguntascorrectas($IDEmpresa,$rangofecha,$para,$IDPregunta,$respuesta,$tipopregunta){
 		$tipopregunta=trim($tipopregunta);
-		if($tipopregunta==="Dias" || $tipopregunta==="Horas" || $tipopregunta==="Num" ){
+		if($tipopregunta==="DIAS" || $tipopregunta==="HORAS" || $tipopregunta==="NUM" ){
 			$sql=$this->db->select("avg(Respuesta) as total")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("tbcalificaciones.IDEmpresaReceptor=$IDEmpresa and date(FechaRealizada) between ".$rangofecha." and Emitidopara='$para' and IDPregunta='$IDPregunta' and Respuesta='$respuesta'")->get();
-
+			$porcentaje=$sql->result()[0]->total;
 		}else if($tipopregunta==="Si/No/NA" || $tipopregunta==="Si/No" || $tipopregunta==="Si/No/NA/NS" || $tipopregunta="Si/No/No Aplica" || $tipopregunta==="No tiene/NA/NS/Si/No"){
 			$sql=$this->db->select("count(*) as total")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("tbcalificaciones.IDEmpresaReceptor=$IDEmpresa and date(FechaRealizada) between ".$rangofecha." and Emitidopara='$para' and IDPregunta='$IDPregunta' and Respuesta='$respuesta'")->get();
+			$sql2=$this->db->select("count(*) as total")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("tbcalificaciones.IDEmpresaReceptor=$IDEmpresa and date(FechaRealizada) between ".$rangofecha." and Emitidopara='$para' and IDPregunta='$IDPregunta'")->get();
+			($sql->result()[0]->total==="0")?$porcentaje=0:$porcentaje=((int)$sql->result()[0]->total*100)/(int)$sql2->result()[0]->total;
+			
 		}
-		return $sql->result()[0]->total;
+		return round($porcentaje,2);
 	}
 
 }

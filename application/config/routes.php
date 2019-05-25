@@ -72,6 +72,10 @@ $route["getlista"]="ClieProv/getlista";
 $route["getallrealizadas"]="Calificaciones/getallrealizadas";
 $route["detallescalificacion"]="Calificaciones/detalles";
 
+$route["getallrecibidas"]="Calificaciones/getallrecibidas";
+
+$route["pendientevaloracion"]="Calificaciones/pendiente";
+
 //rutas para las calificaciones
 $route["getcuestionario"]="Calificaciones/calificar";
 $route["calificar"]="Calificaciones/calificarfinal";

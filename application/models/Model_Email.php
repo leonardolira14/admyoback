@@ -613,4 +613,64 @@ class Model_Email extends CI_Model
 		$this->email->message($body);
 		$this->email->send();
 	}
+
+	public function cambio_de_valoracion_emisora($RazonValorada,$_Correo,$FechaVal){
+		$this->email->to($_Correo);
+		$this->email->subject("Visita de su Perfil en admyo.");
+		$body = '<html>
+                        <head>
+                          <meta charset="utf-8" />
+                        </head>
+                        <body>
+                          <div style="overflow: hidden; margin: 0 auto; width: 1104px">
+                            
+                            <div style="float: left; margin: 10px 0 0 0; width: 69%; text-align:center;"><br/>
+                                                          
+
+                              <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+                              <h2> '.$RazonValorada.' solicita un cambio en la calificación que le dio el día '.$FechaVal.' </h2><br/><p>&nbsp;</p><p>&nbsp;</p>
+                              <p align="left">Esta calificación permanecerá un máximo de, 3 meses en calificaciones pendientes de resolución, para que tome una acción.
+                              <a href="https://admyo.com/" style="color: #fff; text-decoration: none;" target="_blank">
+                                <div style="float: left; margin: 10px 10px 10px 10px; background-color: #e46c0a; color: #fff; width: 40%; -moz-border-radius: 15px 15px 15px 15px; -webkit-border-radius: 15px 15px 15px 15px; border-radius: 15px 15px 15px 15px; height: 135px">
+                                  <br/><h1>CAMBIE CALIFICACIÓN</h1>
+                                </div>
+                              </a>
+                              <a href="https://admyo.com" style="color: #fff; text-decoration: none;" target="_blank">
+                                <div style="float: left; margin: 10px 10px 10px 10px; background-color: #21334d; color: #fff; width: 40%; -moz-border-radius: 15px 15px 15px 15px; -webkit-border-radius: 15px 15px 15px 15px; border-radius: 15px 15px 15px 15px; height: 135px;">
+                                  <h1>MANTENER CALIFICACIÓN</h1>
+                                </div>
+                              <p>&nbsp;</p><p>&nbsp;</p>
+                              </a><div style="clear: both"></div>
+                              <p>&nbsp;</p><p align="left">Detalle de la calificación realizada el '.$FechaVal.'</p>
+                            </div>
+                          </div>
+                          <div style="overflow: hidden; margin: 0 auto; width: 1104px">
+                           <div style="float: left; margin: 0px 0px 0px 13px; width: 23%; background-color: #ffca69; text-align: center;" ><br/><br/>
+                            <a href="https://admyo.com/planes-precios/" style="color: #fff; text-decoration: none;" target="_blank">
+                              <div style="background-color: #e46c0a; color: #fff; width: 70%; margin: 0 auto;-moz-border-radius: 15px 15px 15px 15px; -webkit-border-radius: 15px 15px 15px 15px; border-radius: 15px 15px 15px 15px; height: 70px; padding: 2px;">
+                                <h2>Promoción</h2>
+                              </div><br/>
+                            </a>
+                          </div>
+                          </div>
+                          <div style="overflow: hidden; margin: 0 auto; width: 1104px">
+                            <div style="float: left; margin: 0px 0px 0px 12px; width: 23%; background-color: #a6a6a6; text-align: center;" >
+                              Si usted no se ha dado de alta en ADMYO, póngase en contacto con nosotros en: support@admyo.com
+                              &nbsp;
+                            </div>
+                            <div style="float: left; width: 70%; text-align: center; margin: 10px 0 0 0; padding: 5px; color: #21334d;">
+                              <p align="left">Si no esta de acuerdo con la calificación o no tiene relaciones comerciales con esta empresa, puede solicitar un cambio de calificación en su perfil de empresa en admyo.com</p>
+                              <p>&nbsp;</p><span style="font-weight: bold; font-style: italic; font-size: 20px">"El marketing boca a boca ha sido siempre importante. Hoy es más importante que nunca debido al poder de internet"</span><br/> Joe Pulizzi y Newt Barrett, autores de Get Content Get Customers.
+                            </div>
+                            <div style="float: left; margin: 0px 0px 0px 12px; width: 23%; text-align: center;" >
+                              <a href="https://admyo.com" style="color: #21334d;" target="_blank">www.admyo.com</a>
+                              &nbsp;
+                            </div>
+                          </div>    
+                          <div style="overflow: hidden; margin: 0 auto; width: 1104px"><a href="https://www.admyo.com/terminos-condiciones/" style="color: #21334d;" target="_blank"> Politica de privacidad  |  Términos y condiciones </a></div>
+                        </body>
+                      </html> ';
+		$this->email->message($body);
+		$this->email->send();
+	}
 }
