@@ -65,6 +65,7 @@ $route["getimagen"]="imagen/getImagen";
 $route["detallesimagen"]="imagen/detalle";
 
 $route["getriesgo"]="Riesgo/getriesgo";
+$route["getdetalle"]="Riesgo/detalle";
 
 $route["getaresumen"]="ClieProv/getaresumen";
 $route["getlista"]="ClieProv/getlista";

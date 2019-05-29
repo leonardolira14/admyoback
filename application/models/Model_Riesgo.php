@@ -10,6 +10,9 @@ class Model_Riesgo extends CI_Model
 		parent::__construct();
 		$this->load->database();
 		$this->load->helper('selec_Titulo');
+		$this->load->model('Model_Empresa');
+		$this->load->model('Model_Empresa');
+		$this->load->model('Model_Calificaciones');
 	}
 	//funcion para obtener los clientes
 	public function ObtenerClientes($idempresa){
@@ -539,6 +542,23 @@ class Model_Riesgo extends CI_Model
 		return $sql->result()[0]->total;
 	}
 	//funcion para obtener el listado de ID de preguntas segun sea el tipo
+	public function listpreguntas_nivel2($categoria,$tipo,$giro){
+		if($categoria!=""){
+			$listasid=[];
+			$listnomencla=$this->db->select($categoria)->where("Tipo='".$tipo."' and IDNivel2='$giro'")->get("tbconfigcuestionarios");
+			$numenclaturas=explode(",",$listnomencla->result()[0]->$categoria);			
+			foreach ($numenclaturas as $nomenclatura) {
+				if($nomenclatura!=""){
+					$datos=$this->Model_Calificaciones->detpreguntas($nomenclatura);
+					array_push($listasid,$datos);
+				}
+				
+			}
+			return $listasid;
+		}
+		
+	}
+	//funcion para obtener el listado de ID de preguntas segun sea el tipo
 	public function listpreguntas($categoria,$tipo){
 		if($categoria!=""){
 			$listasid=[];
@@ -556,4 +576,237 @@ class Model_Riesgo extends CI_Model
 		
 	}
 
+	//funcion para obtener los detalles del riego
+	public function detalles_riesgo($_IDEmpresa,$_Tipo,$_Fecha){
+		$fechas=docemeces();
+		$fechas2=docemecespasados();
+
+		$lista_preguntas_calidad=[];
+		$lista_preguntas_cumplimiento=[];
+		$lista_preguntas_oferta=[];
+
+
+		//primero obtengo a quein evaluar
+		if($_Tipo==="cliente"){
+			$lista_de_personas = $this->ObtenerClientes($_IDEmpresa);
+		}else{
+			$lista_de_personas = $this->ObtenerProveedores($_IDEmpresa);
+		}
+
+		//ahora obtengo los datos de mi empresa
+		$datos_empresa=$this->Model_Empresa->getempresa($_IDEmpresa);
+		//ahora obtengo el giro pricipal
+		$giro_principal=$this->Model_Empresa->Get_Giro_Principal($_IDEmpresa);
+
+		
+		$lista_preguntas_calidad=$this->listpreguntas_nivel2("calidad",$_Tipo,$giro_principal["IDGiro2"]);
+		$lista_preguntas_cumplimiento=$this->listpreguntas_nivel2("cumplimiento",$_Tipo,$giro_principal["IDGiro2"]);
+		if($_Tipo==="proveedor"){
+			$lista_preguntas_oferta=$this->listpreguntas_nivel2("oferta",$_Tipo,$giro_principal["IDGiro2"]);
+		}
+
+		if($_Fecha==="A"){
+			$fech1="'".$fechas[0]."-01' and '".$fechas[12]."-31'";
+			$fech2="'".$fechas2[0]."-01' and '".$fechas2[12]."-31'";
+		}else{
+			$fech1="'".$fechas[11]."-".date('d')."' and '".$fechas[12]."-".date('d')."'";
+			$fech2="'".$fechas[9]."-".date('d')."' and '".$fechas[10]."-".date('d')."'";
+		}
+		//vdebug($lista_preguntas_cumplimiento);
+		//vdebug($lista_de_personas);
+		$cuantos_clientes_evaluados_calidad=0;
+		$cuantos_clientes_evaluados_cumplimiento=0;
+		$cuantos_clientes_evaluados_oferta=0;
+
+		
+		$subtotal_calificaciones_cumplimiento=0;
+		$subtotal_calificaciones_oferta=0;
+
+		
+		$subtotal_calificaciones_cumplimiento_pasado=0;
+		$subtotal_calificaciones_oferta_pasado=0;
+
+		
+		$total_calificaciones_cumplimiento=0;
+		$total_calificaciones_oferta=0;
+
+		
+		$total_calificaciones_cumplimiento_pasado=0;
+		$total_calificaciones_oferta_pasado=0;
+
+
+		$listadatos_calidad=[];
+		//ahora empiexo a contar de calidad
+		foreach ($lista_preguntas_calidad as $pregunta) {
+
+			$cuantos_clientes_evaluados_calidad=0;
+			$subtotal_calificaciones_calidad=0;
+			$total_calificaciones_calidad=0;
+			$total_calificaciones_calidad_pasado=0;
+
+			$subtotal_calificaciones_calidad_pasado=0;
+			if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
+				foreach ($lista_de_personas as $persona) {
+					$sql_erroneas_actual=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech1,$pregunta->Forma);
+
+					
+
+					$sql_erroneas_pasado=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech2,$pregunta->Forma);
+					
+					
+
+					$subtotal_calificaciones_calidad=$subtotal_calificaciones_calidad+(int)$sql_erroneas_actual["erroneas"];
+					$total_calificaciones_calidad=$total_calificaciones_calidad+(int)$sql_erroneas_actual["total"];
+					
+
+
+					$subtotal_calificaciones_calidad_pasado=$subtotal_calificaciones_calidad_pasado+(int)$sql_erroneas_pasado["erroneas"];
+					$total_calificaciones_calidad_pasado=$total_calificaciones_calidad_pasado+(int)$sql_erroneas_pasado["total"];
+					
+
+					if($sql_erroneas_actual["total"]!=="0"){
+						$cuantos_clientes_evaluados_calidad++;
+					}
+
+				}
+				if($pregunta->Forma==="DIAS" || $pregunta->Forma==="HORAS" || $pregunta->Forma==="NUM" ){
+					($subtotal_calificaciones_calidad===0)?$porcentaje_actual=0:$porcentaje_actual=round((int)$subtotal_calificaciones_calidad/$total_calificaciones_calidad,0);
+				
+					($subtotal_calificaciones_calidad_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round((int)$subtotal_calificaciones_calidad_pasado/$total_calificaciones_calidad_pasado,0);	
+				}else{
+					($subtotal_calificaciones_calidad===0)?$porcentaje_actual=0:$porcentaje_actual=round(((int)$subtotal_calificaciones_calidad*100)/$total_calificaciones_calidad,2);
+				
+					($subtotal_calificaciones_calidad_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round(((int)$subtotal_calificaciones_calidad_pasado*100)/$total_calificaciones_calidad_pasado,2);	
+				}
+				
+
+				array_push($listadatos_calidad,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_calidad,"clientesevaluados"=>$cuantos_clientes_evaluados_calidad,"serie"=>[array("data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
+
+				
+			}
+		}
+		$listadatos_cumplimiento=[];
+		//ahora con cumplimiento
+		foreach ($lista_preguntas_cumplimiento as $pregunta) {
+
+			$cuantos_clientes_evaluados_cumplimiento=0;
+			$subtotal_calificaciones_cumplimiento=0;
+			$total_calificaciones_cumplimiento=0;
+			$total_calificaciones_cumplimiento_pasado=0;
+
+			$subtotal_calificaciones_cumplimiento_pasado=0;
+			if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
+				foreach ($lista_de_personas as $persona) {
+					$sql_erroneas_actual=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech1,$pregunta->Forma);
+
+					
+
+					$sql_erroneas_pasado=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech2,$pregunta->Forma);
+					
+					
+
+					$subtotal_calificaciones_cumplimiento=$subtotal_calificaciones_cumplimiento+(int)$sql_erroneas_actual["erroneas"];
+					$total_calificaciones_cumplimiento=$total_calificaciones_cumplimiento+(int)$sql_erroneas_actual["total"];
+					
+
+
+					$subtotal_calificaciones_cumplimiento_pasado=$subtotal_calificaciones_cumplimiento_pasado+(int)$sql_erroneas_pasado["erroneas"];
+					$total_calificaciones_cumplimiento_pasado=$total_calificaciones_cumplimiento_pasado+(int)$sql_erroneas_pasado["total"];
+					
+
+					if($sql_erroneas_actual["total"]!=="0"){
+						$cuantos_clientes_evaluados_cumplimiento++;
+					}
+
+				}
+				if($pregunta->Forma==="DIAS" || $pregunta->Forma==="HORAS" || $pregunta->Forma==="NUM" ){
+					($subtotal_calificaciones_cumplimiento===0)?$porcentaje_actual=0:$porcentaje_actual=round((int)$subtotal_calificaciones_cumplimiento/$total_calificaciones_cumplimiento,0);
+				
+					($subtotal_calificaciones_cumplimiento_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round((int)$subtotal_calificaciones_cumplimiento_pasado/$total_calificaciones_cumplimiento_pasado,0);	
+				}else{
+					($subtotal_calificaciones_cumplimiento===0)?$porcentaje_actual=0:$porcentaje_actual=round(((int)$subtotal_calificaciones_cumplimiento*100)/$total_calificaciones_cumplimiento,2);
+				
+					($subtotal_calificaciones_cumplimiento_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round(((int)$subtotal_calificaciones_cumplimiento_pasado*100)/$total_calificaciones_cumplimiento_pasado,2);
+				}
+				
+
+				array_push($listadatos_cumplimiento,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_cumplimiento,"clientesevaluados"=>$cuantos_clientes_evaluados_cumplimiento,"serie"=>[array("data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
+
+				
+			}
+		}
+		if(count($lista_preguntas_oferta)>0){
+			$listadatos_oferta=[];
+			foreach ($lista_preguntas_oferta as $pregunta) {
+
+				$cuantos_clientes_evaluados_oferta=0;
+				$subtotal_calificaciones_oferta=0;
+				$total_calificaciones_oferta=0;
+				$total_calificaciones_oferta=0;
+
+				$subtotal_calificaciones_oferta_pasado=0;
+				if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
+					foreach ($lista_de_personas as $persona) {
+						$sql_erroneas_actual=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech1,$pregunta->Forma);
+
+						
+
+						$sql_erroneas_pasado=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech2,$pregunta->Forma);
+						
+						
+
+						$subtotal_calificaciones_oferta=$subtotal_calificaciones_oferta+(int)$sql_erroneas_actual["erroneas"];
+						$total_calificaciones_oferta=$total_calificaciones_oferta+(int)$sql_erroneas_actual["total"];
+						
+
+
+						$subtotal_calificaciones_oferta_pasado=$subtotal_calificaciones_oferta_pasado+(int)$sql_erroneas_pasado["erroneas"];
+						$total_calificaciones_oferta_pasado=$total_calificaciones_oferta_pasado+(int)$sql_erroneas_pasado["total"];
+						
+
+						if($sql_erroneas_actual["total"]!=="0"){
+							$cuantos_clientes_evaluados_oferta++;
+						}
+
+					}
+					if($pregunta->Forma==="DIAS" || $pregunta->Forma==="HORAS" || $pregunta->Forma==="NUM" ){
+						($subtotal_calificaciones_oferta===0)?$porcentaje_actual=0:$porcentaje_actual=round((int)$subtotal_calificaciones_oferta/$total_calificaciones_oferta,0);
+					
+						($subtotal_calificaciones_oferta_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round((int)$subtotal_calificaciones_oferta_pasado/$total_calificaciones_oferta_pasado,0);	
+					}else{
+						($subtotal_calificaciones_oferta===0)?$porcentaje_actual=0:$porcentaje_actual=round(((int)$subtotal_calificaciones_oferta*100)/$total_calificaciones_oferta,2);
+					
+						($subtotal_calificaciones_oferta_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round(((int)$subtotal_calificaciones_oferta_pasado*100)/$total_calificaciones_oferta_pasado,2);
+					}
+					
+
+					array_push($listadatos_oferta,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_oferta,"clientesevaluados"=>$cuantos_clientes_evaluados_oferta,"serie"=>[array("data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
+
+					
+				}
+			}
+			$data["listado_oferta"]=$listadatos_oferta;
+		}
+		$data["listado_calidad"]=$listadatos_calidad;
+		$data["listadatos_cumplimiento"]=$listadatos_cumplimiento;
+		return $data;
+		
+	}
+	public function total_preguntas_porcentaje($_ID_Pregunta,$_ID_Receptor,$_Respuesta_correcta,$_Fecha,$_Tipo_pregunta){
+		$sql_actual_total=$this->db->select('count(*) as total')->join('tbdetallescalificaciones',"tbcalificaciones.IDCalificacion=tbdetallescalificaciones.IDCalificacion")->from('tbcalificaciones')->where("IDEmpresaReceptor='$_ID_Receptor' and IDPregunta='$_ID_Pregunta' and date(FechaRealizada) between $_Fecha")->get();
+		if($_Tipo_pregunta==="DIAS" || $_Tipo_pregunta==="HORAS" || $_Tipo_pregunta==="NUM" ){
+			$sql_erroneas_actual=$this->db->select('sum(Respuesta) as erroneas')->join('tbdetallescalificaciones',"tbcalificaciones.IDCalificacion=tbdetallescalificaciones.IDCalificacion")->from('tbcalificaciones')->where("IDEmpresaReceptor='$_ID_Receptor' and IDPregunta='$_ID_Pregunta' and tbdetallescalificaciones.Respuesta != '$_Respuesta_correcta' and date(FechaRealizada) between $_Fecha")->get();
+			
+			
+		}else{
+			$sql_erroneas_actual=$this->db->select('count(*) as erroneas')->join('tbdetallescalificaciones',"tbcalificaciones.IDCalificacion=tbdetallescalificaciones.IDCalificacion")->from('tbcalificaciones')->where("IDEmpresaReceptor='$_ID_Receptor' and IDPregunta='$_ID_Pregunta' and tbdetallescalificaciones.Respuesta != '$_Respuesta_correcta' and date(FechaRealizada) between $_Fecha")->get();
+			
+		}
+		
+
+		
+		$data["total"]=$sql_actual_total->row_array()["total"];
+		$data["erroneas"]=$sql_erroneas_actual->row_array()["erroneas"];
+		return $data;
+	}
 }

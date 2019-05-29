@@ -96,7 +96,7 @@ class Model_Empresa extends CI_Model
 	}
 	//funcion para saber el giro principal de la empresa
 	public function Get_Giro_Principal($_ID_Empresa){
-		$_registro=$this->db->select("IDGiro")->where("IDEmpresa=$_ID_Empresa and Principal='1'")->get("giroempresa");
+		$_registro=$this->db->select("IDGiro,IDGiro2")->where("IDEmpresa=$_ID_Empresa and Principal='1'")->get("giroempresa");
 		return $_registro->row_array();
 
 	}

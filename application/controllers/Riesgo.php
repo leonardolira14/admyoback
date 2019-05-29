@@ -25,4 +25,13 @@ class Riesgo extends REST_Controller
 		$this->response($_data);
 		
 	}
+	//funcion para obtener el detalle del riesgo
+	public function detalle_post(){
+		$datos=$this->post();
+		$data=$this->Model_Riesgo->detalles_riesgo($datos["IDEmpresa"],$datos["tipo"],$datos["fecha"]);
+		$_data["code"]=0;
+		$_data["ok"]="SUCCES";
+		$_data["response"]=array("result"=>$data);
+		$this->response($_data);
+	}
 }
