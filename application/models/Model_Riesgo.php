@@ -680,7 +680,7 @@ class Model_Riesgo extends CI_Model
 				}
 				
 
-				array_push($listadatos_calidad,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_calidad,"clientesevaluados"=>$cuantos_clientes_evaluados_calidad,"serie"=>[array("data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
+				array_push($listadatos_calidad,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_calidad,"clientesevaluados"=>$cuantos_clientes_evaluados_calidad,"serie"=>[array("backgroundColor"=>"#005792","data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("backgroundColor"=>"#f53d3d","data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
 
 				
 			}
@@ -730,7 +730,7 @@ class Model_Riesgo extends CI_Model
 				}
 				
 
-				array_push($listadatos_cumplimiento,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_cumplimiento,"clientesevaluados"=>$cuantos_clientes_evaluados_cumplimiento,"serie"=>[array("data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
+				array_push($listadatos_cumplimiento,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_cumplimiento,"clientesevaluados"=>$cuantos_clientes_evaluados_cumplimiento,"serie"=>[array("backgroundColor"=>"#005792","data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("backgroundColor"=>"#f53d3d","data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
 
 				
 			}
@@ -780,7 +780,7 @@ class Model_Riesgo extends CI_Model
 					}
 					
 
-					array_push($listadatos_oferta,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_oferta,"clientesevaluados"=>$cuantos_clientes_evaluados_oferta,"serie"=>[array("data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
+					array_push($listadatos_oferta,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_oferta,"clientesevaluados"=>$cuantos_clientes_evaluados_oferta,"serie"=>[array("backgroundColor"=>"#005792","data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("backgroundColor"=>"#f53d3d","data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
 
 					
 				}
