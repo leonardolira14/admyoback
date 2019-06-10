@@ -17,7 +17,9 @@ class Registro extends REST_Controller
     	$this->load->model("Model_Empresa");
     	$this->load->model("Model_Usuario");
     	$this->load->model("Model_QvalEmpresa");
-    	$this->load->model("Model_Email");
+		$this->load->model("Model_Email");
+		$this->load->model("Model_Conecta_qval");
+		$this->load->model("Model_Conecta_admyo");
 
 	}
 	public function valid_password($password = '')
@@ -67,7 +69,9 @@ class Registro extends REST_Controller
 	
 	//funcion para agregar una empresa
 	public function addempresa_post(){
+	
 		$_POST = json_decode(file_get_contents("php://input"), true);
+		
 		//vdebug($_POST);
 		$config=array( array(
 			'field'=>'Razon_Social', 
@@ -128,7 +132,7 @@ class Registro extends REST_Controller
 		$this->form_validation->set_message($array);
 		if($this->form_validation->run() !=false){
 			//;
-			if($_POST["Productoadmyo"]==="0"){
+			if($_POST["Productoadmyo"]==="gratis"){
 				$_Tipo_Cuenta="basic";
 			}else{
 				$_Tipo_Cuenta=$_POST["Productoadmyo"];
@@ -143,7 +147,7 @@ class Registro extends REST_Controller
 
 
 			//si traigo licencias de qval registro la empresa en qval
-			if($_POST["ProductoQval"]!==0){
+			if($_POST["PrecioQval"]!==0){
 				$IDQval=$this->Model_QvalEmpresa->addempresa($_POST["Razon_Social"],$_POST["Nombre_Comercial"],$_POST["RFC"],$_POST["Tipo_Persona"],json_encode(array("Producto"=>$_POST["ProductoQval"],"Precio"=>$_POST["PrecioQval"])),$_POST["NlicenasQval"],$ID_Empresa_Admyo);
 				//ahora inserto el usuario en la tabla de usauarios de qval
 				$this->Model_QvalEmpresa->addusuario($IDQval,$_POST["Nombre"],$_POST["Apellidos"],'Usuario Master','0',$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"]);
@@ -152,7 +156,7 @@ class Registro extends REST_Controller
 			$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Razon_Social"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
-			$_data["result"]="Access";
+			$_data["result"]=$ID_Empresa_Admyo;
 
 		}else{
 			$_data["code"]=1990;
@@ -160,5 +164,37 @@ class Registro extends REST_Controller
 			$_data["result"]=validation_errors();
 		}
 		$this->response(array("response"=>$_data));
+	}
+	public function pago_post(){
+		$datos=$this->post();
+		//$datos= json_decode(file_get_contents("php://input"), true);
+		//vdebug($datos);
+		$_nombre=$datos["pagoadmyo"]["nombre"];
+		$_correo=$datos["pagoadmyo"]["correo"];
+		$_tel=$datos["pagoadmyo"]["tel"];
+		$_ID_Empresa=$datos["datosempresa"];
+
+		$_token_admyo=$datos["pagoadmyo"]["token"];
+		$_precio_admyo=$datos["pagoadmyo"]["total"];
+		$_tipo_admyo=$datos["pagoadmyo"]["tiempo"];
+		$_plan_admyo=$datos["pagoadmyo"]["descripcion"];
+		$_tiempo_admyo=$datos["pagoadmyo"]["tiempo"];
+
+		$_token_qval=$datos["pagoqval"]["token"];
+		$_precio_qval=$datos["pagoqval"]["total"];
+		$_tipo_qval=$datos["pagoqval"]["tiempo"];
+		$_plan_qval=$datos["pagoqval"]["descripcion"];
+		$_tiempo_qval=$datos["pagoqval"]["tiempo"];
+
+		//primero tengo que hacer el cargo de admyo
+
+		//$respuesta=$this->Model_Conecta_admyo->Tarjeta($_nombre,$_correo,$_token_admyo,$_plan_admyo,$_precio_admyo,$_tel,$_tiempo_admyo);
+		//ahora coloco el ID  de conecta y el id del plan
+		//if($respuesta["status"]==="active"){
+		//	$this->Model_Empresa->update_datos_conecta($_ID_Empresa,$respuesta["customer_id"],$respuesta["plan_id"]);
+		//}
+		$num='cus_2knV1NaYKykQcBZLt';
+		$respuesta=$this->Model_Conecta_admyo->obtner_info($num);
+		vdebug($respuesta);
 	}
 }

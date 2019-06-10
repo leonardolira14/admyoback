@@ -130,5 +130,10 @@ class Model_Empresa extends CI_Model
 		$array=array("IDEmpresa"=>$IDEmpresa,"IDGiro"=>$n1,"Principal"=>'0',"IDGiro2"=>$n2,"IDGiro3"=>$n3);
 		return $this->db->insert('giroempresa', $array);
 	}
+	//funccion para modificar el pago el id y el pago de conecta 
+	public function update_datos_conecta($IDEmpresa,$IDCustomer,$PlanID){
+		$array=array("Customer_id"=>$IDCustomer,"Plan_ID"=>$PlanID);
+		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",$array);
+	}	
 	
 }

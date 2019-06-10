@@ -80,3 +80,6 @@ $route["pendientevaloracion"]="Calificaciones/pendiente";
 //rutas para las calificaciones
 $route["getcuestionario"]="Calificaciones/calificar";
 $route["calificar"]="Calificaciones/calificarfinal";
+
+//funcion para realziar los cargos
+$route["pago"]="Registro/pago";
