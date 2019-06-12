@@ -1,4 +1,7 @@
 <?
+header('Access-Control-Allow-Origin: *');
+date_default_timezone_set ("America/Mexico_City");
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 require_once( APPPATH.'/libraries/REST_Controller.php' );
 use Restserver\libraries\REST_Controller;
