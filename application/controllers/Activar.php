@@ -8,10 +8,9 @@ class Activar extends CI_Controller {
 
 	public function __construct(){
 		parent::__construct();
-		$this->load->model('Model_Notificaciones');
+		
 		$this->load->model('Model_Conecta_admyo');
-		$this->load->model('Model_Empresa');
-		$this->load->model('Model_Usuarios');
+
 		
 	}
 	
