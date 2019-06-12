@@ -218,8 +218,8 @@ class Registro extends REST_Controller
 	//funcion para activar pago 
 	public function activarpago_get(){
 		$result = @file_get_contents('php://input');
-		/*$fp = fopen('acceso.txt', 'w+');
-		fwrite($fp, $result);*/
+		$fp = fopen('acceso.txt', 'w+');
+		fwrite($fp, $result);
 		$data = json_decode($result);
 		http_response_code(200);
 		if(isset($data)){
