@@ -29,4 +29,11 @@ class Model_QvalEmpresa extends CI_Model
 		$db_prueba->insert("usuario",$array);
 
 	}
+	//funcion para cambiar el status de pago de la empresa
+	public function active_pago($_ID_Empresa_admyo,$_Status){
+		$db_prueba = $this->load->database('qval', TRUE);
+		$array=array("Status_pago"=>$_Status);
+		$db_prueba->where("IDAdmyo='$_ID_Empresa_admyo'")->update("empresa",$array);
+
+	}
 }

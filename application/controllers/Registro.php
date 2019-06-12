@@ -169,32 +169,65 @@ class Registro extends REST_Controller
 		$datos=$this->post();
 		//$datos= json_decode(file_get_contents("php://input"), true);
 		//vdebug($datos);
-		$_nombre=$datos["pagoadmyo"]["nombre"];
-		$_correo=$datos["pagoadmyo"]["correo"];
-		$_tel=$datos["pagoadmyo"]["tel"];
+		$_nombre=$datos["pago"]["nombre"];
+		$_correo=$datos["pago"]["correo"];
+		$_tel=$datos["pago"]["tel"];
 		$_ID_Empresa=$datos["datosempresa"];
+		$_precio_admyo=$datos["pago"]["total"];
+		$_tiempo_admyo=$datos["pago"]["tiempo"];
+		$_plan_admyo=$datos["pago"]["descripcion"];
+		if($_tiempo_admyo===FALSE){
+			$_tiempo_admyo=0;
+		}
+		
+		if($datos["pago"]["metodo"]==='Tarjeta'){
+			$_token_admyo=$datos["pago"]["token"];
+			$respuesta=$this->Model_Conecta_admyo->Tarjeta($_nombre,$_correo,$_token_admyo,$_plan_admyo,$_precio_admyo,$_tel,$_tiempo_admyo);
+			
+			if($respuesta["status"]==="active"){
+				if($datos["pago"]["para"]==='admyo'){
+					$this->Model_Empresa->update_datos_conecta('admyo',$_ID_Empresa,$respuesta["customer_id"],$respuesta["plan_id"]);
+				}
+				if($datos["pago"]["para"]==='qval'){
+					$this->Model_Empresa->update_datos_conecta('qval',$_ID_Empresa,$respuesta["customer_id"],$respuesta["plan_id"]);
+				}
+				$this->Model_Conecta_admyo->save_pago($_ID_Empresa,$datos["pago"]["para"],$_precio_admyo,$respuesta["status"],$respuesta["customer_id"],$respuesta["plan_id"],"Tarjeta");
+				$data["ok"]="succes";
+				$data["status"]=$respuesta["status"];
+			}else{
+				$data["ok"]="error";
+				$data["status"]=$respuesta;
+			}
+			$data["pago"]="Tarjeta";
+			
 
-		$_token_admyo=$datos["pagoadmyo"]["token"];
-		$_precio_admyo=$datos["pagoadmyo"]["total"];
-		$_tipo_admyo=$datos["pagoadmyo"]["tiempo"];
-		$_plan_admyo=$datos["pagoadmyo"]["descripcion"];
-		$_tiempo_admyo=$datos["pagoadmyo"]["tiempo"];
-
-		$_token_qval=$datos["pagoqval"]["token"];
-		$_precio_qval=$datos["pagoqval"]["total"];
-		$_tipo_qval=$datos["pagoqval"]["tiempo"];
-		$_plan_qval=$datos["pagoqval"]["descripcion"];
-		$_tiempo_qval=$datos["pagoqval"]["tiempo"];
-
-		//primero tengo que hacer el cargo de admyo
-
-		//$respuesta=$this->Model_Conecta_admyo->Tarjeta($_nombre,$_correo,$_token_admyo,$_plan_admyo,$_precio_admyo,$_tel,$_tiempo_admyo);
-		//ahora coloco el ID  de conecta y el id del plan
-		//if($respuesta["status"]==="active"){
-		//	$this->Model_Empresa->update_datos_conecta($_ID_Empresa,$respuesta["customer_id"],$respuesta["plan_id"]);
-		//}
-		$num='cus_2knV1NaYKykQcBZLt';
-		$respuesta=$this->Model_Conecta_admyo->obtner_info($num);
-		vdebug($respuesta);
+		}else{
+			$respuesta=$this->Model_Conecta_admyo->tranfer($_precio_admyo, $_nombre, $_correo, $_tel, $_plan_admyo);
+			$data["pago"]="Transferencia";
+			$data["ID_orden"]=$respuesta->id;
+			$data["Bank"]=$respuesta->charges[0]->payment_method->receiving_account_bank;
+			$data["CLABE"]=$respuesta->charges[0]->payment_method->receiving_account_number;
+			$data["Cantidad"]=$_precio_admyo;
+			$data["descripcion"]=$_plan_admyo;
+			$data["ok"]="succes";
+			$this->Model_Conecta_admyo->save_pago($_ID_Empresa,$datos["pago"]["para"],$_precio_admyo,'espera',$data["ID_orden"],'',"Transferencia");		
+		}
+		
+		$this->response($data);
+	}
+	//funcion para activar pago 
+	public function activarpago_get(){
+		$result = @file_get_contents('php://input');
+		$fp = fopen('acceso.txt', 'w+');
+		fwrite($fp, $result);
+		$data = json_decode($result);
+		http_response_code(200);
+		if(isset($data)){
+			if($data->type=='charge.paid'){
+				$numreferencia=$data->data->object->order_id;
+				$this->Model_Conecta_admyo->activarpago($numreferencia);
+			}
+		}
+		$this->response("echo");
 	}
 }

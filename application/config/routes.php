@@ -83,3 +83,4 @@ $route["calificar"]="Calificaciones/calificarfinal";
 
 //funcion para realziar los cargos
 $route["pago"]="Registro/pago";
+$route["activarpago"]="Registro/activarpago";
