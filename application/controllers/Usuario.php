@@ -103,7 +103,7 @@ class Usuario extends REST_Controller
 			$_datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
 
 			$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$_POST["Correo"],$clave,$_POST["Puesto"],'0',"");
-			$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo"],$_POST["Nombre"],$_POST["Apellidos"],$_datos_empresa["Razon_Social"]);
+			$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$clave);
 
 
 			$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
@@ -133,9 +133,15 @@ class Usuario extends REST_Controller
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
+			//obtengo el usuario master para avisarle
+			$_datos_usuario_master=$this->Model_Usuario->GetMaster($_ID_Empresa);
+			//obtengo los datos del correo del usario que se dio de baja
+			$_datos_usuario_baja=$this->Model_Usuario->DatosUsuario($_ID_Usuario);
 			//actualizo los datos del usuario
 			$this->Model_Usuario->updatestatus($_ID_Usuario,$_Status);
 			$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
+			$this->Model_Email->baja_usuario_admin($_datos_usuario_master["Correo"],$_datos_usuario_baja["Correo"]);
+			$this->Model_Email->baja_usuario($_datos_usuario_baja["Correo"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$respuesta;

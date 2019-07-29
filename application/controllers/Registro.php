@@ -155,7 +155,7 @@ class Registro extends REST_Controller
 				$this->Model_QvalEmpresa->addusuario($IDQval,$_POST["Nombre"],$_POST["Apellidos"],'Usuario Master','0',$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"]);
 			}
 			//apartir de aqui mando los conrreo para qe se actiben las cuentas
-			$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Razon_Social"]);
+			$this->Model_Email->Activar_Usuario_registro($_Token_Usuario,$_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_Tipo_Cuenta,$_POST["Correo1"],$_POST["Clave1"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$ID_Empresa_Admyo;

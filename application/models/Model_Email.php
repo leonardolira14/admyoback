@@ -74,54 +74,195 @@ class Model_Email extends CI_Model
 		$this->email->send();
 	}
 	//funcion para enviar correo de registro
-	public function Activar_Usuario($Token,$_Correo_envio,$_Nombre,$_Apellido,$_Razon_Social){
+	public function Activar_Usuario($Token,$_Correo_envio,$_Nombre,$_Apellido,$usuario,$clave){
 		$this->email->to($_Correo_envio);
 		$this->email->subject("Bienvenido ".$_Nombre." ".$_Apellido.", active su cuenta");
 		$body  =
-		'<html>
+		'<!DOCTYPE html>
+		<html lang="en">
 		<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<style type="text/css">
-		body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
-		.container {margin-right: auto;margin-left: auto; width: 100%;}.col-sm-7 {width: 90%;}.img-responsive{display: block;max-width: 100%;height: auto;}
-		h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}button{border-radius: 10px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}h4{text-align: justify;}h5{text-align: justify;}
-		</style>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<meta http-equiv="X-UA-Compatible" content="ie=edge">
+			<title>Document</title>
+			
 		</head>
+		<style type="text/css">
+			body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
+			
+			h1{
+				font-size: 20pt;color: #878788;font-style: italic;font-weight: bold;
+			}
+			h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}
+			.button{text-decoration: none; border-radius: 0Px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}
+			.button:hover{text-decoration: none;color:#fff}
+			h4{text-align: justify;}h5{text-align: justify;}
+			</style>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 		<body>
-		<div class="container">
-		<center><div class="col-sm-7">
-		<img class="img-responsive" src='.$_SERVER['HTTP_HOST'].'/assets/img/images-mail/header-admyo-bienvenida.jpg" />
-		</div></center>
-		<center><div class="col-sm-7">
-		<div class="col-sm-12">
-		<center><br><h3>¡Bienvenido a admyo!</h3></center>
-		</div>
-		<div class="col-sm-12" style="margin-top:40px">
-		<h5>'.$_Razon_Social.'</h5>
-		</div>
-		<p>En nombre del equipo de admyo, le damos la bienvenida. admyo.com es una plataforma enfocada en la reputación empresarial para que las empresas puedan crecer su negocio y gestionar su riesgo. Si no has visto nuestro video, te recomendamos que lo mires <a href="https://player.vimeo.com/video/48771589?autoplay=1" >aquí</a>.</p>
-		<p><font color="#005288" style="font-weight: bold;">¿Quiere crecer su negocio diferenciándose de su competencia? </font> Descubra cuanto puede crecer su negocio requiriendo a sus clientes y proveedores que le califiquen. Promueva su perfil empresarial. </p>
-		<p><font color="#005288" style="font-weight: bold;">¿Quieres aparecer en nuestra página de inicio?, ¿Que publiquemos sobre ti en redes sociales?,</font> entre más participes calificando a empresas más puntos de public static idad y descuentos obtendrás. </p>
-		<p><font color="#005288" style="font-weight: bold;">¿Quieres saber el riesgo que corres con tus clientes o proveedores?</font> Exígeles que tengan y mantengan un perfil  empresarial en <a href="https://admyo.com/" >admyo.com </a></p>
-		<p><font color="#005288" style="font-weight: bold;">¿Quiere saber si puede aplicar a un descuento?</font> Si es una empresa con menos de un año de antigüedad puedes obtener un descuento del <font style="font-weight: bold;"> 50% </font>, además tenemos acuerdos con algunas cámaras y asociaciones. Para más información mándenos un email a <a href="mailto:promociones@admyo.com" target="_top">promociones@admyo.com</a><br><br></p>
-		<h5><font style="font-weight: bold;">Es necesario que active su cuenta. Haga clic en el siguiente botón</font></h5>
-		<div class="col-sm-12"><center><a href="'.$_SERVER['HTTP_HOST'].'/activar/acttoken/'.$Token.'" ><button type="button" >ACTIVE SU CUENTA</button></a><br><br></div>
-		<p>Si no basta con hacer clic, copie y pegue el siguiente enlace en su navegador. <br><a href="'.$_SERVER['HTTP_HOST'].'/activar/acttoken/'.$Token.'" >"'.$_SERVER['HTTP_HOST'].'/activar/acttoken/'.$Token.'</a><br><br></p>
-		<h4><font color="#005288" style="font-weight: bold;">¡Genere su perfil para que su negocio crezca!</font></h4>
-		<p>Saludos,<br> 
-		<font color="#005288" style="font-weight: bold;">Equipo admyo</font></p>     
-		<div class="col-sm-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
-		<div class="col-sm-12"><br><p><font color="#cc9829" >““… A man I do not trust could not get money from me on all the bonds in Christendom. I think that is the fundamental basis of business.”…<font style="font-weight: bold;">J. P. Morgan</font></font></p></div>
-		<div class="col-sm-12"><p><a href="https://www.admyo.com/terminos-condiciones/" style="color: #21334d;" target="_blank"> Politica de privacidad  |  Términos y condiciones </a></p></div>
-		</div></center></div>
-		</body>';
+			<div class="container-fluid">
+				<div class="row d-flex justify-content-end">
+					<div class="col-2 text-rigth">
+						<img src="https://admyo.com/assets/img/logo-admyo2.png" class="img-fluid" alt="">
+					</div>
+					
+				</div>
+				<div class="row">
+						<div class="col-12 text-center">
+								<h1>Bienvenido a admyo</h1>
+						</div>
+						<div class="col-12 text-center">
+								<h4 class="text-center" style="color:#878788">La herramienta que te permitirá gestionar el riesgo operativo de tu negocio.</h4>
+						</div>
+						<div class="col-12">
+								<h5 ><span style="font-weight: bold;color:#878788"> Controla el riesgo de tus clientes y proveedores.
+									Mejora tus oportunidades de venta, gestionando tu reputación empresarial.
+									Gestiona tu reputación empresarial online.</span></h5>
+						</div>
+						 <div class="col-12 text-center mt-3">
+							<a href="'.$_SERVER['HTTP_HOST'].'/activar/acttoken/'.$Token.'" class="button">Activar Cuenta</a>
+						 </div>   
+					   <div class="col-12 mt-3">
+						   <span>Tu usuario es: '.$usuario.'</span>
+					   </div>
+					   <div class="col-12">
+						<span>Tu contraseña es: '.$clave.'</span>
+						<br>
+						<small class="text-muted">Dentro de admyo.com podrás cambiar tu contraseña en cualquier momento.
+						</small>
+						</div>
+					   
+						<p>
+							<small style="color:#878788">Gracias por elegir admyo.</small>
+						</p>
+						<p>
+								<small style="color:#878788">Equipo de admyo.com.</small>
+							</p>
+					   
+		
+						<div class="col-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
+						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="https://www.admyo.com/terminos-condiciones/">siguiente enlace</a>
+							</small></p>
+					   
+				</div>
+			</div>
+			
+		</body>
+		</html>';
 		
 		$this->email->message($body);
 		$this->email->send();
 	}
+	//funcion para activar a un usuario cuando se registro
+	public function Activar_Usuario_registro($Token,$_Correo_envio,$_Nombre,$_Apellido,$Plan,$usuario,$clave){
+		switch($Plan){
+			case "basic":
+				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
+				$leyenda_precio="Gratuito";
+			case "micro":
+				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
+				$leyenda_precio="Micro Empresa Mensual de 200 MXN + IVA";
+			case "micro_anual":
+				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
+				$leyenda_precio="Micro Empresa Anual de 166.67 MXN + IVA";
+			case "empresa":
+				$leyenda="Una vez vencido tendrá que volver a pagar para acceder a la herramienta. Si requiere una factura por favor solicítela en facturacion@admyo.com";
+				$leyenda_precio="Empresarial Mensual de 1,000 MXN + IVA";
+			case "empresa_anual":
+				$leyenda="Una vez vencido tendrá que volver a pagar para acceder al paquete premium. Siempre tendrá acceso al paquete gratuito. Si requiere una factura por favor solicítela en facturación@admyo.com.";
+				$leyenda_precio="Empresarial Anual de 8333.33 MXN + IVA";
+		}
+		$this->email->to($_Correo_envio);
+		$this->email->subject("Bienvenido ".$_Nombre." ".$_Apellido.", active su cuenta");
+		$body  =
+		'<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<meta http-equiv="X-UA-Compatible" content="ie=edge">
+			<title>Document</title>
+			
+		</head>
+		<style type="text/css">
+			body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
+			
+			h1{
+				font-size: 20pt;color: #878788;font-style: italic;font-weight: bold;
+			}
+			h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}
+			.button{text-decoration: none; border-radius: 0Px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}
+			.button:hover{text-decoration: none;color:#fff}
+			h4{text-align: justify;}h5{text-align: justify;}
+			</style>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<body>
+			<div class="container-fluid">
+				<div class="row d-flex justify-content-end">
+					<div class="col-2 text-rigth">
+						<img src="https://admyo.com/assets/img/logo-admyo2.png" class="img-fluid" alt="">
+					</div>
+					
+				</div>
+				<div class="row">
+						<div class="col-12 text-center">
+								<h1>Bienvenido a admyo</h1>
+						</div>
+						<div class="col-12 text-center">
+								<h4 class="text-center" style="color:#878788">La herramienta que te permitirá gestionar el riesgo operativo de tu negocio.</h4>
+						</div>
+						<div class="col-12">
+								<h5 ><span style="font-weight: bold;color:#878788"> Controla el riesgo de tus clientes y proveedores.
+									Mejora tus oportunidades de venta, gestionando tu reputación empresarial.
+									Gestiona tu reputación empresarial online.</span></h5>
+						</div>
+						 <div class="col-12 text-center mt-3">
+							<a href="'.$_SERVER['HTTP_HOST'].'/activar/acttoken/'.$Token.'" class="button">Activar Cuenta</a>
+						 </div>   
+					   <div class="col-12">
+						   <span>Tu usuario es: '.$usuario.'</span>
+					   </div>
+					   <div class="col-12">
+						<span>Tu contraseña es: '.$clave.'</span>
+						<br>
+						<small class="text-muted">Dentro de admyo.com podrás cambiar tu contraseña en cualquier momento.
+						</small>
+						</div>
+						<div class="col-12 mt-3">
+							<span>Tu pago en admyo.com ha sido procesado correctamente.</span>
+							<br>
+							<span>Has contratado el paquete:</span>
+						</div>
+						<div class="col-12 mt-3">
+							<h3 style="color:#e96610">'.$leyenda_precio.'</h3>
+							<br>
+							<h6>'.$leyenda.'</h6>
+						</div>
+						<p>
+							<small style="color:#878788">Gracias por elegir admyo.</small>
+						</p>
+						<p>
+								<small style="color:#878788">Equipo de admyo.com.</small>
+							</p>
+					   
+		
+						<div class="col-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
+						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="https://www.admyo.com/terminos-condiciones/">siguiente enlace</a>
+							</small></p>
+					   
+				</div>
+			</div>
+			
+		</body>
+		</html>';
+		
+		$this->email->message($body);
+		$this->email->send();	
+	}
 	//funcion para enviar una valoracion
 	public function enviar_valoracion($_Correo_envio,$_Tipo_valoracion,$_Razon_social_emisora,$_Promedio,$_Razon_social_receptora,$_Preguntas)
 	{
+		
 		$this->email->to($_Correo_envio);
 		$this->email->subject("¡Ha Realizado una Calificación en ADMYO!");
 		$html="";
@@ -292,7 +433,9 @@ class Model_Email extends CI_Model
 		@import url(http://fonts.googleapis.com/css?family=Patua+One|Open+Sans);
 		body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
 		.container {margin-right: auto;margin-left: auto; width: 100%;}.col-sm-7 {width: 90%;}.img-responsive{display: block;max-width: 100%;height: auto;}
-		h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}button{border-radius: 10px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}h4{text-align: justify;}h5{text-align: justify;}
+		h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}
+		button{border-radius: 10px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}
+		h4{text-align: justify;}h5{text-align: justify;}
 		table {
 			border-collapse: separate;
 			border: 4px solid #fff;  
@@ -670,6 +813,215 @@ class Model_Email extends CI_Model
                           <div style="overflow: hidden; margin: 0 auto; width: 1104px"><a href="https://www.admyo.com/terminos-condiciones/" style="color: #21334d;" target="_blank"> Politica de privacidad  |  Términos y condiciones </a></div>
                         </body>
                       </html> ';
+		$this->email->message($body);
+		$this->email->send();
+	}
+	//funcion para el cambio de contraseña
+	public function resetpassword($usuario,$clave,$Correo){
+		$this->email->to($Correo);
+		$this->email->subject("Cambio de contraseña");
+		$body  = 
+		'<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<meta http-equiv="X-UA-Compatible" content="ie=edge">
+			<title>Document</title>
+			
+		</head>
+		<style type="text/css">
+			body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
+			
+			h1{
+				font-size: 20pt;color: #878788;font-style: italic;font-weight: bold;
+			}
+			h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}
+			.button{text-decoration: none; border-radius: 0Px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}
+			.button:hover{text-decoration: none;color:#fff}
+			h4{text-align: justify;}h5{text-align: justify;}
+			</style>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<body>
+			<div class="container-fluid">
+				<div class="row d-flex justify-content-end">
+					<div class="col-2 text-rigth">
+						<img src="https://admyo.com/assets/img/logo-admyo2.png" class="img-fluid" alt="">
+					</div>
+					
+				</div>
+				<div class="row">
+						<div class="col-12 text-center">
+								<h1>Cambio de contraseña</h1>
+						</div>
+						<div class="col-12 text-center">
+								<h4 class="text-center" style="color:#878788">Ha solicitado un cambio de contraseña en la herramienta.</h4>
+						</div> 
+					   <div class="col-12 mt-3">
+						   <span>Tu usuario es: '.$usuario.'</span>
+					   </div>
+					   <div class="col-12">
+						<span>Tu contraseña es: '.$clave.'</span>
+						<br>
+						<small class="text-muted">Dentro de admyo.com podrás cambiar tu contraseña en cualquier momento.
+						</small>
+						</div>
+					   
+						<p>
+							<small style="color:#878788">Gracias por elegir admyo.</small>
+						</p>
+						<p>
+								<small style="color:#878788">Equipo de admyo.com.</small>
+							</p>
+					   
+		
+						<div class="col-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
+						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="https://www.admyo.com/terminos-condiciones/">siguiente enlace</a>
+							</small></p>
+					   
+				</div>
+			</div>
+			
+		</body>
+		</html>';
+
+		$this->email->message($body);
+		$this->email->send();
+	}
+	//funcion para baja de usuario
+	public function baja_usuario_admin($_Correo,$_Usuario){
+		$this->email->to($_Correo);
+		$this->email->subject("Visita de su Perfil en admyo.");
+		$body = '<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<meta http-equiv="X-UA-Compatible" content="ie=edge">
+			<title>Document</title>
+			
+		</head>
+		<style type="text/css">
+			body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
+			
+			h1{
+				font-size: 20pt;color: #878788;font-style: italic;font-weight: bold;
+			}
+			h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}
+			.button{text-decoration: none; border-radius: 0Px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}
+			.button:hover{text-decoration: none;color:#fff}
+			h4{text-align: justify;}h5{text-align: justify;}
+			</style>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<body>
+			<div class="container-fluid">
+				<div class="row d-flex justify-content-end">
+					<div class="col-2 text-rigth">
+						<img src="https://admyo.com/assets/img/logo-admyo2.png" class="img-fluid" alt="">
+					</div>
+					
+				</div>
+				<div class="row">
+						<div class="col-12 text-center">
+								<h1>Baja Usuario</h1>
+						</div>
+						<div class="col-12 text-center">
+								<h4 class="text-center" style="color:#878788">Ha solicitado una baja de usuario del sistema.</h4>
+						</div> 
+					   <div class="col-12 mt-3">
+						   <span>El siguiente usuario ya no podrá acceder más al sistema.</span>
+					   </div>
+					   <div class="col-12">
+						<span>'.$_Usuario.'</span>
+						<br>
+					   
+						</div>
+					   
+						<p>
+							<small style="color:#878788">Gracias por elegir admyo.</small>
+						</p>
+						<p>
+								<small style="color:#878788">Equipo de admyo.com.</small>
+							</p>
+					   
+		
+						<div class="col-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
+						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="https://www.admyo.com/terminos-condiciones/">siguiente enlace</a>
+							</small></p>
+					   
+				</div>
+			</div>
+			
+		</body>
+		</html>';
+		$this->email->message($body);
+		$this->email->send();
+	}
+	public function baja_usuario($_Correo){
+		$this->email->to($_Correo);
+		$this->email->subject("Baja Usuario	admyo");
+		$body = '<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<meta http-equiv="X-UA-Compatible" content="ie=edge">
+			<title>Document</title>
+			
+		</head>
+		<style type="text/css">
+			body{font-family: "arial";}p{text-align: justify;font-size: 11pt;color: #878788;}
+			
+			h1{
+				font-size: 20pt;color: #878788;font-style: italic;font-weight: bold;
+			}
+			h3{font-size: 18pt;color: #005288;font-style: italic;font-weight: bold;}
+			.button{text-decoration: none; border-radius: 0Px;border: 2px solid #e96610;padding: 15px 75px;cursor:pointer;background-color:#e96610;color: #ffffff;}
+			.button:hover{text-decoration: none;color:#fff}
+			h4{text-align: justify;}h5{text-align: justify;}
+			</style>
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<body>
+			<div class="container-fluid">
+				<div class="row d-flex justify-content-end">
+					<div class="col-2 text-rigth">
+						<img src="https://admyo.com/assets/img/logo-admyo2.png" class="img-fluid" alt="">
+					</div>
+					
+				</div>
+				<div class="row">
+						<div class="col-12 text-center">
+								<h1>Baja Usuario</h1>
+						</div>
+						<div class="col-12 text-center">
+								<h4 class="text-center" style="color:#878788">Baja del sistema admyo.com.</h4>
+						</div> 
+					   <div class="col-12 mt-3">
+						   <span>Usted ha sido dado de baja del sistema admyo.com.</span>
+					   </div>
+					   <div class="col-12">
+						<span>Si cree que le han dado de baja de forma indebida por favor ponerse en contacto con nosotros.</span>
+						<br>
+					   
+						</div>
+					   
+						<p>
+							<small style="color:#878788">Gracias por elegir admyo.</small>
+						</p>
+						<p>
+								<small style="color:#878788">Equipo de admyo.com.</small>
+							</p>
+					   
+		
+						<div class="col-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
+						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="https://www.admyo.com/terminos-condiciones/">siguiente enlace</a>
+							</small></p>
+					   
+				</div>
+			</div>
+			
+		</body>
+		</html>';
 		$this->email->message($body);
 		$this->email->send();
 	}
