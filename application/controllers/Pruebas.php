@@ -25,7 +25,8 @@ class Pruebas extends CI_Controller
 		$apellido='apellido';
 		$_Tipo_Cuenta='basic';
 		$clave='akjdfhk';
-		$respuesta=$this->Model_Email->Activar_Usuario_registro(
+		$respuesta=$this->Model_Email->Activar_Usuario($toke,$correo,$nombre,$apellido,$correo,$clave);
+		/*$respuesta=$this->Model_Email->Activar_Usuario_registro(
 			$toke,
 			$correo,
 			$nombre,
@@ -33,7 +34,7 @@ class Pruebas extends CI_Controller
 			$_Tipo_Cuenta,
 			$correo,
 			$clave
-		);
+		);*/
 		vdebug($respuesta);
 	}
 	
