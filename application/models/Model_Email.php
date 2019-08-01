@@ -298,7 +298,7 @@ class Model_Email extends CI_Model
 									Mejora tus oportunidades de venta, gestionando tu reputación empresarial.
 									Gestiona tu reputación empresarial online.</span></h5>
 		</div>
-        <div class="col-sm-12"><center><a href="admyo.com/activar/acttoken/'.$Token.'" >
+        <div class="col-sm-12"><center><a href="https://admyo.com/activar/acttoken/'.$Token.'" >
             <button type="button" >ACTIVA TU CUENTA</button>
         </a><br><br>
         </div>
