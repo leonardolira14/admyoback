@@ -73,7 +73,7 @@ class Registro extends REST_Controller
 	public function addempresa_post(){
 	
 		$_POST = json_decode(file_get_contents("php://input"), true);
-		
+		//vdebug($_POST);
 		//vdebug($_POST);
 		$config=array( array(
 			'field'=>'Razon_Social', 
@@ -118,7 +118,7 @@ class Registro extends REST_Controller
 		),array(
 			'field'=>'Correo2', 
 			'label'=>'Confirmar Correo Electrónico', 
-			'rules'=>'trim|required|xss_clean'					
+			'rules'=>'trim|required|xss_clean|matches[Correo1]'					
 		),array(
 			'field'=>'Clave1', 
 			'label'=>'Contraseña', 
@@ -130,8 +130,16 @@ class Registro extends REST_Controller
 		));
 		$this->form_validation->set_error_delimiters('<li>', '</li>');
 		$this->form_validation->set_rules($config);
-			$array=array("required"=>'El campo %s es obligatorio',"valid_email"=>'El campo %s no es valido',"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos','alpha'=>'El campo %s debe estar compuesto solo por letras',"matches"=>"Las contraseñas no coinciden",'is_unique'=>'El contenido del campo %s ya esta registrado');
+			$array=array(
+				"required"=>'El campo %s es obligatorio',
+				"valid_email"=>'El campo %s no es valido',
+				"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',
+				"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos',
+				'alpha'=>'El campo %s debe estar compuesto solo por letras',
+				"matches"=>"El campo %s no coinciden",
+				'is_unique'=>'El contenido del campo %s ya esta registrado');
 		$this->form_validation->set_message($array);
+		
 		if($this->form_validation->run() !=false){
 			//;
 			if($_POST["Productoadmyo"]==="gratis"){
@@ -139,7 +147,7 @@ class Registro extends REST_Controller
 			}else{
 				$_Tipo_Cuenta=$_POST["Productoadmyo"];
 			}
-
+			
 			//ahora agrego la empresa en la base de datos de admyo
 			$ID_Empresa_Admyo=$this->Model_Empresa->preaddempresa($_POST["Tipo_Persona"],$_POST["Razon_Social"],$_POST["Nombre_Comercial"],$_POST["RFC"],$_Tipo_Cuenta,"0");
 			//agrego al usuario en la base de datos
