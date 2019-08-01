@@ -17,6 +17,12 @@ class Notificaciones extends REST_Controller{
 		$this->load->model("Model_Empresa");
 		
     }
+    public function num_post(){
+        $datos=$this->post();
+        $notificaciones=$this->Model_Notificaciones->getnumten($datos["empresa"]);
+        $_data["numnotificaciones"]=$notificaciones;
+        $this->response($_data);
+    }
     public function getnotification_post(){
         $datos=$this->post();
         $notificaciones=$this->Model_Notificaciones->getten($datos["empresa"]);
@@ -35,4 +41,16 @@ class Notificaciones extends REST_Controller{
         $this->response($_data);
        
     }
+    public function delete_post(){
+        $datos=$this->post();
+        $this->Model_Notificaciones->delete($datos["idnotificacion"]);
+        $_data["ok"]="ok";
+        $this->response($_data);
+    }
+    public function updateconfig_post(){
+        $datos=$this->post();
+        $this->Model_Empresa->update_alerta($datos["empresa"],$datos["alertas"]);
+        $_data["ok"]="ok";
+        $this->response($_data);
+    }   
 }

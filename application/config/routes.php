@@ -87,3 +87,6 @@ $route["activarpago"]="Activar/activarpago";
 
 //funcion para las notificaciones
 $route["getallnotification"]="notificaciones/getnotification";
+$route["deletegnotification"]="notificaciones/delete";
+$route["numregistros"]="notificaciones/num";
+$route["updateconfignotification"]="notificaciones/updateconfig";

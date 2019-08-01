@@ -20,6 +20,7 @@ class Calificaciones extends REST_Controller
 		$this->load->model("Model_Empresa");
 		$this->load->model("Model_Usuario");
 		$this->load->model("Model_Email");
+		$this->load->model("Model_Notificaciones");
 	}
 
 	public function getallrealizadas_post(){
@@ -236,6 +237,17 @@ class Calificaciones extends REST_Controller
 		//envio de respuesta
 		//
 		*/
+		// agregamos la notificacion de quien realizo la calificacion
+		if($datos["TipoReceptor"]==='CLIENTE'){
+			$descripemisor="calificacionp";
+			$descripreceptor="calificacionC"
+		}else{
+			$descripemisor="calificacionC";
+			$descripreceptor="calificacionp";
+		}
+		$this->Model_Notificaciones->add($IDEmpresaN,$descripemisor,$_ID_Empresa_emisora,$datos["Emisor"]["IDUsuario"],"crealizadas");
+		// agregamos la notificacion a quien se le realizo la calificacion
+		$this->Model_Notificaciones->add($_ID_Empresa_emisora,$descripreceptor,$IDEmpresa,$datos["Emisor"]["IDUsuario"],"crecibidas");
 		$dat["ok"]=1;
 		$dat["mensaje"]=$_promedio;
 		$this->response($dat);

@@ -199,8 +199,9 @@ class Usuario extends REST_Controller
 			}else{
 				//agregamos el token en accesos
 				$token=$this->Model_Usuario->addacceso($respuesta["IDUsuario"],date('Y-m-d'),1);
-
+				
 				$empresa=$this->Model_Empresa->getempresa($respuesta["IDEmpresa"]);
+				
 				if($respuesta["Status"]==="0"){
 					$this->Model_Email->Activar_Usuario($respuesta["Token_Activar"],$respuesta["Correo"],$respuesta["Nombre"],$respuesta["Apellidos"],$empresa["Razon_Social"]);
 				}
@@ -208,6 +209,7 @@ class Usuario extends REST_Controller
 				$_data["code"]=0;
 				$_data["ok"]="SUCCESS";
 				$_data["datosusuario"]=$respuesta;
+				$_data["empresa"]=$empresa;
 				$_data["Token"]=$token;
 			}
 		}else{

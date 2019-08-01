@@ -85,6 +85,7 @@ class Busqueda extends REST_Controller
 
             if(count($_Datos_Usuario_Receptor)!=0){
                 $this->Model_Email->visita($_Empresa_Receptora["IDEmpresa"], $_Datos_Usuario_Receptor[0]["Correo"]);
+                $this->Model_Notificaciones->add($datos["IDEmpresa"],"vista",$_Empresa_Receptora["IDEmpresa"],'0','vista'); 
             }
             
         }

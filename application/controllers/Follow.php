@@ -75,12 +75,14 @@ class Follow extends REST_Controller
 		}else if($_datos_empresa["TipoCuenta"]==="basic" && $_num<=10){
 			$_data["code"]=0;
 			$dat["datos"]=$this->Model_Follow->tb_follow_empresas($_Empresa,$_EmpresaB);
+			$this->Model_Notificaciones->add($_EmpresaB,"Follow",$_Empresa,'0','follow'); 
 		}else{
 			$_data["code"]=1;
 			$dat["datos"]="Aumentar";
 		}
 
-			
+		$this->Model_Notificaciones->add($IDEmpresaN,$descripemisor,$_ID_Empresa_emisora,$datos["Emisor"]["IDUsuario"]); 
+
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$dat;
 			$data["response"]=$_data;

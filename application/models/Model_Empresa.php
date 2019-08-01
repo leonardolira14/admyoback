@@ -135,5 +135,17 @@ class Model_Empresa extends CI_Model
 		$array=array("Customer_id"=>$IDCustomer,"Plan_ID"=>$PlanID);
 		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",$array);
 	}	
-	
+	/*
+	//
+	/
+	/
+	/
+	//funcion para actualizar la configuaracion de alertas
+	/
+	/
+	/
+	*/
+	public function update_alerta($IDEmpresa,$_config_Alertas){
+		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",array("Configaletas"=>json_encode($_config_Alertas)));
+	}	
 }
