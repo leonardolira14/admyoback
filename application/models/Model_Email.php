@@ -1182,10 +1182,10 @@ class Model_Email extends CI_Model
             <small style="color:#878788">Gracias por elegir admyo.</small>
         </p>
 		<p>Saludos,<br> 
-        <font color="#005288" style="font-weight: bold;">Equipo qvaluation</font></p> 
+        <font color="#005288" style="font-weight: bold;">Equipo admyo</font></p> 
         <div class="col-sm-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
 		<div class="col-sm-12"><br><p><font color="#cc9829" >The most important thing for a young man is to establish credit - a reputation and character”... <br><font style="font-weight: bold;">John D. Rockefeller</font></font></p></div>
-        <p><small class="color:#777">Ha recibido este email por que se ha suscrito en qvaluation.com </small></p>
+        <p><small class="color:#777">Ha recibido este email por que se ha suscrito en admyo.com </small></p>
 						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="">siguiente enlace</a>
 							</small></p>
         
@@ -1322,7 +1322,7 @@ class Model_Email extends CI_Model
         <font color="#005288" style="font-weight: bold;">Equipo admyo</font></p> 
         <div class="col-sm-12" style="border-width: 1px; border-style: dashed; border-color: #fcb034; "></div>
 		<div class="col-sm-12"><br><p><font color="#cc9829" >The most important thing for a young man is to establish credit - a reputation and character”... <br><font style="font-weight: bold;">John D. Rockefeller</font></font></p></div>
-        <p><small class="color:#777">Ha recibido este email por que se ha suscrito en qvaluation.com </small></p>
+        <p><small class="color:#777">Ha recibido este email por que se ha suscrito en admyo.com </small></p>
 						<p><small class="color:#777">infoadmyo S.A. de C.V. es una empresa legalmente constituida en México con RFC IAD120302T35 y es propietaria de la marca admyo y sus logos. Si tiene cualquier duda puede contactar con nosotros al email atencioncliente@admyo.com. Todas nuestras condiciones de uso y privacidad las puede encontrar en el <a href="">siguiente enlace</a>
 							</small></p>
         
