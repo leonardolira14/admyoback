@@ -34,7 +34,7 @@ class Pruebas extends CI_Controller
 			$correo,
 			$clave
 		);
-		vedbug($respuesta);
+		vdebug($respuesta);
 	}
 	
 }

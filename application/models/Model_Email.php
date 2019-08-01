@@ -257,7 +257,7 @@ class Model_Email extends CI_Model
 		</html>';
 		
 		$this->email->message($body);
-		$this->email->send();	
+		return $this->email->send();	
 	}
 	//funcion para enviar una valoracion
 	public function enviar_valoracion($_Correo_envio,$_Tipo_valoracion,$_Razon_social_emisora,$_Promedio,$_Razon_social_receptora,$_Preguntas)
