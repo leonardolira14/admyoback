@@ -159,18 +159,23 @@ class Model_Email extends CI_Model
 			case "basic":
 				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
 				$leyenda_precio="Gratuito";
+				break;
 			case "micro":
 				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
 				$leyenda_precio="Micro Empresa Mensual de 200 MXN + IVA";
+				break;
 			case "micro_anual":
 				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
 				$leyenda_precio="Micro Empresa Anual de 166.67 MXN + IVA";
+				break;
 			case "empresa":
 				$leyenda="Una vez vencido tendrá que volver a pagar para acceder a la herramienta. Si requiere una factura por favor solicítela en facturacion@admyo.com";
 				$leyenda_precio="Empresarial Mensual de 1,000 MXN + IVA";
+				break;
 			case "empresa_anual":
 				$leyenda="Una vez vencido tendrá que volver a pagar para acceder al paquete premium. Siempre tendrá acceso al paquete gratuito. Si requiere una factura por favor solicítela en facturación@admyo.com.";
 				$leyenda_precio="Empresarial Anual de 8333.33 MXN + IVA";
+				break;
 		}
 		$this->email->to($_Correo_envio);
 		$this->email->subject("Bienvenido ".$_Nombre." ".$_Apellido.", active su cuenta");
