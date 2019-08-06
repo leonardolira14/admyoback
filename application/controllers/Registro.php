@@ -154,16 +154,17 @@ class Registro extends REST_Controller
 			$_Token_Usuario=$this->Model_Usuario->addUsuario($ID_Empresa_Admyo,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"],"Master",'0',"Master");
 			//ahora agrego el giro a la empresa
 			$this->Model_Empresa->addgiros($ID_Empresa_Admyo,$_POST["Sector"],$_POST["SubSector"],$_POST["Rama"]);
-
+			$this->Model_Email->Activar_Usuario_registro($_Token_Usuario,$_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_Tipo_Cuenta,$_POST["Correo1"],$_POST["Clave1"]);
 
 			//si traigo licencias de qval registro la empresa en qval
 			if($_POST["PrecioQval"]!==0){
 				$IDQval=$this->Model_QvalEmpresa->addempresa($_POST["Razon_Social"],$_POST["Nombre_Comercial"],$_POST["RFC"],$_POST["Tipo_Persona"],json_encode(array("Producto"=>$_POST["ProductoQval"],"Precio"=>$_POST["PrecioQval"])),$_POST["NlicenasQval"],$ID_Empresa_Admyo);
 				//ahora inserto el usuario en la tabla de usauarios de qval
-				$this->Model_QvalEmpresa->addusuario($IDQval,$_POST["Nombre"],$_POST["Apellidos"],'Usuario Master','0',$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"]);
+				$Token = $this->Model_QvalEmpresa->addusuario($IDQval,$_POST["Nombre"],$_POST["Apellidos"],'Usuario Master','0',$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"]);
+				$this->Model_Email->bienvenida_qval($_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Clave1"],$_POST["Correo1"],$Token);
 			}
 			//apartir de aqui mando los conrreo para qe se actiben las cuentas
-			$this->Model_Email->Activar_Usuario_registro($_Token_Usuario,$_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_Tipo_Cuenta,$_POST["Correo1"],$_POST["Clave1"]);
+			
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$ID_Empresa_Admyo;
@@ -184,17 +185,18 @@ class Registro extends REST_Controller
 		$_tel=$datos["pago"]["tel"];
 		$_ID_Empresa=$datos["datosempresa"];
 		$_precio_admyo=$datos["pago"]["total"];
-		$_tiempo_admyo=$datos["pago"]["tiempo"];
 		$_plan_admyo=$datos["pago"]["descripcion"];
-		if($_tiempo_admyo===FALSE){
+		if(isset($datos["pago"]["tiempo"])){
+			$_tiempo_admyo=$datos["pago"]["tiempo"];
+		}else{
 			$_tiempo_admyo=0;
 		}
 		
 		if($datos["pago"]["metodo"]==='Tarjeta'){
 			$_token_admyo=$datos["pago"]["token"];
 			$respuesta=$this->Model_Conecta_admyo->Tarjeta($_nombre,$_correo,$_token_admyo,$_plan_admyo,$_precio_admyo,$_tel,$_tiempo_admyo);
-			
-			if($respuesta["status"]==="active"){
+			//vdebug($respuesta);
+			if(isset($respuesta["status"]==="active")){
 				if($datos["pago"]["para"]==='admyo'){
 					$this->Model_Empresa->update_datos_conecta('admyo',$_ID_Empresa,$respuesta["customer_id"],$respuesta["plan_id"]);
 				}
@@ -239,5 +241,19 @@ class Registro extends REST_Controller
 			}
 		}
 		$this->response("echo");
+	}
+	//funcion para activar cuenta
+	public function activarcuenta_post(){
+		$datos=$this->post();
+		$respuesta=$this->Model_Usuario->checktokenuser($datos["token"]);
+		if($respuesta===false){
+			$data["ok"]="error";
+			$data["error"]="Token no valido";
+		}else{
+			
+			$data["ok"]="ok";
+			$data["mensaje"]="Cuenta activa";
+		}
+		$this->response($data);
 	}
 }

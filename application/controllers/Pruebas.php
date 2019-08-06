@@ -10,6 +10,7 @@ class Pruebas extends CI_Controller
 		parent::__construct();
 		$this->load->model("Model_Notificaciones");
 		$this->load->model("Model_Email");
+		$this->load->model("Model_Imagen");
 	}
 	public function p1(){
 		$IDEmpresaN='152';
@@ -37,6 +38,19 @@ class Pruebas extends CI_Controller
 			$clave
 		);*/
 		vdebug($respuesta);
+	}
+	public function prueba2(){
+		$this->Model_Imagen->updateimagen(
+			'1',
+			3,
+			10,
+			5,
+			5,
+			5,
+			20,
+			15,
+			15,
+			"Proveedor");
 	}
 	
 }

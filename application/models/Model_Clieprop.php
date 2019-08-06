@@ -96,10 +96,20 @@ class Model_Clieprop extends CI_Model{
 		//grafica nuemero de clientes registrados por mes
 		for($i=1;$i<=date('m');$i++){
 			$sql=$this->db->select("count(*) as total")->where("IDEmpresaP='$IDEmpresa' and Tipo='Cliente' and DATE(FechaRelacion) between '".date('Y')."-$i-01' and '".date('Y')."-$i-31' group by(IDEmpresaP)")->get("tbrelacion");
+			
+			
 			if($sql->num_rows()===0){
 				$num=0;
 			}else{
 				$num=$sql->result()[0]->total;
+			}
+			$sql=$this->db->select("count(*) as total")->where("IDEmpresaB='$IDEmpresa' and Tipo='Cliente' and DATE(FechaRelacion) between '".date('Y')."-$i-01' and '".date('Y')."-$i-31' group by(IDEmpresaP)")->get("tbrelacion");
+			
+			
+			if($sql->num_rows()===0){
+				$num=$num+0;
+			}else{
+				$num=$num+(int)$sql->result()[0]->total;
 			}
 			array_push($serieclientespormeslabel,da_mes($i));
 			array_push($serieclientespormes,$num);
@@ -130,7 +140,7 @@ class Model_Clieprop extends CI_Model{
 
 	//funcion para saber cuantos tengo calificacados y cuantos no 
 	public function cuantoscalif($IDEmpresa,$mes,$anio,$tipo,$forma){
-		
+		$tipo=strtoupper($tipo);
 		$clientes=$this->ObtenerClientes($IDEmpresa);
 		
 		$mayoresde8=0;

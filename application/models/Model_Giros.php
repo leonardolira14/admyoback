@@ -18,8 +18,18 @@ class Model_Giros extends CI_Model
 	}
 	//FUNCION para obtner los giros de una emrpesa
 	public function getGirosEmpresa($_ID_Empresa){
-		$respuesta=$this->db->select("Principal,IDGE,giroempresa.IDGiro,giroempresa.IDGiro2,giroempresa.IDGiro3,gironivel1.Giro as giron1 ,gironivel2.Giro as giron2,gironivel3.Giro as giron3 ")->from("giroempresa")->where("IDEmpresa='$_ID_Empresa'")->join("gironivel1","gironivel1.IDNivel1=giroempresa.IDGiro")->join("gironivel2","gironivel2.IDNivel2=giroempresa.IDGiro2")->join("gironivel3","gironivel3.IDGiro3=giroempresa.IDGiro3")->get();
-		return $respuesta->result_array();
+		$respuesta=$this->db->select("*")->where("IDEmpresa='$_ID_Empresa'")->get("giroempresa");
+		$giros=$respuesta->result_array();
+		foreach($giros as $key=>$item){
+			$datos_rama=$this->getrama($item["IDGiro"]);
+			$datos_subgiro=$this->getsubgiro($item["IDGiro2"]);
+			$datos_sub=$this->getgiro($item["IDGiro3"]);
+			$giros[$key]["giron1"]=$datos_rama["Giro"];
+			$giros[$key]["giron2"]=$datos_subgiro["Giro"];
+		}
+		
+	
+		return $giros;
 	}
 	//funcion para agregar un nuevo giro a una empresa
 	public function addgiro($_Empresa,$_giro,$_subGiro,$_Rama){
@@ -34,5 +44,21 @@ class Model_Giros extends CI_Model
 	public function principal($_ID_Empresa,$_ID_Giro){
 		$this->db->where("IDEmpresa='$_ID_Empresa'")->update("giroempresa",array("Principal"=>'0'));
 		return $this->db->where("IDGE='$_ID_Giro'")->update("giroempresa",array("Principal"=>'1'));
+	}
+
+	//funcion para obtener los datos de una rama
+	public function getrama($IDRama){
+		$respuesta=$this->db->select('*')->where("IDNivel1='$IDRama'")->get("gironivel1");
+		return $respuesta->row_array();
+	}
+	//funcion para obtener los datos de un subgiro
+	public function getsubgiro($IDRama){
+		$respuesta=$this->db->select('*')->where("IDNivel2='$IDRama'")->get("gironivel2");
+		return $respuesta->row_array();
+	}
+	//funcion para obtener los datos de un subbgiro
+	public function getgiro($IDRama){
+		$respuesta=$this->db->select('*')->where("IDGiro3='$IDRama'")->get("gironivel3");
+		return $respuesta->row_array();
 	}
 }

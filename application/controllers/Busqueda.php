@@ -25,6 +25,7 @@ class Busqueda extends REST_Controller
         $this->load->model("Model_Producto");
         $this->load->model("Model_Imagen");
         $this->load->model("Model_General");
+        $this->load->model("Model_Notificaciones");
 
 	}
     // funcion para buscar con filtros

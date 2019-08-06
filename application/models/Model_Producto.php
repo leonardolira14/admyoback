@@ -27,4 +27,8 @@ class Model_Producto extends CI_Model
 	public function delete($_ID_Producto){
 		return $this->db->where("IDProducto='$_ID_Producto'")->delete("productos");
 	}
+	public function getnum($_Empresa){
+		$respuesta=$this->db->select('COUNT(*) as num')->where("IDEmpresa='$_Empresa'")->get("productos");
+		return $respuesta->row_array()["num"];
+	}
 }

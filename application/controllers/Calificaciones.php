@@ -21,6 +21,7 @@ class Calificaciones extends REST_Controller
 		$this->load->model("Model_Usuario");
 		$this->load->model("Model_Email");
 		$this->load->model("Model_Notificaciones");
+		$this->load->model("Model_Imagen");
 	}
 
 	public function getallrealizadas_post(){
@@ -158,6 +159,14 @@ class Calificaciones extends REST_Controller
 	public function calificarfinal_post(){
 		$datos=$this->post();
 		
+		$IDEmpresa=$datos["IDReceptor"];
+		$_tipo_imagen=$datos["TipoReceptor"];
+		$_puntos_ob_calidad=0;
+		$_puntos_pos_calidad=0;
+		$_puntos_ob_cumplimiento=0;
+		$_puntos_pos_cumplimiento=0;
+		$_puntos_ob_oferta=0;
+		$_puntos_pos_oferta=0;
 		//primero tengo que guardar la calificaciones netas
 		//obtener el giro de la empresa emisora
 		$_IDGiro_emisora=$this->Model_Empresa->Get_Giro_Principal($datos["Emisor"]["IDEmpresa"]);
@@ -183,37 +192,45 @@ class Calificaciones extends REST_Controller
 			strtoupper($datos["TipoReceptor"])
 		);
 		//ahora inserto los detalles de esa calificacion
+		
 		//primero voy con calidad
 		$Cuestionario_calidad=$datos["cuestionarios"]["calidad"];
 		$cuestionario_gen=[];
 		$puntos_obtenidos=0;
 		$puntos_posibles=0;
-		
 		foreach ($Cuestionario_calidad as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
+			$_puntos_ob_calidad=$_puntos_ob_calidad+(int)$respuesta["PuntosObtenidos"];
+			$_puntos_pos_calidad=$_puntos_pos_calidad+(int)$respuesta["PuntosPosibles"];
 		}
-
 		$Cuestionario_cumplimiento=$datos["cuestionarios"]["cumplimiento"];
+				
 		//cumplimiento
 		foreach ($Cuestionario_cumplimiento as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
+			$_puntos_ob_cumplimiento=$_puntos_ob_cumplimiento+(int)$respuesta["PuntosObtenidos"];
+			$_puntos_pos_cumplimiento=$_puntos_pos_cumplimiento+(int)$respuesta["PuntosPosibles"];
 		}
-
 		$Cuestionario_oferta=$datos["cuestionarios"]["oferta"];
+		
+	
 		//oferta
 		foreach ($Cuestionario_oferta as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
+			$_puntos_ob_oferta=$_puntos_ob_oferta+(int)$respuesta["PuntosObtenidos"];
+			$_puntos_pos_oferta=$_puntos_pos_oferta+(int)$respuesta["PuntosPosibles"];
 		}
 		$Cuestionario_recomendacion=$datos["cuestionarios"]["recomendacion"];
+		
 		//recomendacion
 		foreach ($Cuestionario_recomendacion as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
@@ -221,8 +238,22 @@ class Calificaciones extends REST_Controller
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
 		}
-		//ahora mando los mails
 		$_promedio=round(($puntos_obtenidos/$puntos_posibles)*10,2);
+		$this->Model_Imagen->updateimagen(
+									$IDEmpresa,
+									$puntos_obtenidos,
+									$puntos_posibles,
+									$_puntos_ob_calidad,
+									$_puntos_pos_calidad,
+									$_puntos_ob_cumplimiento,
+									$_puntos_pos_cumplimiento,
+									$_puntos_ob_oferta,
+									$_puntos_pos_oferta,
+									$_tipo_imagen
+								);
+		//ahora mando los mails
+		
+
 		$this->Model_Empresa->addRelacion($_ID_Empresa_emisora,$_ID_Empresa_receptora,$datos["TipoReceptor"]);
 		/*
 		//
@@ -240,14 +271,14 @@ class Calificaciones extends REST_Controller
 		// agregamos la notificacion de quien realizo la calificacion
 		if($datos["TipoReceptor"]==='CLIENTE'){
 			$descripemisor="calificacionp";
-			$descripreceptor="calificacionC"
+			$descripreceptor="calificacionrp";
 		}else{
 			$descripemisor="calificacionC";
-			$descripreceptor="calificacionp";
+			$descripreceptor="calificacionrc";
 		}
-		$this->Model_Notificaciones->add($IDEmpresaN,$descripemisor,$_ID_Empresa_emisora,$datos["Emisor"]["IDUsuario"],"crealizadas");
+		$this->Model_Notificaciones->add($_ID_Empresa_receptora,$descripreceptor,$_ID_Empresa_emisora,$_datos_usuario_receptor["IDUsuario"],"crealizadas");
 		// agregamos la notificacion a quien se le realizo la calificacion
-		$this->Model_Notificaciones->add($_ID_Empresa_emisora,$descripreceptor,$IDEmpresa,$datos["Emisor"]["IDUsuario"],"crecibidas");
+		$this->Model_Notificaciones->add($_ID_Empresa_emisora,$descripemisor,$_ID_Empresa_receptora,$datos["Emisor"]["IDUsuario"],"crecibidas");
 		$dat["ok"]=1;
 		$dat["mensaje"]=$_promedio;
 		$this->response($dat);

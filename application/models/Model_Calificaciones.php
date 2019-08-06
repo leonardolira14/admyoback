@@ -142,11 +142,12 @@ class Model_Calificaciones extends CI_Model{
 			$cliente="and tbcalificaciones.IDEmpresaReceptor='$cliente'";
 		}
 		$listascalificaciones=[];
-
+		
 	 	//primero obtengo las calificaciones en bruto
 	 	if($Forma==="Recibida"){
 	 		$sql=$this->db->select("*")->where("tbcalificaciones.IDEmpresaReceptor='$IDEmpresa' $rango $status $cliente and Emitidopara='$Tipo'")->get("tbcalificaciones");
-	 		foreach ($sql->result() as $valoracion)
+			
+			 foreach ($sql->result() as $valoracion)
 	 			{
 					 	 				
 	 				//Datos de la empresa
@@ -178,12 +179,8 @@ class Model_Calificaciones extends CI_Model{
 	 			}
 	 	}else{
 	 		$sql=$this->db->select("*")->where("tbcalificaciones.IDEmpresaEmisor='$IDEmpresa' $rango $status $cliente and Emitidopara='$Tipo'")->get("tbcalificaciones");
-	 	
-	 	
 	 			foreach ($sql->result() as $valoracion)
 	 			{
-					 
-	 				
 	 				//Datos de la empresa
 	 				 $datosempresa=$this->DatosEmpresa($valoracion->IDEmpresaReceptor);
 	 				//datos del usuario receptor
@@ -299,13 +296,11 @@ class Model_Calificaciones extends CI_Model{
 		$respu=$this->db->get();
 		return $respu->result()[0]->IDValora;
 	}
-
-	
 	public function addDetallevaloracion($tipo,$respuestas,$IDEmpresa,$IDEmpresa_Valorada,$correo,$IDUsuario,$IDGiro){
 		$resp=$this->cuestionario($tipo);
 		$existe=[];
 		 $valoracion=$this->ultimavaloracion()+1;
-	$preguntas="";
+		$preguntas="";
 		if(count($resp["Preguntas"])!=count($respuestas)){
 			foreach ($resp["Preguntas"] as $key) {
 				foreach ($respuestas as $keys) {
@@ -449,7 +444,7 @@ class Model_Calificaciones extends CI_Model{
 	}
 	public function detallescalif($num){
 		$sql=$this->db->select("Pregunta,Respuesta as calificacion")->from("tbdetallescalificaciones")->join('preguntas_val',"preguntas_val.IDPregunta=tbdetallescalificaciones.IDPregunta")->where("IDCalificacion='$num'")->get();
-
+		
 		return($sql->result());
 	}
 	public function detalletotalcuestionario($num){

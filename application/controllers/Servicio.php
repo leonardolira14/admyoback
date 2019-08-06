@@ -80,6 +80,18 @@ class Servicio extends REST_Controller
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
+			$datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
+			$num=$this->Model_Producto->getnum($_ID_Empresa);
+			
+			if($num==="2" && $datos_empresa["TipoCuenta"]){
+				$_data["code"]=1990;
+				$_data["ok"]="ERROR";
+				$banderaimg=false;
+				$_data["result"]="plan_basico";
+				$data["response"]=$_data;
+				$this->response($data);
+				return false;
+			}
 			//ahora guardo la imagen
 			if(count($_FILES)>0){
 				foreach ($_FILES as $archivo=>$key) {

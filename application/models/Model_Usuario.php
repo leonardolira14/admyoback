@@ -24,7 +24,7 @@ class Model_Usuario extends CI_Model
 				"Correo"=>$_Correo,
 				"password"=>$clave,
 				"visible"=>$_Visible,
-				"Status"=>1,
+				"Status"=>0,
 				"Fecha_Alta"=>date('Y-m-d H:i:s'),
 				"Token_Activar"=>$TokenActivar,
 				"IDEmpresa"=>$_ID_Empresa,
@@ -64,6 +64,16 @@ class Model_Usuario extends CI_Model
 			return false;
 		}else{
 			return $respuesta->row_array();
+		}
+	}
+	//funcion para revisar un token
+	public function checktokenuser($token){
+		$respuesta=$this->db->select("*")->where("Token_Activar='$token'")->get('usuarios');
+		if($respuesta->num_rows===0){
+			return false;
+		}else{
+			$this->db->where("Token_Activar='$token'")->update('usuarios',array("Status"=>'1'));
+			return true;
 		}
 	}
 	public function update($_ID_Usuario,$_Nombre,$_Apellidos,$_Puesto,$_Correo,$_Visible){

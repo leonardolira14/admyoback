@@ -21,12 +21,33 @@ class Model_QvalEmpresa extends CI_Model
 		return $ultimoId;
 
 	}
-	public function addusuario($_ID_Empresa,$_Nombre,$_Apellidos,$_Puesto,$_ID_Config,$_Usuario,$_Correo,$_Clave)
+	public function addusuario(
+		$_ID_Empresa,
+		$_Nombre,
+		$_Apellidos,
+		$_Puesto,
+		$_ID_Config,
+		$_Usuario,
+		$_Correo,
+		$_Clave
+		)
 	{
 		$_Clave=md5($_Clave.$this->constante);
 		$db_prueba = $this->load->database('qval', TRUE);
-		$array=array("IDEmpresa"=>$_ID_Empresa,"Nombre"=>$_Nombre,"Apellidos"=>$_Apellidos,"Usuario"=>$_Correo,"Correo"=>$_Correo,"Clave"=>$_Clave,"Est"=>1,"Funciones"=>'["1","1","1","1","1","1","1","1","1"]');
+		$token=md5(date('Y-m-d').date('h:i:s'));
+		$array=array(
+			"IDEmpresa"=>$_ID_Empresa,
+			"Nombre"=>$_Nombre,
+			"Apellidos"=>$_Apellidos,
+			"Usuario"=>$_Correo,
+			"Correo"=>$_Correo,
+			"Clave"=>$_Clave,
+			"Est"=>1,
+			"Funciones"=>'["1","1","1","1","1","1","1","1","1"]',
+			"Token"=>$token
+		);
 		$db_prueba->insert("usuario",$array);
+		return $token;
 
 	}
 	//funcion para cambiar el status de pago de la empresa

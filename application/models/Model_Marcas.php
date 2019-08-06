@@ -33,4 +33,8 @@ class Model_Marcas extends CI_Model
 		}
 		$this->db->where("IDMarca='$_ID_Marca'")->update("marcas",$array);
 	}
+	public function getnum($_Empresa){
+		$respuesta=$this->db->select('COUNT(*) as num')->where("IDEmpresa='$_Empresa'")->get("marcas");
+		return $respuesta->row_array()["num"];
+	}
 }

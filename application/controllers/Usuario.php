@@ -101,15 +101,25 @@ class Usuario extends REST_Controller
 		if($this->form_validation->run() !=false){
 			$clave=generate_clave();
 			$_datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
+			$num=$this->Model_Usuario->getAlluser($_ID_Empresa);
+			$num=count($num);
+			if($num===2 && $_datos_empresa["TipoCuenta"]){
+				$_data["code"]=1991;
+				$_data["ok"]="ERROR";
+				$_data["result"]="plan_basico";
+				
+			}else{
+				$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$_POST["Correo"],$clave,$_POST["Puesto"],'0',"");
+				$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$clave);
 
-			$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$_POST["Correo"],$clave,$_POST["Puesto"],'0',"");
-			$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$clave);
 
+				$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
+				$_data["code"]=0;
+				$_data["ok"]="SUCCESS";
+				$_data["result"]=$respuesta;
+			}
 
-			$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
-			$_data["code"]=0;
-			$_data["ok"]="SUCCESS";
-			$_data["result"]=$respuesta;
+			
 		}else{
 			$_data["code"]=1990;
 			$_data["ok"]="Error";
@@ -197,20 +207,27 @@ class Usuario extends REST_Controller
 				$_data["result"]="Usuario y/o Contraseña no validos";
 
 			}else{
+				//primero verifico que su cuenta este activa si no le mando un mail para activarla y no le doy acceso
+
 				//agregamos el token en accesos
 				$token=$this->Model_Usuario->addacceso($respuesta["IDUsuario"],date('Y-m-d'),1);
 				
 				$empresa=$this->Model_Empresa->getempresa($respuesta["IDEmpresa"]);
 				
 				if($respuesta["Status"]==="0"){
-					$this->Model_Email->Activar_Usuario($respuesta["Token_Activar"],$respuesta["Correo"],$respuesta["Nombre"],$respuesta["Apellidos"],$empresa["Razon_Social"]);
+					$this->Model_Email->Activar_Usuario($respuesta["Token_Activar"],$respuesta["Correo"],$respuesta["Nombre"],$respuesta["Apellidos"],$respuesta["Correo"],"");
+					$_data["code"]=1990;
+					$_data["ok"]="Error";
+					$_data["result"]="Cuenta no activada, se han enviado un email las instrucciones para activar su cuenta.";
+				}else{
+					$_data["code"]=0;
+					$_data["ok"]="SUCCESS";
+					$_data["datosusuario"]=$respuesta;
+					$_data["empresa"]=$empresa;
+					$_data["Token"]=$token;
 				}
 				
-				$_data["code"]=0;
-				$_data["ok"]="SUCCESS";
-				$_data["datosusuario"]=$respuesta;
-				$_data["empresa"]=$empresa;
-				$_data["Token"]=$token;
+				
 			}
 		}else{
 			$_data["code"]=1990;

@@ -35,6 +35,19 @@ class Marca extends REST_Controller
 			$_data["result"]="Error de empresa";
 			$bandera=true;
 		}else {
+			//verifico que plan tiene
+			$datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
+			$num=$this->Model_Marcas->getnum($_ID_Empresa);
+			
+			if($num==="2" && $datos_empresa["TipoCuenta"]){
+				$_data["code"]=1990;
+				$_data["ok"]="ERROR";
+				$banderaimg=false;
+				$_data["result"]="plan_basico";
+				$data["response"]=$_data;
+				$this->response($data);
+				return false;
+			}
 			if(count($_FILES)!==0){
 				$_Imagen=$_FILES["logo"]["name"];	
 				$ruta='./assets/img/logosmarcas/';
@@ -126,6 +139,10 @@ class Marca extends REST_Controller
 			}
 			$data["response"]=$_data;
 		    $this->response($data);
+	}
+	//funcion para saber cuantos registros tiene esta empresa
+	public function getnum($_Empresa){
+		
 	}
 	function checksession($_Token,$_Empresa){
 		//primerocheco el token

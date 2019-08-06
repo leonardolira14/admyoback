@@ -108,7 +108,7 @@ class Model_Imagen extends CI_Model
 			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get($tb);
 			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get($tb);
 			//ahora obtenemos para calidad
-
+		
 	
 		if($promedios_pasadas->result()[0]->mediageneral!==NULL)
 			{
@@ -136,12 +136,13 @@ class Model_Imagen extends CI_Model
 			$_data["Calidad"]=array("media"=>$_media_calidad_actual,"incremento"=> _increment($_media_calidad_actual,$_media_calidad_pasado,"imagen"));
 			$_data["Cumplimiento"]=array("media"=>$_media_cumplimiento_actual,"incremento"=>_increment($_media_cumplimiento_actual,$_media_cumplimiento_pasado,"imagen"));
 			if($tipo_persona==="proveedor"){
-			$_data["Oferta"]=array("media"=>$_media_cumplimiento_actual,"incremento"=>_increment($_media_oferta_actual,$_media_oferta_pasado,"imagen"));
+			$_data["Oferta"]=array("media"=>$_media_oferta_actual,"incremento"=>_increment($_media_oferta_actual,$_media_oferta_pasado,"imagen"));
 			}
 			$_data["totalCalif"]=$_Numero_de_calificaciones_actual;
 			$_data["Media"]=$_media_general_actual;
 			$_data["aumento"]=_increment($_Numero_de_calificaciones_actual,$_Numero_de_calificaciones_pasado,"imagen");
-		if($resumen===FALSE){
+			
+			if($resumen===FALSE){
 			if($tipo_fecha==="A"){
 				$evolucion=[];
 				$evolucionlabel=[];
@@ -153,6 +154,7 @@ class Model_Imagen extends CI_Model
 				foreach ($fechas_rango as $fechacom) {
 					$datos=explode("-", $fechacom);
 					$cuantas=$this->Total_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
+					
 					array_push($evolucionlabel,da_mes($datos[1])."-".$datos[0]);
 					array_push($evolucion,(int)$cuantas);
 					$cuantas=$this->Media_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
@@ -163,16 +165,16 @@ class Model_Imagen extends CI_Model
 					array_push($_evolucion_media_calidad,$calidad);
 					$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
 					array_push($_evolucion_media_cumplimiento,$cumplimiento);
-					if($tipo_persona==="Proveedor"):
+					if($tipo_persona==="proveedor"):
 						$oferta=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Oferta');
+						
 						array_push($_evolucion_media_oferta,$oferta);
 					endif;
 					
 				}
 
 			}
-			
-				if($tipo_fecha==="M"){
+			if($tipo_fecha==="M"){
 					$evolucion=[];
 					$evolucionlabel=[];
 					$_evolucion_media=[];
@@ -198,7 +200,8 @@ class Model_Imagen extends CI_Model
 							array_push($_evolucion_media_calidad,$calidad);
 							$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Cumplimiento');
 							array_push($_evolucion_media_cumplimiento,$cumplimiento);
-							if($tipo_persona==="Proveedor"):
+							
+							if($tipo_persona==="proveedor"):
 								$oferta=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Oferta');
 								array_push($_evolucion_media_oferta,$oferta);
 							endif;
@@ -217,8 +220,10 @@ class Model_Imagen extends CI_Model
 							array_push($_evolucion_media_calidad,$calidad);
 							$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Cumplimiento');
 							array_push($_evolucion_media_cumplimiento,$cumplimiento);
-							if($tipo_persona==="Proveedor"):
+							
+							if($tipo_persona==="proveedor"):
 								$oferta=$this->Media_calificaciones_tipo($fechacom."-".$inicio,$fechacom."-".$inicio,$IDEmpresa,$tipo_persona,'Oferta');
+								
 								array_push($_evolucion_media_oferta,$oferta);
 							endif;
 							$inicio++;
@@ -229,6 +234,7 @@ class Model_Imagen extends CI_Model
 				$_data["evolucionmedia"]=array("data"=>array("data"=>$_evolucion_media,"label"=>"Media de calificaciones"),"label"=>$_evolucion_media_label);	
 				$_data["evolucion_calidad"]=array("data"=>array("data"=>$_evolucion_media_calidad,"label"=>"Media de calificaciones Calidad"),"label"=>$_evolucion_media_label);
 				$_data["evolucion_cumplimiento"]=array("data"=>array("data"=>$_evolucion_media_cumplimiento,"label"=>"Media de calificaciones Cumplimiento"),"label"=>$_evolucion_media_label);
+				
 				if($tipo_persona==="proveedor"):
 					$_data["evolucion_oferta"]=array("data"=>array("data"=>$_evolucion_media_oferta,"label"=>"Media de calificaciones Oferta"),"label"=>$_evolucion_media_label);
 				endif;
@@ -237,7 +243,8 @@ class Model_Imagen extends CI_Model
 			return $_data;
 	}
 	public function Total_calificaciones($_fecha_inicio,$_fecha_fin,$IDEmpresa,$forma){
-		if($forma==="Cliente"){
+		$forma=strtolower($forma);
+		if($forma==="cliente"){
 			$sql=$this->db->select('sum(N_Calificaciones) as Numcalificaciones')->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_cliente');
 		}else{
 			$sql=$this->db->select('sum(N_Calificaciones) as Numcalificaciones')->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_proveedor');
@@ -250,7 +257,8 @@ class Model_Imagen extends CI_Model
 		}
 	}
 	public function Media_calificaciones($_fecha_inicio,$_fecha_fin,$IDEmpresa,$forma){
-		if($forma==="Cliente"){
+		$forma=strtolower($forma);
+		if($forma==="cliente"){
 			$sql=$this->db->select('round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral')->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_cliente');
 		}else{
 			$sql=$this->db->select('round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral')->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_proveedor');
@@ -263,6 +271,7 @@ class Model_Imagen extends CI_Model
 		}
 	}
 	public function Media_calificaciones_tipo($_fecha_inicio,$_fecha_fin,$IDEmpresa,$forma,$_Tipo){
+		$forma=strtolower($forma);
 		switch ($_Tipo) {
 			case 'Calidad':
 				$sql='round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) as media';
@@ -275,7 +284,7 @@ class Model_Imagen extends CI_Model
 				break;
 			
 		}
-		if($forma==="Cliente"){
+		if($forma==="cliente"){
 			$sql=$this->db->select($sql)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_cliente');
 		}else{
 			$sql=$this->db->select($sql)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_proveedor');
@@ -637,9 +646,10 @@ class Model_Imagen extends CI_Model
 		}else{
 			$listacp=$this->ObtenerProveedores($IDEmpresa);
 			$listapreguntascalidad=$this->listpreguntas("Calidad",$forma,$_Giro_Principal);
+			
 			$listapreguntascumplimento=$this->listpreguntas("Cumplimiento",$forma,$_Giro_Principal);
 			$listapreguntasoferta=$this->listpreguntas("Oferta",$forma,$_Giro_Principal);
-			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get('tbimagen_proveedor');
+			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get('tbimagen_proveedor');
 			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get('tbimagen_proveedor');
 		}
 		
@@ -761,6 +771,93 @@ class Model_Imagen extends CI_Model
 			
 		}
 		return round($porcentaje,2);
+	}
+
+	//function para modificar la imagen en esta parte agrego o modifico la tabla de imgen ya sea cliente o proveedor
+	public function updateimagen(
+		$_IDEmpresa,
+		$_puntos_obs_general,
+		$_puntos_pos_general,
+		$_puntos_ob_calidad,
+		$_puntos_pos_calidad,
+		$_puntos_ob_cumplimiento,
+		$_puntos_pos_cumplimiento,
+		$_puntos_ob_oferta,
+		$_puntos_pos_oferta,
+		$_tipo_imagen
+		){
+			
+			//ahora busco si es que hay algun registro de imagen en la fecha en la que se esta registrando la calificacion
+			if($_tipo_imagen==="Cliente"){
+				$_datos_imagen=$this->db->select('*')->where("IDEmpresa='$_IDEmpresa' and Fecha='".date('Y-m-d')."'")->get('tbimagen_cliente');
+			}else{
+				$_datos_imagen=$this->db->select('*')->where("IDEmpresa='$_IDEmpresa' and Fecha='".date('Y-m-d')."'")->get('tbimagen_proveedor');
+			}
+			
+			if($_datos_imagen->num_rows()===0){
+				if($_puntos_obs_general===0 && $_puntos_pos_general===0){
+					$num=0;
+				}else{
+					$num=round(($_puntos_obs_general/$_puntos_pos_general)*10,2);
+				}
+				
+				//si no hay registro entonces agrego uno nuevo 
+				$array=array(
+					"IDEmpresa"=>$_IDEmpresa,
+					"P_Ob_Generales"=>$_puntos_obs_general,
+					"P_Pos_Generales"=>$_puntos_pos_general,
+					"P_Obt_Calidad"=>$_puntos_ob_calidad,
+					"P_Pos_Calidad"=>$_puntos_pos_calidad,
+					"P_Obt_Cumplimiento"=>$_puntos_ob_cumplimiento,
+					"P_Pos_Cumplimiento"=>$_puntos_pos_cumplimiento,
+					"Ultima_Media"=>$num,
+					"Fecha"=>date('Y-m-d')
+					);
+					if($_tipo_imagen!=="Cliente"){
+						$array["P_Obt_Oferta"]=$_puntos_ob_oferta;
+						$array["P_Pos_Oferta"]=$_puntos_pos_oferta;
+						$this->db->insert("tbimagen_proveedor",$array);
+					}else{
+						$this->db->insert("tbimagen_cliente",$array);
+					}
+					
+			}else{
+				
+				//si ya hay algun registro solo modifico los datos 
+				$datos_imagen = $_datos_imagen->result_array()[0];
+				$datos_imagen["P_Ob_Generales"]=(float)$datos_imagen["P_Ob_Generales"]+(float)$_puntos_obs_general;
+				$datos_imagen["P_Pos_Generales"]=(float)$datos_imagen["P_Pos_Generales"]+(float)$_puntos_pos_general;
+				$datos_imagen["P_Obt_Calidad"]=(float)$datos_imagen["P_Obt_Calidad"]+(float)$_puntos_ob_calidad;
+				$datos_imagen["P_Pos_Calidad"]=(float)$datos_imagen["P_Pos_Calidad"]+(float)$_puntos_pos_calidad;
+				$datos_imagen["P_Obt_Cumplimiento"]=(float)$datos_imagen["P_Obt_Cumplimiento"]+(float)$_puntos_ob_cumplimiento;
+				$datos_imagen["P_Pos_Cumplimiento"]=(float)$datos_imagen["P_Pos_Cumplimiento"]+(float)$_puntos_pos_cumplimiento;
+				$datos_imagen["N_Calificaciones"]=(float)$datos_imagen["N_Calificaciones"]+1;
+				
+				if($_puntos_obs_general===0 && $_puntos_pos_general===0){
+					$num=0;
+				}else{
+					$num=round(($_puntos_obs_general/$_puntos_pos_general)*10,2);
+				}
+				if((float)$datos_imagen["Ultima_Media"]>$num){
+					$_position_actual="Emp";
+				}else if((float)$datos_imagen["Ultima_Media"]<$num){
+					$_position_actual="Mej";
+				}else{
+					$_position_actual="Man";
+				}
+				$datos_imagen["Posicion_Anterior"]=$datos_imagen["Posicion_Actual"];
+				$datos_imagen["Posicion_Actual"]=$_position_actual;
+				$datos_imagen["Ultima_Media"]=$num;
+				if($_tipo_imagen!=="Cliente"){
+					$datos_imagen["P_Obt_Oferta"]=(float)$datos_imagen["P_Obt_Oferta"]+(float)$_puntos_ob_oferta;
+					$datos_imagen["P_Pos_Oferta"]=(float)$datos_imagen["P_Pos_Oferta"]+(float)$_puntos_pos_oferta;
+					$this->db->where("IDImagen='".$datos_imagen["IDImagen"]."'")->update("tbimagen_proveedor",$datos_imagen);
+				}else{
+					$this->db->where("IDImagen='".$datos_imagen["IDImagen"]."'")->update("tbimagen_cliente",$datos_imagen);
+				}
+			}
+			
+		
 	}
 
 }
