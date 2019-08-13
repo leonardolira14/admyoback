@@ -85,7 +85,8 @@ class Model_Riesgo extends CI_Model
 		
 	}
 	//funcion obtener el riesgo general
-	public function obtenerrisgos($IDEmpresa,$_tipo_persona,$_tipo_fecha,$resumen=FALSE){
+	public function obtenerrisgos($IDEmpresa,$_tipo_persona,$_tipo_fecha,$resumen=FALSE,$Tipo_Persona){
+		
 		
 		$mejorados=0;
 		$empeorados=0;
@@ -110,126 +111,105 @@ class Model_Riesgo extends CI_Model
 		$fechas2=docemecespasados();
 		$evolucion=[];
 		$evolucionlabel=[];	
-		
+		if($_tipo_fecha==="A")
+		{
+			$_fecha_actual=$fechas[12];
+			$_fecha_pasada=$fechas[0];
+		}
+		else
+		{
+			$_fecha_actual=$fechas[12];
+			$_fecha_pasada=$fechas[11];
+				
+		}
 		
 		//empiezo para la grafica de evolucion
 		if($_tipo_persona==="cliente"){
 			$clientes=$this->ObtenerClientes($IDEmpresa);
 			$tb="tbriesgo_clientes";
-			$tbimagen="tbimagen_cliente";
+			
 		}else{
 			$clientes=$this->ObtenerProveedores($IDEmpresa);
 			$tb="tbriesgo_proveedores";
-			$tbimagen="tbimagen_proveedor";
-		}
-		
-			if($_tipo_fecha==="A")
-			{
-				$_fecha_actual=$fechas[12]."-".date("d");
-				$_fecha_pasada=$fechas2[12]."-".date("d");
-				if($resumen===FALSE){
-					foreach ($fechas as $fecha) {
-						$datos=explode("-",$fecha);
-						$num=$this->NumCantidad("Empeorados",$IDEmpresa,$fecha."-01",$fecha."-31",$tb);
-						array_push($evolucionlabel,da_mes($datos[1])."-".$datos[0]);
-						array_push($evolucion,(int)$num);
-					}
-				}
-				$data["evolucion"]=array("Labels"=>$evolucionlabel,"data"=>[array("data"=>$evolucion,"label"=>"No de Empeorados")]);
-			}
-			else
-			{
-				$_fecha_actual=$fechas[12]."-".date("d");
-				$_fecha_pasada=$fechas[11]."-".date("d");
-				if($resumen===FALSE){
-					$inicio=date("d");
-					$para=31;
-					$datos=$datos=explode("-",$fechas[11]);
-					$mes=$datos[1];
-					$anio=$datos[0];
-					while($inicio<=$para){
-						$fecha=$anio."-".$mes;
-						if($inicio===31){
-							$para=date("d");
-							$inicio=1;
-							$datos=$datos=explode("-",$fechas[12]);
-							$mes=$datos[1];
-							$anio=$datos[0];
-							$fecha=$anio."-".$mes;
-							$num=$this->NumCantidad("Empeorados",$IDEmpresa,$fecha."-".$inicio,$fecha."-".$inicio,$tb);
-							array_push($evolucionlabel,$inicio."-".da_mes($mes));
-							array_push($evolucion,(int)$num);
-						}else{
-							$num=$this->NumCantidad("Empeorados",$IDEmpresa,$fecha."-".$inicio,$fecha."-".$inicio,$tb);
-							array_push($evolucionlabel,$inicio."-".da_mes($mes));
-							array_push($evolucion,(int)$num);
-							$inicio++;
-						}
-					}
-					$data["evolucion"]=array("Labels"=>$evolucionlabel,"data"=>[array("data"=>$evolucion,"label"=>"No de Empeorados")]);
-				}
-			}
-		
-		
-		//ahora empiezo compara mis clientes o proveedores para ver como se han comportado con respecto mes/anio
-		foreach ($clientes as $cliente) {
-			$mediaactual=$this->db->select("Ultima_Media")->where("IDEmpresa='".$cliente["num"]."' and Fecha='$_fecha_actual'")->get($tbimagen);
-			$mediapasada=$this->db->select("Ultima_Media")->where("IDEmpresa='".$cliente["num"]."' and Fecha='$_fecha_pasada'")->get($tbimagen);
-			if($mediaactual->num_rows()===0 && $mediapasada->num_rows()===0)
-			{
-				$mantenidos++;
-			}else if($mediaactual->num_rows()===0 && $mediapasada->num_rows()!==0)
-			{
-				$empeorados++;
-			}else if($mediaactual->num_rows()!==0 && $mediapasada->num_rows()===0)
-			{
-				$mejorados++;	
-			}else if($mediaactual->result()[0]->Ultima_Media===$mediapasada->result()[0]->Ultima_Media){
-				$mantenidos++;
-			}else if($mediaactual->result()[0]->Ultima_Media<$mediapasada->result()[0]->Ultima_MediaLL){
-				$empeorados++;
-			}else if($mediaactual->result()[0]->Ultima_Media>$mediapasada->result()[0]->Ultima_Media){
-				$mejorados++;		
-			}
-			//calidad
-			$calidad_actual=$this->MeediaCategoria("P_Obt_Calidad","P_Pos_Calidad",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
-			$calidad_pasada=$this->MeediaCategoria("P_Obt_Calidad","P_Pos_Calidad",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
-			if(_comparacion($calidad_actual,$calidad_pasada)===1){
-				$mantenidoscalidad++;
-			}else if(_comparacion($calidad_actual,$calidad_pasada)===2){
-				$mejoradoscalidad++;
-			}else if(_comparacion($calidad_actual,$calidad_pasada)===3){
-				$empeoradoscalidad++;
-			}
-			//calidad
-			$cumplimiento_actual=$this->MeediaCategoria("P_Obt_Cumplimiento","P_Pos_Cumplimiento",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
-			$cumplimiento_pasada=$this->MeediaCategoria("P_Obt_Cumplimiento","P_Pos_Cumplimiento",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
-			if(_comparacion($calidad_actual,$calidad_pasada)===1){
-				$mantenidoscumplimiento++;
-			}else if(_comparacion($calidad_actual,$calidad_pasada)===2){
-				$mejoradoscumplimiento++;
-			}else if(_comparacion($calidad_actual,$calidad_pasada)===3){
-				$empeoradoscumplimiento++;
-			}
-			if($_tipo_persona!=="cliente"){
-				//calidad
-			$oferta_actual=$this->MeediaCategoria("P_Obt_Oferta","P_Pos_Oferta",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
-			$oferta_pasada=$this->MeediaCategoria("P_Obt_Oferta","P_Pos_Oferta",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
-			if(_comparacion($oferta_actual,$oferta_pasada)===1){
-				$mantenidosoferta++;
-			}else if(_comparacion($oferta_actual,$oferta_pasada)===2){
-				$mejoradosoferta++;
-			}else if(_comparacion($oferta_actual,$oferta_pasada)===3){
-				$empeoradosoferta++;
-			}
-			}
 			
 		}
+		switch($Tipo_Persona){
+			case 'Cliente':
+				$tbimagen="tbimagen_cliente";
+				break;
+			case 'Proveedor':
+				$tbimagen="tbimagen_proveedor";
+				break;
+		}
+		foreach($clientes as $cliente){
+			$general_actual=$this->MeediaCategoria("P_Ob_Generales","P_Pos_Generales",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
+			$general_pasada=$this->MeediaCategoria("P_Ob_Generales","P_Pos_Generales",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
+			switch(_comparacion($general_actual,$general_pasada)){
+				case 1:
+					$mantenidos++;
+					break;
+				case 2:
+					$mejorados++;
+					break;
+				case 3:
+					$empeorados++;
+					break;
+			}
+			
+			//general
+			$calidad_actual=$this->MeediaCategoria("P_Obt_Calidad","P_Pos_Calidad",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
+			$calidad_pasada=$this->MeediaCategoria("P_Obt_Calidad","P_Pos_Calidad",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
+			switch(_comparacion($calidad_actual,$calidad_pasada)){
+				case 1:
+					$mantenidoscalidad++;
+					break;
+				case 2:
+					$mejoradoscalidad++;
+					break;
+				case 3:
+					$empeoradoscalidad++;
+					break;
+			}
+			
+			//cumplimento
+			$cumplimiento_actual=$this->MeediaCategoria("P_Obt_Cumplimiento","P_Pos_Cumplimiento",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
+			$cumplimiento_pasada=$this->MeediaCategoria("P_Obt_Cumplimiento","P_Pos_Cumplimiento",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
+			
+			switch(_comparacion($cumplimiento_actual,$cumplimiento_pasada)){
+				case 1:
+					$mantenidoscumplimiento++;
+					break;
+				case 2:
+					$mejoradoscumplimiento++;
+					break;
+				case 3:
+					$empeoradoscumplimiento++;
+					break;
+			}
+			if($Tipo_Persona!=="Cliente"){
+				//oferta
+				$oferta_actual=$this->MeediaCategoria("P_Obt_Oferta","P_Pos_Oferta",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen);
+				
+				$oferta_pasada=$this->MeediaCategoria("P_Obt_Oferta","P_Pos_Oferta",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen);
+				switch(_comparacion($oferta_actual,$oferta_pasada)){
+					case 1:
+						$mantenidosoferta++;
+						break;
+					case 2:
+						$mejoradosoferta++;
+						break;
+					case 3:
+						$empeoradosoferta++;
+						break;
+				}
+			}
+		}
+		
 		$total=$mejorados+$empeorados+$mantenidos;
 		$data["mejorados"]=array("numero"=>$mejorados,"porcentaje"=>porcentaje($total,$mejorados));
 		$data["empeorados"]=array("numero"=>$empeorados,"porcentaje"=>porcentaje($total,$empeorados));
 		$data["mantenidos"]=array("numero"=>$mantenidos,"porcentaje"=>porcentaje($total,$mantenidos));
-		 $data["seriecir"]=array("label"=>["Mejorados","Empeorados","Mantenidos"],"data"=>[$mejorados,$empeorados,$mantenidos]);
+		$data["seriecir"]=array("label"=>["Mejorados","Empeorados","Mantenidos"],"data"=>[$mejorados,$empeorados,$mantenidos]);
 		$totalcalidad=$mejoradoscalidad+$empeoradoscalidad+$mantenidoscalidad;
 		$data["mejoradoscalidad"]=array("num"=>$mejoradoscalidad,"porcentaje"=>porcentaje($totalcalidad,$mejorados));
 		$data["empeoradoscalidad"]=array("num"=>$empeoradoscalidad,"porcentaje"=>porcentaje($totalcalidad,$empeorados));
@@ -239,24 +219,26 @@ class Model_Riesgo extends CI_Model
 		$data["mejoradoscumplimiento"]=array("num"=>$mejoradoscumplimiento,"porcentaje"=>porcentaje($totalcumplimento,$mejorados));
 		$data["empeoradoscumplimiento"]=array("num"=>$empeoradoscumplimiento,"porcentaje"=>porcentaje($totalcumplimento,$empeorados));
 		$data["mantenidoscumplimiento"]=array("num"=>$mantenidoscumplimiento,"porcentaje"=>porcentaje($totalcumplimento,$mantenidos));
-		if($_tipo_persona!=="cliente"){
+		if($Tipo_Persona!=="Cliente"){
 			$totaloferta=$mejoradosoferta+$empeoradosoferta+$mantenidosoferta;
 			$data["mejoradosoferta"]=array("num"=>$mejoradosoferta,"porcentaje"=>porcentaje($totaloferta,$mejoradosoferta));
 			$data["empeoradosoferta"]=array("num"=>$empeoradosoferta,"porcentaje"=>porcentaje($totaloferta,$empeoradosoferta));
 			$data["mantenidosoferta"]=array("num"=>$mantenidosoferta,"porcentaje"=>porcentaje($totaloferta,$mantenidosoferta));
 			
 		}
-		return $data;
+		
+		return $data;	
 	}
 	
 	//funcion para obtener el promedio de una categoria en una fecha
 	public function MeediaCategoria($categoria,$categoria2,$IDEmpresa,$_fecha_inicio,$_fecha_fin,$_tb)
 	{
-		$sql=$this->db->select("round(sum($categoria)/sum($categoria2)*10,2) as media")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '".$_fecha_inicio."' and '".$_fecha_fin."'")->get($_tb);
+		
+		$sql=$this->db->select("round(sum($categoria)/sum($categoria2)*10,2) as media")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '".$_fecha_inicio."-01' and '".$_fecha_fin."-".date("d")."'")->get($_tb);
 		if($sql->row()->media==="" || $sql->row()->media===NULL || $sql->row()->media===0){
 			return 0;
 		}else{
-			return $sql->row()->media;
+			return (float)$sql->row()->media;
 		}
 	}
 	//funcion para obtener la cantidad de una categoria
@@ -577,14 +559,25 @@ class Model_Riesgo extends CI_Model
 	}
 
 	//funcion para obtener los detalles del riego
-	public function detalles_riesgo($_IDEmpresa,$_Tipo,$_Fecha){
+	public function detalles_riesgo($_IDEmpresa,$_Tipo,$_Fecha,$_rama){
 		$fechas=docemeces();
 		$fechas2=docemecespasados();
 
 		$lista_preguntas_calidad=[];
 		$lista_preguntas_cumplimiento=[];
 		$lista_preguntas_oferta=[];
+		
+		//ahora obtengo los datos de mi empresa
+		$datos_empresa=$this->Model_Empresa->getempresa($_IDEmpresa);
+		//ahora obtengo el giro pricipal
+		
 
+		if($_rama===''){
+			$giro_principal=$this->Model_Empresa->Get_Giro_Principal($_IDEmpresa);
+			$giro_principal=$giro_principal["IDGiro2"];
+		}else{
+			$giro_principal=$_rama;
+		}
 
 		//primero obtengo a quein evaluar
 		if($_Tipo==="cliente"){
@@ -593,28 +586,30 @@ class Model_Riesgo extends CI_Model
 			$lista_de_personas = $this->ObtenerProveedores($_IDEmpresa);
 		}
 
-		//ahora obtengo los datos de mi empresa
-		$datos_empresa=$this->Model_Empresa->getempresa($_IDEmpresa);
-		//ahora obtengo el giro pricipal
-		$giro_principal=$this->Model_Empresa->Get_Giro_Principal($_IDEmpresa);
+		
 
 		
-		$lista_preguntas_calidad=$this->listpreguntas_nivel2("calidad",$_Tipo,$giro_principal["IDGiro2"]);
-		$lista_preguntas_cumplimiento=$this->listpreguntas_nivel2("cumplimiento",$_Tipo,$giro_principal["IDGiro2"]);
+		$lista_preguntas_calidad=$this->listpreguntas_nivel2("calidad",$_Tipo,$giro_principal);
+		$lista_preguntas_cumplimiento=$this->listpreguntas_nivel2("cumplimiento",$_Tipo,$giro_principal);
 		if($_Tipo==="proveedor"){
-			$lista_preguntas_oferta=$this->listpreguntas_nivel2("oferta",$_Tipo,$giro_principal["IDGiro2"]);
+			$lista_preguntas_oferta=$this->listpreguntas_nivel2("oferta",$_Tipo,$giro_principal);
 		}
 
 		if($_Fecha==="A"){
-			$fech1="'".$fechas[0]."-01' and '".$fechas[12]."-31'";
-			$fech2="'".$fechas2[0]."-01' and '".$fechas2[12]."-31'";
+			$fech1="'".$fechas[0]."-".date('d')."' and '".$fechas[12]."-".date('d');
+			$fech2="'".$fechas2[0]."-".date('d')."' and '".$fechas2[12]."-".date('d');
+			
 		}else{
 			$fech1="'".$fechas[11]."-".date('d')."' and '".$fechas[12]."-".date('d')."'";
 			$fech2="'".$fechas[9]."-".date('d')."' and '".$fechas[10]."-".date('d')."'";
+			
 		}
-		//vdebug($lista_preguntas_cumplimiento);
+		//vdebug($fech1);
 		//vdebug($lista_de_personas);
-		$cuantos_clientes_evaluados_calidad=0;
+		
+		
+
+
 		$cuantos_clientes_evaluados_cumplimiento=0;
 		$cuantos_clientes_evaluados_oferta=0;
 
@@ -636,162 +631,125 @@ class Model_Riesgo extends CI_Model
 
 
 		$listadatos_calidad=[];
+
 		//ahora empiexo a contar de calidad
 		foreach ($lista_preguntas_calidad as $pregunta) {
-
-			$cuantos_clientes_evaluados_calidad=0;
-			$subtotal_calificaciones_calidad=0;
-			$total_calificaciones_calidad=0;
-			$total_calificaciones_calidad_pasado=0;
-
-			$subtotal_calificaciones_calidad_pasado=0;
+			$puntos_actuales_obtenidos_calidad=0;
+			$puntos_actuales_posibles_calidad=0;
+			$cuantos_clientes_empeorados_calidad=0;
+			$cuantos_clientes_mantenidos_calidad=0;
+			$cuantos_clientes_mejorados_calidad=0;
+			$puntos_pasados_obtenidos_calidad=0;
+			$puntos_pasados_posibles_calidad=0;
+			$numero_total_calificaciones=0;
 			if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
 				foreach ($lista_de_personas as $persona) {
-					$sql_erroneas_actual=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech1,$pregunta->Forma);
 
+					$puntos_actuales=$this->getPuntos($pregunta->IDPregunta,$_IDEmpresa,$giro_principal,$fech1);
+					$puntos_pasados=$this->getPuntos($pregunta->IDPregunta,$_IDEmpresa,$giro_principal,$fech2);
+					$numero_total_calificaciones=$numero_total_calificaciones+($puntos_actuales["num"]+(float)$puntos_pasados["num"]);
 					
-
-					$sql_erroneas_pasado=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech2,$pregunta->Forma);
 					
+					$puntos_pasados_obtenidos_calidad=$puntos_pasados_obtenidos_calidad+(float)$puntos_pasados["obtenidos"];
+					$puntos_pasados_posibles_calidad=$puntos_pasados_posibles_calidad+(float)$puntos_pasados["posibles"];
+
+					$puntos_actuales_obtenidos_calidad=$puntos_actuales_obtenidos_calidad+(float)$puntos_actuales["obtenidos"];
+					$puntos_actuales_posibles_calidad=$puntos_actuales_posibles_calidad+(float)$puntos_actuales["posibles"];
 					
-
-					$subtotal_calificaciones_calidad=$subtotal_calificaciones_calidad+(int)$sql_erroneas_actual["erroneas"];
-					$total_calificaciones_calidad=$total_calificaciones_calidad+(int)$sql_erroneas_actual["total"];
-					
-
-
-					$subtotal_calificaciones_calidad_pasado=$subtotal_calificaciones_calidad_pasado+(int)$sql_erroneas_pasado["erroneas"];
-					$total_calificaciones_calidad_pasado=$total_calificaciones_calidad_pasado+(int)$sql_erroneas_pasado["total"];
-					
-
-					if($sql_erroneas_actual["total"]!=="0"){
-						$cuantos_clientes_evaluados_calidad++;
+					$_promedio_pasado=_media_puntos((float)$puntos_pasados["obtenidos"],(float)$puntos_pasados["posibles"]);
+					$_promedio_actual=_media_puntos((float)$puntos_actuales["obtenidos"],(float)$puntos_actuales["posibles"]);
+					switch($_promedio_pasado){
+						case $_promedio_actual:
+							$cuantos_clientes_mantenidos_calidad++;
+							break;
+						case $_promedio_pasado>$_promedio_actual:
+							$cuantos_clientes_empeorados_calidad++;
+							break;
+						case $_promedio_pasado<$_promedio_actual:
+							$cuantos_clientes_mejorados_calidad++;
+							break;
 					}
-
-				}
-				if($pregunta->Forma==="DIAS" || $pregunta->Forma==="HORAS" || $pregunta->Forma==="NUM" ){
-					($subtotal_calificaciones_calidad===0)?$porcentaje_actual=0:$porcentaje_actual=round((int)$subtotal_calificaciones_calidad/$total_calificaciones_calidad,0);
-				
-					($subtotal_calificaciones_calidad_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round((int)$subtotal_calificaciones_calidad_pasado/$total_calificaciones_calidad_pasado,0);	
-				}else{
-					($subtotal_calificaciones_calidad===0)?$porcentaje_actual=0:$porcentaje_actual=round(((int)$subtotal_calificaciones_calidad*100)/$total_calificaciones_calidad,2);
-				
-					($subtotal_calificaciones_calidad_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round(((int)$subtotal_calificaciones_calidad_pasado*100)/$total_calificaciones_calidad_pasado,2);	
-				}
-				
-
-				array_push($listadatos_calidad,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_calidad,"clientesevaluados"=>$cuantos_clientes_evaluados_calidad,"serie"=>[array("backgroundColor"=>"#005792","data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("backgroundColor"=>"#f53d3d","data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
-
-				
-			}
-		}
-		$listadatos_cumplimiento=[];
-		//ahora con cumplimiento
-		foreach ($lista_preguntas_cumplimiento as $pregunta) {
-
-			$cuantos_clientes_evaluados_cumplimiento=0;
-			$subtotal_calificaciones_cumplimiento=0;
-			$total_calificaciones_cumplimiento=0;
-			$total_calificaciones_cumplimiento_pasado=0;
-
-			$subtotal_calificaciones_cumplimiento_pasado=0;
-			if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
-				foreach ($lista_de_personas as $persona) {
-					$sql_erroneas_actual=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech1,$pregunta->Forma);
-
-					
-
-					$sql_erroneas_pasado=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech2,$pregunta->Forma);
-					
-					
-
-					$subtotal_calificaciones_cumplimiento=$subtotal_calificaciones_cumplimiento+(int)$sql_erroneas_actual["erroneas"];
-					$total_calificaciones_cumplimiento=$total_calificaciones_cumplimiento+(int)$sql_erroneas_actual["total"];
-					
-
-
-					$subtotal_calificaciones_cumplimiento_pasado=$subtotal_calificaciones_cumplimiento_pasado+(int)$sql_erroneas_pasado["erroneas"];
-					$total_calificaciones_cumplimiento_pasado=$total_calificaciones_cumplimiento_pasado+(int)$sql_erroneas_pasado["total"];
-					
-
-					if($sql_erroneas_actual["total"]!=="0"){
-						$cuantos_clientes_evaluados_cumplimiento++;
-					}
-
-				}
-				if($pregunta->Forma==="DIAS" || $pregunta->Forma==="HORAS" || $pregunta->Forma==="NUM" ){
-					($subtotal_calificaciones_cumplimiento===0)?$porcentaje_actual=0:$porcentaje_actual=round((int)$subtotal_calificaciones_cumplimiento/$total_calificaciones_cumplimiento,0);
-				
-					($subtotal_calificaciones_cumplimiento_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round((int)$subtotal_calificaciones_cumplimiento_pasado/$total_calificaciones_cumplimiento_pasado,0);	
-				}else{
-					($subtotal_calificaciones_cumplimiento===0)?$porcentaje_actual=0:$porcentaje_actual=round(((int)$subtotal_calificaciones_cumplimiento*100)/$total_calificaciones_cumplimiento,2);
-				
-					($subtotal_calificaciones_cumplimiento_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round(((int)$subtotal_calificaciones_cumplimiento_pasado*100)/$total_calificaciones_cumplimiento_pasado,2);
-				}
-				
-
-				array_push($listadatos_cumplimiento,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_cumplimiento,"clientesevaluados"=>$cuantos_clientes_evaluados_cumplimiento,"serie"=>[array("backgroundColor"=>"#005792","data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("backgroundColor"=>"#f53d3d","data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
-
-				
-			}
-		}
-		if(count($lista_preguntas_oferta)>0){
-			$listadatos_oferta=[];
-			foreach ($lista_preguntas_oferta as $pregunta) {
-
-				$cuantos_clientes_evaluados_oferta=0;
-				$subtotal_calificaciones_oferta=0;
-				$total_calificaciones_oferta=0;
-				$total_calificaciones_oferta=0;
-
-				$subtotal_calificaciones_oferta_pasado=0;
-				if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
-					foreach ($lista_de_personas as $persona) {
-						$sql_erroneas_actual=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech1,$pregunta->Forma);
-
-						
-
-						$sql_erroneas_pasado=$this->total_preguntas_porcentaje($pregunta->IDPregunta,$persona["num"],$pregunta->Condicion,$fech2,$pregunta->Forma);
-						
-						
-
-						$subtotal_calificaciones_oferta=$subtotal_calificaciones_oferta+(int)$sql_erroneas_actual["erroneas"];
-						$total_calificaciones_oferta=$total_calificaciones_oferta+(int)$sql_erroneas_actual["total"];
-						
-
-
-						$subtotal_calificaciones_oferta_pasado=$subtotal_calificaciones_oferta_pasado+(int)$sql_erroneas_pasado["erroneas"];
-						$total_calificaciones_oferta_pasado=$total_calificaciones_oferta_pasado+(int)$sql_erroneas_pasado["total"];
-						
-
-						if($sql_erroneas_actual["total"]!=="0"){
-							$cuantos_clientes_evaluados_oferta++;
-						}
-
-					}
-					if($pregunta->Forma==="DIAS" || $pregunta->Forma==="HORAS" || $pregunta->Forma==="NUM" ){
-						($subtotal_calificaciones_oferta===0)?$porcentaje_actual=0:$porcentaje_actual=round((int)$subtotal_calificaciones_oferta/$total_calificaciones_oferta,0);
-					
-						($subtotal_calificaciones_oferta_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round((int)$subtotal_calificaciones_oferta_pasado/$total_calificaciones_oferta_pasado,0);	
-					}else{
-						($subtotal_calificaciones_oferta===0)?$porcentaje_actual=0:$porcentaje_actual=round(((int)$subtotal_calificaciones_oferta*100)/$total_calificaciones_oferta,2);
-					
-						($subtotal_calificaciones_oferta_pasado===0)?$porcentaje_pasado=0:$porcentaje_pasado=round(((int)$subtotal_calificaciones_oferta_pasado*100)/$total_calificaciones_oferta_pasado,2);
-					}
-					
-
-					array_push($listadatos_oferta,array("Pregunta"=>$pregunta->Pregunta,"Totalcalificaciones"=>$total_calificaciones_oferta,"clientesevaluados"=>$cuantos_clientes_evaluados_oferta,"serie"=>[array("backgroundColor"=>"#005792","data"=>[$porcentaje_actual],"label"=>"Actual(%)"),array("backgroundColor"=>"#f53d3d","data"=>[$porcentaje_pasado],"label"=>"Pasado(%)")]));
-
 					
 				}
 			}
-			$data["listado_oferta"]=$listadatos_oferta;
+			
+			$_promedio_pasado=_media_puntos((float)$puntos_pasados_obtenidos_calidad,(float)$puntos_pasados_posibles_calidad);
+			$_promedio_actual=_media_puntos((float)$puntos_actuales_obtenidos_calidad,(float)$puntos_pasados_posibles_calidad);
+			array_push($listadatos_calidad,array("empeorados"=>$cuantos_clientes_empeorados_calidad,"mantenidos"=>$cuantos_clientes_mantenidos_calidad,"mejorados"=>$cuantos_clientes_mejorados_calidad,"promedio_actual"=>$_promedio_actual,"promedio_pasado"=>$_promedio_pasado,"Pregunta"=>$pregunta->Pregunta,"Respuesta"=>$pregunta->Condicion,"total_calificaciones"=>$numero_total_calificaciones));
 		}
 		$data["listado_calidad"]=$listadatos_calidad;
-		$data["listadatos_cumplimiento"]=$listadatos_cumplimiento;
+		$listadatos_cumplimiento=[];
+		//ahora empiexo a contar de calidad
+		foreach ($lista_preguntas_cumplimiento as $pregunta) {
+			$puntos_actuales_obtenidos_cumplimiento=0;
+			$puntos_actuales_posibles_cumplimiento=0;
+			$cuantos_clientes_empeorados_cumplimiento=0;
+			$cuantos_clientes_mantenidos_cumplimiento=0;
+			$cuantos_clientes_mejorados_cumplimiento=0;
+			$puntos_pasados_obtenidos_cumplimiento=0;
+			$puntos_pasados_posibles_cumplimiento=0;
+			$numero_total_calificaciones=0;
+			if($pregunta->Forma!="AB" || $pregunta->Forma!="OP"){
+				foreach ($lista_de_personas as $persona) {
+
+					$puntos_actuales=$this->getPuntos($pregunta->IDPregunta,$_IDEmpresa,$giro_principal,$fech1);
+					$puntos_pasados=$this->getPuntos($pregunta->IDPregunta,$_IDEmpresa,$giro_principal,$fech2);
+					$numero_total_calificaciones=$numero_total_calificaciones+($puntos_actuales["num"]+(float)$puntos_pasados["num"]);
+					
+					
+					$puntos_pasados_obtenidos_cumplimiento=$puntos_pasados_obtenidos_cumplimiento+(float)$puntos_pasados["obtenidos"];
+					$puntos_pasados_posibles_cumplimiento=$puntos_pasados_posibles_cumplimiento+(float)$puntos_pasados["posibles"];
+
+					$puntos_actuales_obtenidos_cumplimiento=$puntos_actuales_obtenidos_cumplimiento+(float)$puntos_actuales["obtenidos"];
+					$puntos_actuales_posibles_cumplimiento=$puntos_actuales_posibles_cumplimiento+(float)$puntos_actuales["posibles"];
+					
+					$_promedio_pasado=_media_puntos((float)$puntos_pasados["obtenidos"],(float)$puntos_pasados["posibles"]);
+					$_promedio_actual=_media_puntos((float)$puntos_actuales["obtenidos"],(float)$puntos_actuales["posibles"]);
+					switch($_promedio_pasado){
+						case $_promedio_actual:
+							$cuantos_clientes_mantenidos_cumplimiento++;
+							break;
+						case $_promedio_pasado>$_promedio_actual:
+							$cuantos_clientes_empeorados_cumplimiento++;
+							break;
+						case $_promedio_pasado<$_promedio_actual:
+							$cuantos_clientes_mejorados_cumplimiento++;
+							break;
+					}
+					
+				}
+			}
+			$cuantos_clientes_evaluados_cumplimiento=$cuantos_clientes_mantenidos_cumplimiento+$cuantos_clientes_empeorados_cumplimiento+$cuantos_clientes_mejorados_cumplimiento;
+			$_promedio_pasado=_media_puntos((float)$puntos_pasados_obtenidos_cumplimiento,(float)$puntos_pasados_posibles_cumplimiento);
+			$_promedio_actual=_media_puntos((float)$puntos_actuales_obtenidos_cumplimiento,(float)$puntos_pasados_posibles_cumplimiento);
+			array_push($listadatos_cumplimiento,array("empeorados"=>$cuantos_clientes_empeorados_cumplimiento,"mantenidos"=>$cuantos_clientes_mantenidos_cumplimiento,"mejorados"=>$cuantos_clientes_mejorados_cumplimiento,"promedio_actual"=>$_promedio_actual,"promedio_pasado"=>$_promedio_pasado,"Pregunta"=>$pregunta->Pregunta,"Respuesta"=>$pregunta->Condicion,"total_calificaciones"=>$numero_total_calificaciones));
+		}
+		$data["listado_cumplimiento"]=$listadatos_cumplimiento;
+			
+		//vdebug($listadatos_calidad);
 		return $data;
 		
 	}
+
+	//nuevas funciones para los detalles de riesgo
+	//funcion para obtener los puntos obtenidos y posibles  y el total de calificaciones para 
+	public function getPuntos($_IDPregunta,$_IDEmpresa,$_Giro,$Fecha){
+		$respuesta=$this->db->select('count(*) as num, SUM(PuntosObtenidos) as obtenidos,SUM(PuntosPosibles) AS posibles')
+		->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')
+		->where("IDPregunta='$_IDPregunta' and IDEmpresaReceptor='$_IDEmpresa' AND IDGiroReceptor='$_Giro' AND  date(FechaRealiza) BETWEEN  $Fecha")
+		->from('tbcalificaciones')->get();
+		return $respuesta->row_array();
+	}
+	
+	//fin del bloque de detalles de riegos
+
+
+
+
+
+
+
+
 	public function total_preguntas_porcentaje($_ID_Pregunta,$_ID_Receptor,$_Respuesta_correcta,$_Fecha,$_Tipo_pregunta){
 		$sql_actual_total=$this->db->select('count(*) as total')->join('tbdetallescalificaciones',"tbcalificaciones.IDCalificacion=tbdetallescalificaciones.IDCalificacion")->from('tbcalificaciones')->where("IDEmpresaReceptor='$_ID_Receptor' and IDPregunta='$_ID_Pregunta' and date(FechaRealizada) between $_Fecha")->get();
 		if($_Tipo_pregunta==="DIAS" || $_Tipo_pregunta==="HORAS" || $_Tipo_pregunta==="NUM" ){

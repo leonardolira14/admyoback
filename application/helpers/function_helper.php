@@ -35,8 +35,9 @@ if(!function_exists("converter_cvs")){
 
 if(!function_exists("_compracion"))
 {
-		function _comparacion($numero1,$numero2)
+		function _comparacion(float $numero1,float $numero2)
 		{
+			
 			if($numero1===$numero2){
 				return 1;
 			}else if($numero1>$numero2){
@@ -86,7 +87,7 @@ if(!function_exists("_media_puntos"))
 {
 	function _media_puntos($_puntos_obtenidos,$_puntos_posibles){
 		
-		if($_puntos_obtenidos===0 && $_puntos_posibles===0){
+		if(bccomp($_puntos_obtenidos, $_puntos_posibles) == 0){
 			$num=0;
 		}else{
 			$num=round(($_puntos_obtenidos/$_puntos_posibles)*10,2);
