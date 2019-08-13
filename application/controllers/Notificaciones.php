@@ -26,6 +26,7 @@ class Notificaciones extends REST_Controller{
     public function getnotification_post(){
         $datos=$this->post();
         $notificaciones=$this->Model_Notificaciones->getten($datos["empresa"]);
+        
         //agrego los datos del usuario
         foreach($notificaciones as $key=>$notificacion){
             if($notificacion["IDUsuarioE"]==="0"){

@@ -596,8 +596,8 @@ class Model_Riesgo extends CI_Model
 		}
 
 		if($_Fecha==="A"){
-			$fech1="'".$fechas[0]."-".date('d')."' and '".$fechas[12]."-".date('d');
-			$fech2="'".$fechas2[0]."-".date('d')."' and '".$fechas2[12]."-".date('d');
+			$fech1="'".$fechas[0]."-".date('d')."' and '".$fechas[12]."-".date('d')."'";
+			$fech2="'".$fechas2[0]."-".date('d')."' and '".$fechas2[12]."-".date('d')."'";
 			
 		}else{
 			$fech1="'".$fechas[11]."-".date('d')."' and '".$fechas[12]."-".date('d')."'";

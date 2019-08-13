@@ -703,14 +703,14 @@ class Model_Imagen extends CI_Model
 			
 			if($datospregunta["Forma"]!="AB" || $datospregunta["Forma"]!="OP"){
 				$total=$this->cuantaspreguntascorrectas($IDEmpresa,$fech1,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-				$totalprimero=$total;
 				$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
 				($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
-				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual(%)"),array("data"=>[$totalsegundo],"label"=>"Pasado(%)")]));
+				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$total["numerocorrectas"],"respuesta"=>$respuesta,"serie"=>[array("data"=>[$total["porcentaje"]],"label"=>"Actual(%)"),array("data"=>[$totalsegundo["porcentaje"]],"label"=>"Pasado(%)")]));
 			}		
 		}
 
 		$_data["listCalidad"]=$listadatosp;
+		
 		$listadatosp=[];
 		
 		$listapreguntascumplimento=explode(",",$listapreguntascumplimento->Cumplimiento);
@@ -723,10 +723,10 @@ class Model_Imagen extends CI_Model
 			$datospregunta=$this->datos_preguntaID($preguntacalidad);
 			if($datospregunta["Forma"]!="AB" || $datospregunta["Forma"]!="OP"){
 				$total=$this->cuantaspreguntascorrectas($IDEmpresa,$fech1,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
-				$totalprimero=$total;
+				
 				$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
 				($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
-				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual(%)"),array("data"=>[$totalsegundo],"label"=>"Pasado(%)")]));
+				array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$total["numerocorrectas"],"respuesta"=>$respuesta,"serie"=>[array("data"=>[$total["porcentaje"]],"label"=>"Actual(%)"),array("data"=>[$totalsegundo["porcentaje"]],"label"=>"Pasado(%)")]));
 			}		
 		}
 		$_data["listCumplimiento"]=$listadatosp;
@@ -749,7 +749,7 @@ class Model_Imagen extends CI_Model
 					$totalprimero=$total;
 					$totalsegundo=$this->cuantaspreguntascorrectas($IDEmpresa,$fech2,$forma,$preguntacalidad,$datospregunta["Condicion"],$datospregunta["Forma"]);
 					($datospregunta["Forma"]==="DIAS" || $datospregunta["Forma"]==="HORAS" || $datospregunta["Forma"]==="NUM" )?$respuesta=$datospregunta["Forma"]:$respuesta=$datospregunta["Condicion"];
-					array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$totalprimero,"respuesta"=>$respuesta,"serie"=>[array("data"=>[$totalprimero],"label"=>"Actual(%)"),array("data"=>[$totalsegundo],"label"=>"Pasado(%)")]));
+					array_push($listadatosp,array("Pregunta"=>$datospregunta["Pregunta"],"Totalcalificaciones"=>$total["numerocorrectas"],"respuesta"=>$respuesta,"serie"=>[array("data"=>[$total["porcentaje"]],"label"=>"Actual(%)"),array("data"=>[$totalsegundo["porcentaje"]],"label"=>"Pasado(%)")]));
 				}		
 			}
 			$_data["listOferta"]=$listadatosp;
@@ -763,14 +763,27 @@ class Model_Imagen extends CI_Model
 		$tipopregunta=trim($tipopregunta);
 		if($tipopregunta==="DIAS" || $tipopregunta==="HORAS" || $tipopregunta==="NUM" ){
 			$sql=$this->db->select("avg(Respuesta) as total")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("tbcalificaciones.IDEmpresaReceptor=$IDEmpresa and date(FechaRealizada) between ".$rangofecha." and Emitidopara='$para' and IDPregunta='$IDPregunta' and Respuesta='$respuesta'")->get();
-			$porcentaje=$sql->result()[0]->total;
+			if($sql->result()[0]->total===NULL){
+				$porcentaje=0;
+			}else{
+				$porcentaje=$sql->result()[0]->total;
+			}
+			$_data["porcentaje"]=round($porcentaje,2);
+			$_data["numerocorrectas"]=$porcentaje;
+			
+			
 		}else if($tipopregunta==="Si/No/NA" || $tipopregunta==="Si/No" || $tipopregunta==="Si/No/NA/NS" || $tipopregunta="Si/No/No Aplica" || $tipopregunta==="No tiene/NA/NS/Si/No"){
 			$sql=$this->db->select("count(*) as total")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("tbcalificaciones.IDEmpresaReceptor=$IDEmpresa and date(FechaRealizada) between ".$rangofecha." and Emitidopara='$para' and IDPregunta='$IDPregunta' and Respuesta='$respuesta'")->get();
 			$sql2=$this->db->select("count(*) as total")->from("tbcalificaciones")->join("tbdetallescalificaciones","tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion")->where("tbcalificaciones.IDEmpresaReceptor=$IDEmpresa and date(FechaRealizada) between ".$rangofecha." and Emitidopara='$para' and IDPregunta='$IDPregunta'")->get();
 			($sql->result()[0]->total==="0")?$porcentaje=0:$porcentaje=((int)$sql->result()[0]->total*100)/(int)$sql2->result()[0]->total;
-			
+			$_data["numerototal"]=$sql2->result()[0]->total;
+			$_data["porcentaje"]=round($porcentaje,2);
+			$_data["numerocorrectas"]=$sql->result()[0]->total;
 		}
-		return round($porcentaje,2);
+	
+		
+		
+		return $_data;
 	}
 
 	//function para modificar la imagen en esta parte agrego o modifico la tabla de imgen ya sea cliente o proveedor
