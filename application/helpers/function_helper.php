@@ -38,7 +38,7 @@ if(!function_exists("_compracion"))
 		function _comparacion(float $numero1,float $numero2)
 		{
 			
-			if($numero1===$numero2){
+			if(strval($numero1)===strval($numero2)){
 				return 1;
 			}else if($numero1>$numero2){
 				return 2;
@@ -85,14 +85,20 @@ if(!function_exists("limpiar_array")){
 }
 if(!function_exists("_media_puntos"))
 {
-	function _media_puntos($_puntos_obtenidos,$_puntos_posibles){
+	function _media_puntos($_puntos_obtenidos,$_puntos_posibles,$_IDPRegunta=0){
 		
-		if(bccomp($_puntos_obtenidos, $_puntos_posibles) == 0){
+		
+		if(strval($_puntos_obtenidos)==="0" && strval($_puntos_posibles) === "0"){
 			$num=0;
+			
 		}else{
-			$num=round(($_puntos_obtenidos/$_puntos_posibles)*10,2);
+			
+			$num=(float)$_puntos_obtenidos/(float)$_puntos_posibles;
+			$num=$num*10;
+			$num=round($num,2);
+			
 		}
-
+		
 		if($num===0){
 				$_data["class"]="neutro";
 		}else if($num>0){
@@ -123,12 +129,13 @@ if(!function_exists('_increment'))
 		
 		$num=0;
 		$_data=[];
-		
-		if(bccomp($a, $b) == 0){
+		if(strval($a)==="0" && strval($b)==="0"){
 			$num=0;
-		}else if(round($b, 2)==0){
+		}else if($a === null && $b===null){
+			$num=0;
+		}else if(strval($b)=="0"){
 			$num=100;
-		}else if(round($a, 2)==0){
+		}else if(strval($a)=="0"){
 			$num=-100;
 			
 		}else{
@@ -147,9 +154,9 @@ if(!function_exists('_increment'))
 		}else{
 			if($num===0){
 				$_data["class"]="neutro";
-			}else if($num<0){
-				$_data["class"]="green";
 			}else if($num>0){
+				$_data["class"]="green";
+			}else if($num<0){
 				$_data["class"]="red";
 			}
 			$_data["num"]=$num."%";

@@ -45,7 +45,14 @@ class Model_Giros extends CI_Model
 		$this->db->where("IDEmpresa='$_ID_Empresa'")->update("giroempresa",array("Principal"=>'0'));
 		return $this->db->where("IDGE='$_ID_Giro'")->update("giroempresa",array("Principal"=>'1'));
 	}
-
+	//funcion para obtener los datos de una rama
+	public function getrama_empresa($IDEmpresa){
+		$respuesta=$this->db->select('IDNivel2,Giro,Principal')
+		->from("giroempresa")
+		->join('gironivel2','gironivel2.IDNivel2=giroempresa.IDGiro2')
+		->where("IDEmpresa='$IDEmpresa'")->get();
+		return $respuesta->result_array();
+	}
 	//funcion para obtener los datos de una rama
 	public function getrama($IDRama){
 		$respuesta=$this->db->select('*')->where("IDNivel1='$IDRama'")->get("gironivel1");
