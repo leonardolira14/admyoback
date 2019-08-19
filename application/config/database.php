@@ -25,7 +25,11 @@ $db['defaultt'] = array(
 	'failover' => array(),
 	'save_queries' => TRUE
 );
+<<<<<<< HEAD
 $db['default'] = array(
+=======
+$db['defaultl'] = array(
+>>>>>>> 9af0ec3429780ee7926b2040f5ae53af7e728b2f
 	'dsn'	=> '',
 	'hostname' => '127.0.0.1',
 	'username' => 'root',
