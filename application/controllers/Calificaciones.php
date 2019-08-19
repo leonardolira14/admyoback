@@ -22,6 +22,8 @@ class Calificaciones extends REST_Controller
 		$this->load->model("Model_Email");
 		$this->load->model("Model_Notificaciones");
 		$this->load->model("Model_Imagen");
+		$this->load->model("Model_Follow");
+		
 	}
 
 	public function getallrealizadas_post(){
@@ -159,6 +161,7 @@ class Calificaciones extends REST_Controller
 	public function calificarfinal_post(){
 		$datos=$this->post();
 		
+		$_sub_giro=$datos["Subgiro"];
 		$IDEmpresa=$datos["IDReceptor"];
 		$_tipo_imagen=$datos["TipoReceptor"];
 		$_puntos_ob_calidad=0;
@@ -172,7 +175,7 @@ class Calificaciones extends REST_Controller
 		$_IDGiro_emisora=$this->Model_Empresa->Get_Giro_Principal($datos["Emisor"]["IDEmpresa"]);
 		$_datos_usuario_receptor=$this->Model_Usuario->DatosUsuarioCorreo($datos["email"]);
 		$_datos_usuario_emisor=$this->Model_Usuario->DatosUsuario($datos["Emisor"]["IDUsuario"]);
-		$_ID_Empresa_emisora=$datos["Emisor"]["IDEmpresa"];
+		
 		if(isset($datos["IDReceptor"])){
 			$_ID_Empresa_receptora=$datos["IDReceptor"];
 		}else{
@@ -188,7 +191,7 @@ class Calificaciones extends REST_Controller
 			$_IDGiro_emisora["IDGiro"],
 			$_datos_usuario_receptor["IDUsuario"],
 			$datos["IDReceptor"],
-			$datos["Giro"],
+			$_sub_giro,
 			strtoupper($datos["TipoReceptor"])
 		);
 		//ahora inserto los detalles de esa calificacion
@@ -249,7 +252,8 @@ class Calificaciones extends REST_Controller
 									$_puntos_pos_cumplimiento,
 									$_puntos_ob_oferta,
 									$_puntos_pos_oferta,
-									$_tipo_imagen
+									$_tipo_imagen,
+									$_sub_giro
 								);
 		//ahora mando los mails
 		
@@ -272,13 +276,46 @@ class Calificaciones extends REST_Controller
 		if($datos["TipoReceptor"]==='CLIENTE'){
 			$descripemisor="calificacionp";
 			$descripreceptor="calificacionrp";
+			$_riesgo_notificaion="riesgop";
+			$_imagen_notificaion="imagenp";
+			$_imagen_notificaion_seguida="imagensp";
+			$_riesgo_notificaion_seguida="riegosp";
 		}else{
 			$descripemisor="calificacionC";
 			$descripreceptor="calificacionrc";
+			$_riesgo_notificaion="riesgoc";
+			$_imagen_notificaion="imagenc";
+			$_imagen_notificaion_seguida="imagensc";
+			$_riesgo_notificaion_seguida="riegosc";
 		}
 		$this->Model_Notificaciones->add($_ID_Empresa_receptora,$descripreceptor,$_ID_Empresa_emisora,$_datos_usuario_receptor["IDUsuario"],"crealizadas");
 		// agregamos la notificacion a quien se le realizo la calificacion
 		$this->Model_Notificaciones->add($_ID_Empresa_emisora,$descripemisor,$_ID_Empresa_receptora,$datos["Emisor"]["IDUsuario"],"crecibidas");
+		
+		//ahora mando las notificaciones de que la imagen cambio de quien recibio la calificación
+		$_lista_clientes=$this->Model_Clieprop->listaclientes($_ID_Empresa_receptora);
+
+		
+		foreach ($_lista_clientes as $_empresa) {
+			$this->Model_Notificaciones->add($_empresa["num"],$_riesgo_notificaion,$_ID_Empresa_receptora,"0",$_riesgo_notificaion);
+			$this->Model_Notificaciones->add($_empresa["num"],$_imagen_notificaion,$_ID_Empresa_receptora,"0",$_imagen_notificaion);
+		}
+		
+		$_lista_proveedores=$this->Model_Proveedores->listaproveedores($_ID_Empresa_receptora);
+		foreach ($_lista_proveedores as $_empresa) {
+			$this->Model_Notificaciones->add($_empresa["num"],$_riesgo_notificaion,$_ID_Empresa_receptora,"0",$_riesgo_notificaion);
+			$this->Model_Notificaciones->add($_empresa["num"],$_imagen_notificaion,$_ID_Empresa_receptora,"0",$_imagen_notificaion);
+		}
+		
+		//ahora mando las notificaciones a las empresas que siguen a esta empresa
+		$_lista_follow =$this->Model_Follow->getAll_que_la_siguen($_ID_Empresa_receptora);
+		foreach ($_lista_follow as $_empresa) {
+			$this->Model_Notificaciones->add($_empresa["num"],$_riesgo_notificaion_seguida,$_ID_Empresa_receptora,"0",$_riesgo_notificaion_seguida);
+			$this->Model_Notificaciones->add($_empresa["num"],$_imagen_notificaion_seguida,$_ID_Empresa_receptora,"0",$_imagen_notificaion_seguida);
+		}
+		
+		
+		
 		$dat["ok"]=1;
 		$dat["mensaje"]=$_promedio;
 		$this->response($dat);

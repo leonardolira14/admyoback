@@ -797,7 +797,8 @@ class Model_Imagen extends CI_Model
 		$_puntos_pos_cumplimiento,
 		$_puntos_ob_oferta,
 		$_puntos_pos_oferta,
-		$_tipo_imagen
+		$_tipo_imagen,
+		$_sub_giro
 		){
 			
 			//ahora busco si es que hay algun registro de imagen en la fecha en la que se esta registrando la calificacion
@@ -807,7 +808,7 @@ class Model_Imagen extends CI_Model
 				$_datos_imagen=$this->db->select('*')->where("IDEmpresa='$_IDEmpresa' and Fecha='".date('Y-m-d')."'")->get('tbimagen_proveedor');
 			}
 			
-			if($_datos_imagen->num_rows()===0){
+			
 				if($_puntos_obs_general===0 && $_puntos_pos_general===0){
 					$num=0;
 				}else{
@@ -824,7 +825,8 @@ class Model_Imagen extends CI_Model
 					"P_Obt_Cumplimiento"=>$_puntos_ob_cumplimiento,
 					"P_Pos_Cumplimiento"=>$_puntos_pos_cumplimiento,
 					"Ultima_Media"=>$num,
-					"Fecha"=>date('Y-m-d')
+					"Fecha"=>date('Y-m-d'),
+					"IDGiro"=>$_sub_giro
 					);
 					if($_tipo_imagen!=="Cliente"){
 						$array["P_Obt_Oferta"]=$_puntos_ob_oferta;
@@ -832,44 +834,7 @@ class Model_Imagen extends CI_Model
 						$this->db->insert("tbimagen_proveedor",$array);
 					}else{
 						$this->db->insert("tbimagen_cliente",$array);
-					}
-					
-			}else{
-				
-				//si ya hay algun registro solo modifico los datos 
-				$datos_imagen = $_datos_imagen->result_array()[0];
-				$datos_imagen["P_Ob_Generales"]=(float)$datos_imagen["P_Ob_Generales"]+(float)$_puntos_obs_general;
-				$datos_imagen["P_Pos_Generales"]=(float)$datos_imagen["P_Pos_Generales"]+(float)$_puntos_pos_general;
-				$datos_imagen["P_Obt_Calidad"]=(float)$datos_imagen["P_Obt_Calidad"]+(float)$_puntos_ob_calidad;
-				$datos_imagen["P_Pos_Calidad"]=(float)$datos_imagen["P_Pos_Calidad"]+(float)$_puntos_pos_calidad;
-				$datos_imagen["P_Obt_Cumplimiento"]=(float)$datos_imagen["P_Obt_Cumplimiento"]+(float)$_puntos_ob_cumplimiento;
-				$datos_imagen["P_Pos_Cumplimiento"]=(float)$datos_imagen["P_Pos_Cumplimiento"]+(float)$_puntos_pos_cumplimiento;
-				$datos_imagen["N_Calificaciones"]=(float)$datos_imagen["N_Calificaciones"]+1;
-				
-				if($_puntos_obs_general===0 && $_puntos_pos_general===0){
-					$num=0;
-				}else{
-					$num=round(($_puntos_obs_general/$_puntos_pos_general)*10,2);
-				}
-				if((float)$datos_imagen["Ultima_Media"]>$num){
-					$_position_actual="Emp";
-				}else if((float)$datos_imagen["Ultima_Media"]<$num){
-					$_position_actual="Mej";
-				}else{
-					$_position_actual="Man";
-				}
-				$datos_imagen["Posicion_Anterior"]=$datos_imagen["Posicion_Actual"];
-				$datos_imagen["Posicion_Actual"]=$_position_actual;
-				$datos_imagen["Ultima_Media"]=$num;
-				if($_tipo_imagen!=="Cliente"){
-					$datos_imagen["P_Obt_Oferta"]=(float)$datos_imagen["P_Obt_Oferta"]+(float)$_puntos_ob_oferta;
-					$datos_imagen["P_Pos_Oferta"]=(float)$datos_imagen["P_Pos_Oferta"]+(float)$_puntos_pos_oferta;
-					$this->db->where("IDImagen='".$datos_imagen["IDImagen"]."'")->update("tbimagen_proveedor",$datos_imagen);
-				}else{
-					$this->db->where("IDImagen='".$datos_imagen["IDImagen"]."'")->update("tbimagen_cliente",$datos_imagen);
-				}
-			}
-			
+					}		
 		
 	}
 

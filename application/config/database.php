@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
-$db['defaultt'] = array(
+$db['default'] = array(
 	'dsn'	=> '',
 	'hostname' => 'ec2-18-188-195-242.us-east-2.compute.amazonaws.com',
 	'username' => 'root',
@@ -25,11 +25,9 @@ $db['defaultt'] = array(
 	'failover' => array(),
 	'save_queries' => TRUE
 );
-<<<<<<< HEAD
-$db['default'] = array(
-=======
+
 $db['defaultl'] = array(
->>>>>>> 9af0ec3429780ee7926b2040f5ae53af7e728b2f
+
 	'dsn'	=> '',
 	'hostname' => '127.0.0.1',
 	'username' => 'root',
@@ -51,7 +49,7 @@ $db['defaultl'] = array(
 	'save_queries' => TRUE
 );
 
-$db['qvall'] = array(
+$db['qval'] = array(
 	'dsn'	=> '',
 	'hostname' => 'ec2-18-188-195-242.us-east-2.compute.amazonaws.com',
 	'username' => 'root',
@@ -72,7 +70,7 @@ $db['qvall'] = array(
 	'failover' => array(),
 	'save_queries' => TRUE
 );
-$db['qval'] = array(
+$db['qvall'] = array(
 	'dsn'	=> '',
 	'hostname' => '127.0.0.1',
 	'username' => 'root',
