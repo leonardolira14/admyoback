@@ -140,7 +140,6 @@ if(!function_exists('_increment'))
 			$num=-100;
 			
 		}else{
-			
 			$num=round((((float)$a-(float)$b)/(float)$b)*100,2);
 		}
 		
