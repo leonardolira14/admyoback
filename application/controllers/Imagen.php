@@ -37,7 +37,6 @@ class Imagen extends REST_Controller
 		$_ID_Empresa=$datos["IDEmpresa"];
 		$_fecha=$datos["fecha"];
 		$_Tipo=$datos["tipo"];
-		
 		$datoss["imagen"]=$this->Model_Imagen->detalleImagen($_Tipo,$_ID_Empresa,$_fecha);
 		$_data["code"]=0;
 		$_data["ok"]="SUCCESS";

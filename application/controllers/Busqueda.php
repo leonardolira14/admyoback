@@ -97,9 +97,10 @@ class Busqueda extends REST_Controller
         $dat["Normas"]=$this->Model_Norma->getall($_ID_Empresa);
         $dat["Productos"]=$this->Model_Producto->getall($_ID_Empresa);
         $dat["telefonos"]=$this->Model_Empresa->getTels($_ID_Empresa);
-        $dat["ImagenCliente"]=$this->Model_Imagen->imgcliente($_ID_Empresa,'A','Cliente',$resumen=FALSE);
-        $dat["ImagenProveedor"]=$this->Model_Imagen->imgcliente($_ID_Empresa,'A','Proveedor',$resumen=FALSE);
-
+        $dat["ImagenCliente"]=$this->Model_Imagen->imgcliente($_ID_Empresa,'A','cliente',$resumen=FALSE);
+        $dat["ImagenProveedor"]=$this->Model_Imagen->imgcliente($_ID_Empresa,'A','proveedor',$resumen=FALSE);
+        $dat["detalleImagenCliente"]=$this->Model_Imagen->detalleImagen("cliente",$_ID_Empresa,'A');
+        $dat["detalleImagenProveedor"]=$this->Model_Imagen->detalleImagen("proveedor",$_ID_Empresa,'A');
 
         $_data["code"]=0;
         $_data["ok"]="SUCCESS";

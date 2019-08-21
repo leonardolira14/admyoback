@@ -125,7 +125,8 @@ if(!function_exists('_increment'))
 {
 	function _increment($a,$b,$c)
 	{
-
+		($a===null)?$a=0:$a=$a;
+		($b===null)?$b=0:$b=$b;
 		
 		$num=0;
 		$_data=[];
@@ -133,12 +134,13 @@ if(!function_exists('_increment'))
 			$num=0;
 		}else if($a === null && $b===null){
 			$num=0;
-		}else if(strval($b)=="0"){
+		}else if(strval($b)==="0"){
 			$num=100;
-		}else if(strval($a)=="0"){
+		}else if(strval($a)==="0"){
 			$num=-100;
 			
 		}else{
+			vdebug($b);
 			$num=round((((float)$a-(float)$b)/(float)$b)*100,2);
 		}
 		

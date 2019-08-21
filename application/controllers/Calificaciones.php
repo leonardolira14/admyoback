@@ -257,7 +257,7 @@ class Calificaciones extends REST_Controller
 								);
 		//ahora mando los mails
 		
-
+		$_ID_Empresa_emisora=$_datos_empresa_emisora["IDEmpresa"];
 		$this->Model_Empresa->addRelacion($_ID_Empresa_emisora,$_ID_Empresa_receptora,$datos["TipoReceptor"]);
 		/*
 		//

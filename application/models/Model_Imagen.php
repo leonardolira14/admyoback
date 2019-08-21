@@ -586,8 +586,9 @@ class Model_Imagen extends CI_Model
 	}
 	public function detalleImagen($forma,$IDEmpresa,$tipo)
 	{
+		
 		$tipo_fecha=$tipo;
-		$tipo_persona=$forma;
+		$tipo_persona=strtolower($forma);
 		$fechas=docemeces();
 		$fechas2=docemecespasados();
 		$_media_calidad_actual=0;
@@ -633,13 +634,14 @@ class Model_Imagen extends CI_Model
 		//primero necesito numero de calificaciones 
 		//esto lo calculo con la suma de todas las calificaciones de la tabla de imagen ya sea de cliente o proveedor
 		*/
+		
 		if($tipo_persona==="cliente"){
 			$listapreguntascalidad=$this->listpreguntas("Calidad",$forma,$_Giro_Principal);
 			$listapreguntascumplimento=$this->listpreguntas("Cumplimiento",$forma,$_Giro_Principal);
 			$listacp=$this->ObtenerClientes($IDEmpresa);
 			//traigo los registros de la tabla de imagen_cliente
-			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get('tbimagen_cliente');
-			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get('tbimagen_cliente');
+			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual' ")->get('tbimagen_cliente');
+			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada' ")->get('tbimagen_cliente');
 			
 			
 			
@@ -649,8 +651,8 @@ class Model_Imagen extends CI_Model
 			
 			$listapreguntascumplimento=$this->listpreguntas("Cumplimiento",$forma,$_Giro_Principal);
 			$listapreguntasoferta=$this->listpreguntas("Oferta",$forma,$_Giro_Principal);
-			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get('tbimagen_proveedor');
-			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get('tbimagen_proveedor');
+			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual' ")->get('tbimagen_proveedor');
+			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta,sum(N_Calificaciones)as numcalif")->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada' ")->get('tbimagen_proveedor');
 		}
 		
 		if($promedios_pasadas->result()[0]->mediageneral!==NULL)
@@ -731,7 +733,7 @@ class Model_Imagen extends CI_Model
 		}
 		$_data["listCumplimiento"]=$listadatosp;
 		//vemos si esta la de oferta si no esta nos pasamos derecho
-		if(isset($listapreguntasoferta))
+		if($tipo_persona==="proveedor")
 		{
 			$listadatosp=[];
 			$listapreguntasoferta=explode(",",$listapreguntasoferta->Oferta);
