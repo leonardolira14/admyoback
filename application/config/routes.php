@@ -27,6 +27,7 @@ $route['deletetel']="empresa/deletetel";
 $route['updatetel']="empresa/updatetel";
 $route['getestados']="datosgenerales/getestados";
 
+$route['recuperarpass']="usuario/recuperar";
 $route['usuarioupdate']="usuario/update";
 $route['updateclave']="usuario/updateclave";
 $route['getalluser']='usuario/getAlluser';

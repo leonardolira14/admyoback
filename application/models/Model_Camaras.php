@@ -28,4 +28,9 @@ class Model_Camaras extends CI_Model
 		$this->db->where("IDAsocia='$asocia'");
 		return $this->db->delete("asociaciones");
 	}
+	//funcion para traer la lista de asociaciones y camaras
+	public function getall_list(){
+		$respuesta=$this->db->select('*')->get('tblistaasociaciones');
+		return $respuesta->result_array();
+	}
 }

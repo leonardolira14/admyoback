@@ -93,6 +93,7 @@ class Camaras extends REST_Controller
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);
+			$_data["data"]=$this->Model_Camaras->getall_list();
 		}
 		$data["response"]=$_data;
 		$this->response($data);
@@ -109,4 +110,5 @@ class Camaras extends REST_Controller
 			return true;
 		}
 	}
+	
 }

@@ -332,4 +332,44 @@ class Usuario extends REST_Controller
 			return true;
 		}
 	}
+	//funcion para recuperar contraseña
+	public function recuperar_post(){
+		$datos=$this->post();
+		$_POST = json_decode(file_get_contents("php://input"), true);
+		$config=array( array(
+			'field'=>'correo', 
+			'label'=>'Correo Electrónico', 
+			'rules'=>'trim|required|xss_clean|valid_email'					
+		));
+		$this->form_validation->set_error_delimiters('', ',');
+		$this->form_validation->set_rules($config);
+				$array=array("required"=>'El campo %s es obligatorio',"valid_email"=>'El campo %s no es valido',"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos','alpha'=>'El campo %s debe estar compuesto solo por letras',"matches"=>"Las contraseñas no coinciden",'is_unique'=>'El contenido del campo %s ya esta registrado');
+		$this->form_validation->set_message($array);
+		if($this->form_validation->run() !=false){
+			//primero verifico si el correo existe en la base de datos
+			$respuesta=$this->Model_Usuario->DatosUsuarioCorreo($_POST["correo"]);
+			if($respuesta===False){
+				$_data["code"]=1990;
+				$_data["ok"]="Error";
+				$_data["result"]="La dirección de correo electrónico no existe";
+			}else{
+				//ahora le genero una contraseña
+				$clave=generate_clave();
+				$this->Model_Email->resetpassword($respuesta["Nombre"],$clave,$_POST["correo"]);
+				$this->Model_Usuario->updateclave($respuesta["IDUsuario"],$clave);
+				$_data["code"]=0;
+				$_data["ok"]="Exito";
+				$_data["result"]="Se ha enviado un correo electrónico con las instrucciones para restableser su cuenta.";
+			}
+			
+		}else{
+			$_data["code"]=1990;
+			$_data["ok"]="Error";
+			$_data["result"]=validation_errors();
+		}
+		$data["response"]=$_data;
+		$this->response($data);
+
+		
+	}
 }

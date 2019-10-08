@@ -469,6 +469,7 @@ class Model_Imagen extends CI_Model
 	}
 	//funcion para obtener el listado de ID de preguntas segun sea el tipo
 	public function listpreguntas($categoria,$tipo,$giro){
+		$tipo=ucwords($tipo);   
 		if($categoria!=""){
 			$listasid=[];
 			$listnomencla=$this->db->select($categoria)->where("Tipo='".$tipo."' and IDNivel2='$giro'")->get("tbconfigcuestionarios");			
@@ -637,6 +638,7 @@ class Model_Imagen extends CI_Model
 		
 		if($tipo_persona==="cliente"){
 			$listapreguntascalidad=$this->listpreguntas("Calidad",$forma,$_Giro_Principal);
+			
 			$listapreguntascumplimento=$this->listpreguntas("Cumplimiento",$forma,$_Giro_Principal);
 			$listacp=$this->ObtenerClientes($IDEmpresa);
 			//traigo los registros de la tabla de imagen_cliente
