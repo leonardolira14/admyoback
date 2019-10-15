@@ -61,6 +61,20 @@ class Camaras extends REST_Controller
 	public function save_post(){
 		
 		$datos=$this->post();
+		if(isset($datos["datosasociacion"])){
+			$_POST = json_decode($datos["datosasociacion"], true);
+			//obtengo los datos para guardarlos
+			$_Nombre=$_POST["Nombre"];
+			$_Nombre=$_POST["Siglas"];;
+			$_Nombre=$_POST["Web"];
+			(isset($_POST["Direccion"]))?$_Direccion=$_POST["Direccion"] : $_Direccion="";
+			(isset($_POST["Colonia"]))?$_Colonia=$_POST["Colonia"] : $_Colonia="";
+			(isset($_POST["Municipio"]))?$_Municipio=$_POST["Municipio"] : $_Municipio="";
+			(isset($_POST["Estado"]))?$_Estado=$_POST["Estado"] : $_Estado="";
+			(isset($_POST["CP"]))?$_CP=$_POST["CP"] : $_CP="";
+			(isset($_POST["Telefono"]))?$_Telefono=$_POST["Telefono"] : $_Telefono="";
+			vdebug(count($_FILES));
+		}
 		
 		$_Token=$datos["token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
