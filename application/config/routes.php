@@ -12,6 +12,7 @@ $route['saveregister']="Registro/addempresa";
 $route['login']="Usuario/login";
 $route['getperfil']="DatosGenerales/perfil";
 $route['getperfilempresa']="DatosGenerales/perfilempresa";
+$route['getallgiro']="Giro/getallempresa";
 $route['reggiro']="Giro/addnew";
 $route['deletegiro']="Giro/delete";
 $route['updategiro']="Giro/edit";

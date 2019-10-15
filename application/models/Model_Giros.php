@@ -26,6 +26,7 @@ class Model_Giros extends CI_Model
 			$datos_sub=$this->getgiro($item["IDGiro3"]);
 			$giros[$key]["giron1"]=$datos_rama["Giro"];
 			$giros[$key]["giron2"]=$datos_subgiro["Giro"];
+			$giros[$key]["giron3"]=$datos_sub["Giro"];
 		}
 		
 	

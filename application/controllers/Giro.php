@@ -16,7 +16,8 @@ class Giro extends REST_Controller
     	header("Access-Control-Allow-Origin: *");
     	parent::__construct();
     	$this->load->model("Model_Usuario");
-    	$this->load->model("Model_Giros");
+		$this->load->model("Model_Giros");
+		$this->load->model("Model_General");
 	}
 	public function addnew_post(){
 		$datos=$this->post();
@@ -38,6 +39,14 @@ class Giro extends REST_Controller
 			$response["giros"]=$this->Model_Giros->getGirosEmpresa($_datos["IDEmpresa"]);
 			$_data["result"]=$response;
 		}
+		$data["response"]=$_data;
+		$this->response($data);
+	}
+	// funcion para obtner todos los giros
+	public function getallempresa_post(){
+		$datos=$this->post();
+		$_data["giros"]=$this->Model_Giros->getGirosEmpresa($datos["datos"]);
+		$_data["allgiros"]=$this->Model_General->getAllsector();
 		$data["response"]=$_data;
 		$this->response($data);
 	}

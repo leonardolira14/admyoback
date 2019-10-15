@@ -70,7 +70,28 @@ class Camaras extends REST_Controller
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
-			$this->Model_Camaras->save($_ID_Empresa,$datos["Asociacion"],$datos["Web"]);
+			// primer verifico que la asociacion ya existe en la base de datos
+			if(!isset($datos["IDAsociasiones"])){
+				// si no se encuentra registrada la agrego a la lista
+				$_IDAsociacion=$this->Model_Camaras->addlistasociacion(
+					$datos["Nombre"],
+					$datos["Siglas"],
+					$datos["Imagen"],
+					$datos["Web"],
+					$datos["Estado"],
+					$datos["Municipio"],
+					$datos["Colonia"],
+					$datos["CP"],
+					$datos["Direccion"],
+					$datos["Telefono"]
+				);
+			}else{
+				$_IDAsociacion=$datos["IDAsociasiones"];
+			}
+			
+			// ahora solo guardo la relacion de camaras
+			$this->Model_Camaras->addrelacion($_ID_Empresa,$_IDAsociacion);
+			
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);
