@@ -64,52 +64,67 @@ class Camaras extends REST_Controller
 		if(isset($datos["datosasociacion"])){
 			$_POST = json_decode($datos["datosasociacion"], true);
 			//obtengo los datos para guardarlos
+			$_ID_Empresa=$_POST["IDEmpresa"];
 			$_Nombre=$_POST["Nombre"];
-			$_Nombre=$_POST["Siglas"];;
-			$_Nombre=$_POST["Web"];
+			$_Siglas=$_POST["Siglas"];;
+			$_Web=$_POST["Web"];
 			(isset($_POST["Direccion"]))?$_Direccion=$_POST["Direccion"] : $_Direccion="";
 			(isset($_POST["Colonia"]))?$_Colonia=$_POST["Colonia"] : $_Colonia="";
 			(isset($_POST["Municipio"]))?$_Municipio=$_POST["Municipio"] : $_Municipio="";
 			(isset($_POST["Estado"]))?$_Estado=$_POST["Estado"] : $_Estado="";
 			(isset($_POST["CP"]))?$_CP=$_POST["CP"] : $_CP="";
 			(isset($_POST["Telefono"]))?$_Telefono=$_POST["Telefono"] : $_Telefono="";
-			vdebug(count($_FILES));
-		}
-		
-		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["IDEmpresa"];
-		
-		if($this->checksession($_Token,$_ID_Empresa)===false){
-			$_data["code"]=1990;
-			$_data["ok"]="ERROR";
-			$_data["result"]="Error de Sesion";
-		}else{
-			// primer verifico que la asociacion ya existe en la base de datos
-			if(!isset($datos["IDAsociasiones"])){
-				// si no se encuentra registrada la agrego a la lista
-				$_IDAsociacion=$this->Model_Camaras->addlistasociacion(
-					$datos["Nombre"],
-					$datos["Siglas"],
-					$datos["Imagen"],
-					$datos["Web"],
-					$datos["Estado"],
-					$datos["Municipio"],
-					$datos["Colonia"],
-					$datos["CP"],
-					$datos["Direccion"],
-					$datos["Telefono"]
-				);
-			}else{
-				$_IDAsociacion=$datos["IDAsociasiones"];
-			}
 			
+			
+			
+			if(count($_FILES)!==0){
+				$_Imagen=$_FILES["logo"]["name"];	
+				$ruta='./assets/img/asociaciones/';
+				$rutatemporal=$_FILES["logo"]["tmp_name"];
+				$nombreactual=$_FILES["logo"]["name"];
+				try {
+					if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
+						$_data["code"]=1991;
+						$_data["ok"]="ERROR";
+						$banderaimg=false;
+						$_data["result"]="No se puede subir imagen";
+					}
+					$_IDAsociacion=$this->Model_Camaras->addlistasociacion(
+						$_Nombre,
+						$_Siglas,
+						$nombreactual,
+						$_Web,
+						$_Estado,
+						$_Municipio,
+						$_Colonia,				
+						$_CP,
+						$_Direccion,
+						$_Telefono
+					);
+					$this->Model_Camaras->addrelacion($_ID_Empresa,$_IDAsociacion);
+					$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);				
+					$_data["code"]=0;
+					$_data["ok"]="SUCCESS";
+					
+					
+				} catch (Exception $e) {
+						$_data["code"]=1991;
+						$_data["ok"]="ERROR";
+						$banderaimg=false;
+						$_data["result"]=$e->getMessage();
+				}
+			}
+		}else{
+			
+			$_ID_Empresa=$datos["IDEmpresa"];
+			$_IDAsociacion=$datos["IDAsociasiones"];
 			// ahora solo guardo la relacion de camaras
 			$this->Model_Camaras->addrelacion($_ID_Empresa,$_IDAsociacion);
-			
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);
 		}
+
 		$data["response"]=$_data;
 		$this->response($data);
 	}
