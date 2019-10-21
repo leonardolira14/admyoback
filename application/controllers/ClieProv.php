@@ -46,4 +46,13 @@ class ClieProv extends REST_Controller
 		$data["response"]=$_data;
 		$this->response($data);
 	}
+	//funcion para filtar los clientes
+	public function fillter_post(){
+		$datos=$this->post();
+		// primero vefico si se filtro por nombre
+		if(isset($datos["filtros"]["nombre"])){
+			$lista=$this->Model_Clieprop->listaclientespalabra($datos["filtros"],$datos["filtros"]["nombre"]);
+		}
+		vdebug($datos);
+	}
 }

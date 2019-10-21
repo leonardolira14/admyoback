@@ -73,6 +73,7 @@ $route["listpersonriesgo"]="Riesgo/listperson";
 
 $route["getaresumen"]="ClieProv/getaresumen";
 $route["getlista"]="ClieProv/getlista";
+$route["filterclientes"]="ClieProv/fillter";
 
 $route["getallrealizadas"]="Calificaciones/getallrealizadas";
 $route["detallescalificacion"]="Calificaciones/detalles";

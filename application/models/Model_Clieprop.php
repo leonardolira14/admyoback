@@ -24,20 +24,37 @@ class Model_Clieprop extends CI_Model{
 	public function listaclientes($IDEmpresa){
 		$listaproveedores=[];
 		$lis=$this->ObtenerClientes($IDEmpresa);
+		
 		foreach ($lis as $proveedor) {
 			$datos=$this->DatosEmpresa($proveedor["num"]);
-			array_push($listaproveedores,array("num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+			// primer obtengo la ultima calificacion que recibio la empresa del cliente
+			$datos_utima_recibida=$this->ultima_clalif($IDEmpresa,$datos[0]->IDEmpresa);
+			
+			// primer obtengo la ultima calificacion que realizada la empresa del cliente
+			$datos_utima_realizada=$this->ultima_clalif($datos[0]->IDEmpresa,$IDEmpresa);
+			
+			array_push($listaproveedores,array("CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
 		}
 		return $listaproveedores;
+	}
+
+	// funcion para obtener la ultima calificacion ya se recibida u obtendia
+	public function ultima_clalif($Empresa_receptora,$Empresa_emisora){
+		$respuesta=$this->db->select('*')
+		->where("IDEmpresaReceptor='$Empresa_receptora' and IDEmpresaEmisor='$Empresa_emisora' order by FechaRealizada Desc limit 1")
+		->get('tbcalificaciones');
+		return $respuesta->row_array();
+
 	}
 	//funcion para obtener los clientes
 	public function ObtenerClientes($idempresa){
 		$clientes1=[];
 		//esta relacion es para obtener en la tabla tbrelacion las que esten como IDEmpresaPque es la principal
 		$sql=$this->db->select('*')->where("IDEmpresaP='$idempresa' and Tipo='cliente'")->get("tbrelacion");
+		
 		if($sql->num_rows()!=0){	
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes1,array("num"=>$provedor->IDEmpresaB));
+				array_push($clientes1,array("num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 		//ahora obtengo las que estan en la IDEmpresaB pero como cliente
@@ -45,7 +62,7 @@ class Model_Clieprop extends CI_Model{
 		$clientes2=[];
 		if($sql->num_rows()!=0){
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes2,array("num"=>$provedor->IDEmpresaP));
+				array_push($clientes2,array("num"=>$provedor->IDEmpresaP,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 		$clientes=array_merge($clientes1,$clientes2);
