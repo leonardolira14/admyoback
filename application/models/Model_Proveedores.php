@@ -21,7 +21,7 @@ class Model_Proveedores extends CI_Model
 		if($sql->num_rows()!=0){	
 			foreach ($sql->result() as $provedor) {
 
-				array_push($clientes1,array("num"=>$provedor->IDEmpresaB));
+				array_push($clientes1,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 
@@ -30,7 +30,7 @@ class Model_Proveedores extends CI_Model
 		$clientes2=[];
 		if($sql->num_rows()!=0){
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes2,array("num"=>$provedor->IDEmpresaP));
+				array_push($clientes2,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 
@@ -57,7 +57,41 @@ class Model_Proveedores extends CI_Model
 		$lis=$this->ObtenerClientes($IDEmpresa);
 		foreach ($lis as $proveedor) {
 			$datos=$this->DatosEmpresa($proveedor["num"]);
-			array_push($listaproveedores,array("num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
+			
+			// primer obtengo la ultima calificacion que recibio la empresa del cliente
+			$datos_utima_recibida=$this->ultima_clalif($IDEmpresa,$datos->IDEmpresa);
+				
+			// primer obtengo la ultima calificacion que realizada la empresa del cliente
+			$datos_utima_realizada=$this->ultima_clalif($datos->IDEmpresa,$IDEmpresa);
+			array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
+		}
+		return $listaproveedores;
+	}
+	// funcion para obtener la ultima calificacion ya se recibida u obtendia
+	public function ultima_clalif($Empresa_receptora,$Empresa_emisora){
+		$respuesta=$this->db->select('*')
+		->where("IDEmpresaReceptor='$Empresa_receptora' and IDEmpresaEmisor='$Empresa_emisora' order by FechaRealizada Desc limit 1")
+		->get('tbcalificaciones');
+		return $respuesta->row_array();
+
+	}
+	public function listaproveedorespalabra($IDEmpresa,$palabra){
+		$listaproveedores=[];
+		$lis=$this->ObtenerClientes($IDEmpresa);
+		
+		foreach ($lis as $proveedor) {
+			
+			$datos=$this->DatosEmpresa($proveedor["num"]);
+			$pos = strpos($datos->Razon_Social, $palabra);
+			if($pos!== false){
+				// primer obtengo la ultima calificacion que recibio la empresa del cliente
+				$datos_utima_recibida=$this->ultima_clalif($IDEmpresa,$datos->IDEmpresa);
+				
+				// primer obtengo la ultima calificacion que realizada la empresa del cliente
+				$datos_utima_realizada=$this->ultima_clalif($datos->IDEmpresa,$IDEmpresa);
+				
+				array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
+			}
 		}
 		return $listaproveedores;
 	}

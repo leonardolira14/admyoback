@@ -33,7 +33,27 @@ class Model_Clieprop extends CI_Model{
 			// primer obtengo la ultima calificacion que realizada la empresa del cliente
 			$datos_utima_realizada=$this->ultima_clalif($datos[0]->IDEmpresa,$IDEmpresa);
 			
-			array_push($listaproveedores,array("CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+			array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+		}
+		return $listaproveedores;
+	}
+	public function listaclientespalabra($IDEmpresa,$palabra){
+		$listaproveedores=[];
+		$lis=$this->ObtenerClientes($IDEmpresa);
+		
+		foreach ($lis as $proveedor) {
+			
+			$datos=$this->DatosEmpresa($proveedor["num"]);
+			$pos = strpos($datos[0]->Razon_Social, $palabra);
+			if($pos!== false){
+				// primer obtengo la ultima calificacion que recibio la empresa del cliente
+				$datos_utima_recibida=$this->ultima_clalif($IDEmpresa,$datos[0]->IDEmpresa);
+				
+				// primer obtengo la ultima calificacion que realizada la empresa del cliente
+				$datos_utima_realizada=$this->ultima_clalif($datos[0]->IDEmpresa,$IDEmpresa);
+				
+				array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+			}
 		}
 		return $listaproveedores;
 	}
@@ -54,7 +74,7 @@ class Model_Clieprop extends CI_Model{
 		
 		if($sql->num_rows()!=0){	
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes1,array("num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
+				array_push($clientes1,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 		//ahora obtengo las que estan en la IDEmpresaB pero como cliente
@@ -62,7 +82,7 @@ class Model_Clieprop extends CI_Model{
 		$clientes2=[];
 		if($sql->num_rows()!=0){
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes2,array("num"=>$provedor->IDEmpresaP,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
+				array_push($clientes2,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaP,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 		$clientes=array_merge($clientes1,$clientes2);
