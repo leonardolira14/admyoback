@@ -191,6 +191,14 @@ class Empresa extends REST_Controller
 		}
 		
 	}
-	
+	// funcion para dar de baja una relacion
+	public function bajarelacion_post(){
+		$datos=$this->post();
+		$this->Model_Empresa->update_relacion($datos["relacion"],'0');
+		$_data["code"]=0;
+		$_data["ok"]="SUCCESS";
+		$data["response"]=$_data;
+		$this->response($data);
+	}
 	
 }

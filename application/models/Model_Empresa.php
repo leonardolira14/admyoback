@@ -130,7 +130,11 @@ class Model_Empresa extends CI_Model
 		$array=array("IDEmpresa"=>$IDEmpresa,"IDGiro"=>$n1,"Principal"=>'0',"IDGiro2"=>$n2,"IDGiro3"=>$n3);
 		return $this->db->insert('giroempresa', $array);
 	}
-
+	 
+	//funcion para cambiar el logo de la empresa
+	public function updatelogo($IDEmpresa,$logo){
+		return $this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",array("Logo"=>$logo));
+	}
 	
 	//funccion para modificar el pago el id y el pago de conecta 
 	public function update_datos_conecta($IDEmpresa,$IDCustomer,$PlanID){
@@ -149,5 +153,11 @@ class Model_Empresa extends CI_Model
 	*/
 	public function update_alerta($IDEmpresa,$_config_Alertas){
 		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",array("Configaletas"=>json_encode($_config_Alertas)));
+	}	
+
+	//funcion para dar de baja una relacion
+	public function update_relacion($IDRealcion,$status){
+		$this->db->where("IDRelacion='$IDRealcion'")->update("tbrelacion",array("Status"=>$status));
+
 	}	
 }

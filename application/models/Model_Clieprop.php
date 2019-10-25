@@ -27,13 +27,14 @@ class Model_Clieprop extends CI_Model{
 		
 		foreach ($lis as $proveedor) {
 			$datos=$this->DatosEmpresa($proveedor["num"]);
+			
 			// primer obtengo la ultima calificacion que recibio la empresa del cliente
 			$datos_utima_recibida=$this->ultima_clalif($IDEmpresa,$datos[0]->IDEmpresa);
 			
 			// primer obtengo la ultima calificacion que realizada la empresa del cliente
 			$datos_utima_realizada=$this->ultima_clalif($datos[0]->IDEmpresa,$IDEmpresa);
 			
-			array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+			array_push($listaproveedores,array("IDRelacion"=>$proveedor["IDRelacion"],"status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
 		}
 		return $listaproveedores;
 	}
@@ -52,7 +53,7 @@ class Model_Clieprop extends CI_Model{
 				// primer obtengo la ultima calificacion que realizada la empresa del cliente
 				$datos_utima_realizada=$this->ultima_clalif($datos[0]->IDEmpresa,$IDEmpresa);
 				
-				array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+				array_push($listaproveedores,array("IDRelacion"=>$proveedor["IDRelacion"],"status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
 			}
 		}
 		return $listaproveedores;
@@ -74,7 +75,7 @@ class Model_Clieprop extends CI_Model{
 		
 		if($sql->num_rows()!=0){	
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes1,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
+				array_push($clientes1,array("IDRelacion"=>$provedor->IDRelacion,"Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 		//ahora obtengo las que estan en la IDEmpresaB pero como cliente
@@ -82,12 +83,26 @@ class Model_Clieprop extends CI_Model{
 		$clientes2=[];
 		if($sql->num_rows()!=0){
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes2,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaP,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
+				array_push($clientes2,array("IDRelacion"=>$provedor->IDRelacion, "Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaP,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 		$clientes=array_merge($clientes1,$clientes2);
-		$clientes = array_map('unserialize', array_unique(array_map('serialize', $clientes)));
-		return $clientes;
+		$nueva=[];
+		foreach($clientes as $cliente){
+			$bandera=false;
+				foreach($nueva as $item){
+					if($item["num"]===$cliente["num"]){
+							
+						$bandera=true;
+						break;
+					}
+				}
+				if($bandera===false){
+					array_push($nueva,$cliente);
+				}
+		}
+		
+		return $nueva;
 	}
 	//funcion para el resumen
 	public function Resumen($IDEmpresa){

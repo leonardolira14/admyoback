@@ -21,7 +21,7 @@ class Model_Proveedores extends CI_Model
 		if($sql->num_rows()!=0){	
 			foreach ($sql->result() as $provedor) {
 
-				array_push($clientes1,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
+				array_push($clientes1,array("IDRelacion"=>$provedor->IDRelacion,"Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 
@@ -30,14 +30,27 @@ class Model_Proveedores extends CI_Model
 		$clientes2=[];
 		if($sql->num_rows()!=0){
 			foreach ($sql->result() as $provedor) {
-				array_push($clientes2,array("Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
+				array_push($clientes2,array("IDRelacion"=>$provedor->IDRelacion,"Status"=>$provedor->Status,"num"=>$provedor->IDEmpresaB,"CerA"=>$provedor->CerA,"CerB"=>$provedor->CerB));
 			}
 		}
 
 		$clientes=array_merge($clientes1,$clientes2);
-		$clientes = array_map('unserialize', array_unique(array_map('serialize', $clientes)));
+		$nueva=[];
+		foreach($clientes as $cliente){
+			$bandera=false;
+				foreach($nueva as $item){
+					if($item["num"]===$cliente["num"]){
+							
+						$bandera=true;
+						break;
+					}
+				}
+				if($bandera===false){
+					array_push($nueva,$cliente);
+				}
+		}
 		
-		return $clientes;
+		return $nueva;
 	}
 	public function DatosEmpresa($IDEmpresa){
 		$this->db->select('*');
@@ -63,7 +76,7 @@ class Model_Proveedores extends CI_Model
 				
 			// primer obtengo la ultima calificacion que realizada la empresa del cliente
 			$datos_utima_realizada=$this->ultima_clalif($datos->IDEmpresa,$IDEmpresa);
-			array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
+			array_push($listaproveedores,array("IDRelacion"=>$proveedor["IDRelacion"],"status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
 		}
 		return $listaproveedores;
 	}
@@ -90,7 +103,7 @@ class Model_Proveedores extends CI_Model
 				// primer obtengo la ultima calificacion que realizada la empresa del cliente
 				$datos_utima_realizada=$this->ultima_clalif($datos->IDEmpresa,$IDEmpresa);
 				
-				array_push($listaproveedores,array("status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
+				array_push($listaproveedores,array("IDRelacion"=>$proveedor["IDRelacion"],"status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos->IDEmpresa,"Razon_Social"=>$datos->Razon_Social,"Nombre_Comer"=>$datos->Nombre_Comer,"RFC"=>$datos->RFC,"Logo"=>$datos->Logo,"Visible"=>"Invisible","Banner"=>$datos->Banner));
 			}
 		}
 		return $listaproveedores;

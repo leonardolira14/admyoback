@@ -96,3 +96,9 @@ $route["getallnotification"]="notificaciones/getnotification";
 $route["deletegnotification"]="notificaciones/delete";
 $route["numregistros"]="notificaciones/num";
 $route["updateconfignotification"]="notificaciones/updateconfig";
+
+
+//funcion para agregar un nuevo cliente
+$route["addclieprove"]="ClieProv/add";
+// para dar de baja una relacion
+$route["bajarelacion"]="empresa/bajarelacion";

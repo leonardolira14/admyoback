@@ -150,6 +150,7 @@ class Registro extends REST_Controller
 			
 			//ahora agrego la empresa en la base de datos de admyo
 			$ID_Empresa_Admyo=$this->Model_Empresa->preaddempresa($_POST["Tipo_Persona"],$_POST["Razon_Social"],$_POST["Nombre_Comercial"],$_POST["RFC"],$_Tipo_Cuenta,"0");
+			
 			//agrego al usuario en la base de datos
 			$_Token_Usuario=$this->Model_Usuario->addUsuario($ID_Empresa_Admyo,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"],"Master",'0',"Master");
 			//ahora agrego el giro a la empresa

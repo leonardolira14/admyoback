@@ -213,7 +213,7 @@ class Calificaciones extends REST_Controller
 				
 		//cumplimiento
 		foreach ($Cuestionario_cumplimiento as $value) {
-			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
+			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
@@ -225,7 +225,7 @@ class Calificaciones extends REST_Controller
 	
 		//oferta
 		foreach ($Cuestionario_oferta as $value) {
-			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
+			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
@@ -236,7 +236,7 @@ class Calificaciones extends REST_Controller
 		
 		//recomendacion
 		foreach ($Cuestionario_recomendacion as $value) {
-			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2('0',$value["Nump"],$value["Respuesta_usuario"]);
+			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
 			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
