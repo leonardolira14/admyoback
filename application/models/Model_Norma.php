@@ -16,21 +16,29 @@ class Model_Norma extends CI_Model
 		$sql=$this->db->select("*")->where("IDEmpresa='$_ID_Empresa'")->get("normascalidad");
 		return $sql->result_array();
 	}
-	public function save($_ID_Empresa,$_Norma,$Fecha,$Calif,$_Archivo)
+	public function save($_ID_Empresa,$_Norma,$Fecha,$Calif,$_Archivo,$_Fecha_Vencimiento)
 	{
-		$data=array("Norma"=>$_Norma,"IDEmpresa"=>$_ID_Empresa,"Fecha"=>$Fecha,"Calif"=>$Calif,"Archivo"=>$_Archivo);
+		$data=array(
+			"Norma"=>$_Norma,
+			"IDEmpresa"=>$_ID_Empresa,
+			"Fecha"=>$Fecha,
+			"Calif"=>$Calif,
+			"Archivo"=>$_Archivo,
+			"FechaVencimiento"=>$_Fecha_Vencimiento
+		);
 		return $this->db->insert("normascalidad",$data);
 	}
 	public function DelCert($cer){
 		$this->db->where("IDNorma='$cer'");
 		return $this->db->delete("normascalidad");
 	}
-	public function UpdateCert($cert,$norma,$fecha,$calif,$archivo){
+	public function UpdateCert($cert,$norma,$fecha,$calif,$archivo,$_Fecha_Vencimiento){
 		$data=array(
 			"Norma"=>$norma,
 			"Fecha"=>$fecha,
 			"Calif"=>$calif,
-			"Archivo"=>$archivo
+			"Archivo"=>$archivo,
+			"FechaVencimiento"=>$_Fecha_Vencimiento
 		);
 		$this->db->where("IDNorma='$cert'");
 		return $this->db->update("normascalidad",$data);

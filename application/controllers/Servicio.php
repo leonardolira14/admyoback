@@ -105,6 +105,8 @@ class Servicio extends REST_Controller
 					$nombreactual=$key["name"];
 					move_uploaded_file($rutatemporal, $ruta.$nombreactual);
 				}
+			}else{
+				$nombreactual='';
 			}
 			//AHORA guardo el producto
 			$this->Model_Producto->save($datos["IDEmpresa"],$datos["Producto"],$datos["Promocion"],$datos["Descripcion"],$nombreactual);
