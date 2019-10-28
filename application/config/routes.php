@@ -26,6 +26,9 @@ $route['gettels']="Empresa/gettels";
 $route['addtel']="empresa/addtel";
 $route['deletetel']="empresa/deletetel";
 $route['updatetel']="empresa/updatetel";
+$route["dataclienteconecta"]="empresa/getdataconecta";
+$route["updateplan"]="empresa/updateplan";
+
 $route['getestados']="datosgenerales/getestados";
 
 $route['recuperarpass']="usuario/recuperar";

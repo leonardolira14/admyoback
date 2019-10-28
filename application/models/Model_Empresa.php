@@ -140,6 +140,10 @@ class Model_Empresa extends CI_Model
 	public function update_datos_conecta($IDEmpresa,$IDCustomer,$PlanID){
 		$array=array("Customer_id"=>$IDCustomer,"Plan_ID"=>$PlanID);
 		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",$array);
+	}
+	public function update_plan($IDEmpresa,$plan){
+		$array=array("TipoCuenta"=>$plan);
+		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",$array);
 	}	
 	/*
 	//
@@ -159,5 +163,10 @@ class Model_Empresa extends CI_Model
 	public function update_relacion($IDRealcion,$status){
 		$this->db->where("IDRelacion='$IDRealcion'")->update("tbrelacion",array("Status"=>$status));
 
-	}	
+	}
+	// funcion para obtener los datos de pago
+	public function getdata_pago($IDEmpresa){
+		$respuesta=$this->db->select('*')->where("IDEmpresa='$IDEmpresa'")->get('pagos');
+		return $respuesta->row_array();
+	}
 }

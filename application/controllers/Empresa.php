@@ -15,7 +15,8 @@ class Empresa extends REST_Controller
     	header("Access-Control-Allow-Origin: *");
     	parent::__construct();
     	$this->load->model("Model_Usuario");
-    	$this->load->model("Model_Empresa");
+		$this->load->model("Model_Empresa");
+		$this->load->model("Model_Conecta_admyo");
 	}
 	public function updatedatgen_post(){
 		$datos=$this->post();
@@ -200,5 +201,41 @@ class Empresa extends REST_Controller
 		$data["response"]=$_data;
 		$this->response($data);
 	}
-	
+	// funcion para solictar a conecta los datos de un cliente
+	public function getdataconecta_post(){
+		$datos=$this->post();
+		//funcion para obtener los datos de id de para conecta
+		$datos_pago=$this->Model_Empresa->getdata_pago($datos["empresa"]);
+		$fecha = new DateTime();
+		$datos_customer=$this->Model_Conecta_admyo->obtner_info($datos_pago["Customer_id"]);
+		$data_response["plan_id"]=$datos_customer["plan_id"];
+		$data_response["customer_id"]=$datos_customer["customer_id"];
+		$fecha->setTimestamp($datos_customer["billing_cycle_end"]);
+		$fecha_cambio=explode("-",$fecha->format('Y-m-d'));
+		$data_response["fecha_proximo_cargo"]=$fecha_cambio[2]."-".dame_mes($fecha_cambio[1])."-".$fecha_cambio[0];
+		$_data["code"]=0;
+		$_data["ok"]="SUCCESS";
+		$data["response"]=$data_response;
+		$this->response($data);
+	}
+	//funcion para cargar plan
+	public function updateplan_post(){
+		$datos=$this->post();
+		
+		// si el plan es gratis solo cambio a gratis la empresa y elimino el plan si es que esta subscrito
+		if($datos["plan_selec"]==="gratis"){
+			$this->Model_Empresa->update_plan($datos["IDEmpresa"],"basic");
+			 // ahora elimino el plan si es que tiene plan
+			 if(isset($datos["datos_cargo"]["plan_id"])){
+
+			 }
+			$_data["code"]=0;
+			$_data["ok"]="SUCCESS";
+			
+		}else{
+			vdebug($datos);
+		}
+		$data["response"]=$_data;
+		$this->response($data);
+	}
 }

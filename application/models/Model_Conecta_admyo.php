@@ -205,9 +205,7 @@ class Model_Conecta_admyo extends CI_Model{
 		\Conekta\Conekta::setApiKey($this->apikey);
 		\Conekta\Conekta::setApiVersion("2.0.0");
 		$customer = \Conekta\Customer::find($num);
-		vdebug($customer->subscription->resume());
-		$subscription = $customer->subscription->resume();
-		vdebug($subscription);
-		//return $subscription;
+		$subscription = $customer->subscription;
+		return $subscription;
 	}
 }
