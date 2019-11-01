@@ -105,3 +105,4 @@ $route["updateconfignotification"]="notificaciones/updateconfig";
 $route["addclieprove"]="ClieProv/add";
 // para dar de baja una relacion
 $route["bajarelacion"]="empresa/bajarelacion";
+
