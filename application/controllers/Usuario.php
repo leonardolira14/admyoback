@@ -65,8 +65,7 @@ class Usuario extends REST_Controller
 	}
 	//funcion para guadar un usuario
 	public function saveususer_post(){
-		$datos=$this->post();
-
+		 $datos=$this->post();
 		$_Token=$datos["token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
 		if($this->checksession($_Token,$_ID_Empresa)===false){
@@ -74,7 +73,7 @@ class Usuario extends REST_Controller
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
-			$_POST = json_decode(file_get_contents("php://input"), true);
+			
 			$config=array( 
 		array(
 			'field'=>'Nombre', 
@@ -87,7 +86,7 @@ class Usuario extends REST_Controller
 		),array(
 			'field'=>'Correo', 
 			'label'=>'Correo Electrónico', 
-			'rules'=>'trim|required|xss_clean|is_unique[usuarios.Correo]'					
+			'rules'=>'trim|required|xss_clean|is_unique[usuarios.Correo]|valid_email'					
 		)
 		,array(
 			'field'=>'Puesto', 
@@ -109,10 +108,36 @@ class Usuario extends REST_Controller
 				$_data["result"]="plan_basico";
 				
 			}else{
-				$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$_POST["Correo"],$clave,$_POST["Puesto"],'0',"");
+				$_Imagen='';
+				if(count($_FILES)!==0){
+						$_Imagen=$_FILES["logo"]["name"];	
+						$ruta='./assets/img/logosUsuarios/';
+						$rutatemporal=$_FILES["logo"]["tmp_name"];
+						$nombreactual=$_FILES["logo"]["name"];
+						try {
+							if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
+								$_data["code"]=1991;
+								$_data["ok"]="ERROR";
+								$banderaimg=false;
+								$_data["result"]="No se puede subir imagen";
+								$data["response"]=$_data;
+								$this->response($data);
+							}else{
+								$_Imagen=$nombreactual;
+							}
+							
+							
+						} catch (Exception $e) {
+								$_data["code"]=1991;
+								$_data["ok"]="ERROR";
+								$banderaimg=false;
+								$_data["result"]=$e->getMessage();
+								$data["response"]=$_data;
+								$this->response($data);
+						}
+				}
+				$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$_POST["Correo"],$clave,$_POST["Puesto"],'0',"",$_Imagen);
 				$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$clave);
-
-
 				$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
 				$_data["code"]=0;
 				$_data["ok"]="SUCCESS";
@@ -240,20 +265,43 @@ class Usuario extends REST_Controller
 	//funcion para actualizar los datos de un usuario
 	public function update_post(){
 		$datos=$this->post();
-		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["datos"]["IDEmpresa"];
-		
-		if($this->checksession($_Token,$_ID_Empresa)===false){
-			$_data["code"]=1990;
-			$_data["ok"]="ERROR";
-			$_data["result"]="Error de Sesion";
+		$respuesta=$this->_check_formlario($datos,"update");
+		if($respuesta["ok"]){
+			$_Token=$datos["token"];
+			$_ID_Empresa=$datos["IDEmpresa"];
+			
+			if($this->checksession($_Token,$_ID_Empresa)===false){
+				$_data["code"]=1990;
+				$_data["ok"]="ERROR";
+				$_data["result"]="Error de Sesión";
+			}else{
+				if(isset($datos["logo"])){
+					$_Imagen=$datos["logo"];
+				}else{
+					$_Imagen='';
+				}
+				
+				$respuesta_Imagen=$this->_update_logo($_FILES,$_Imagen);
+				if($respuesta_Imagen["ok"]){
+					$_Imagen=$respuesta_Imagen["nombre_imagen"];
+					//actualizo los datos del usuario
+					$respuesta=$this->Model_Usuario->update($datos["IDUsuario"],$datos["Nombre"],$datos["Apellidos"],$datos["Puesto"],$datos["Correo"],$datos["Visible"],$_Imagen);
+					$_data["code"]=0;
+					$_data["ok"]="SUCCESS";
+					$_data["result"]=$this->Model_Usuario->getAlluser($_ID_Empresa);
+				}else{
+					$_data["code"]=1990;	
+					$_data["ok"]="Error";
+					$_data["result"]=$respuesta_Imagen["mensaje"];
+				}
+				
+			}
 		}else{
-			//actualizo los datos del usuario
-			$respuesta=$this->Model_Usuario->update($datos["datos"]["IDUsuario"],$datos["datos"]["Nombre"],$datos["datos"]["Apellidos"],$datos["datos"]["Puesto"],$datos["datos"]["Correo"],$datos["datos"]["Visible"]);
-			$_data["code"]=0;
-			$_data["ok"]="SUCCESS";
-			$_data["result"]=$this->Model_Usuario->getAlluser($_ID_Empresa);;
+			$_data["code"]=1990;	
+			$_data["ok"]="Error";
+			$_data["result"]=validation_errors();
 		}
+		
 		$data["response"]=$_data;
 		$this->response($data);
 	}
@@ -371,5 +419,79 @@ class Usuario extends REST_Controller
 		$this->response($data);
 
 		
+	}
+	//funcion para validar si los campos son correctos
+	function _check_formlario($datos,$tipo){
+		($tipo==='update')?$reglas='trim|required|xss_clean|valid_email':$reglas='trim|required|xss_clean|is_unique[usuarios.Correo]|valid_email';
+		$_Token=$datos["token"];
+		$_ID_Empresa=$datos["IDEmpresa"];
+		if($this->checksession($_Token,$_ID_Empresa)===false){
+			$_data["code"]=1990;
+			$_data["ok"]="ERROR";
+			$_data["result"]="Error de Sesion";
+		}else{
+			
+			$config=array( 
+		array(
+			'field'=>'Nombre', 
+			'label'=>'Nombre', 
+			'rules'=>'trim|required|xss_clean'					
+		),array(
+			'field'=>'Apellidos', 
+			'label'=>'Apellidos', 
+			'rules'=>'trim|xss_clean'					
+		),array(
+			'field'=>'Correo', 
+			'label'=>'Correo Electrónico', 
+			'rules'=>$reglas				
+		)
+		,array(
+			'field'=>'Puesto', 
+			'label'=>'Puesto', 
+			'rules'=>'trim|xss_clean'					
+		));
+		$this->form_validation->set_error_delimiters('', ',');
+		$this->form_validation->set_rules($config);
+			$array=array("required"=>'El campo %s es obligatorio',"valid_email"=>'El campo %s no es valido',"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos','alpha'=>'El campo %s debe estar compuesto solo por letras',"matches"=>"Las contraseñas no coinciden",'is_unique'=>'El contenido del campo %s ya esta registrado');
+		$this->form_validation->set_message($array);
+		if($this->form_validation->run() !=false){
+			$data["ok"]=true;
+		}else{
+			$data["ok"]=false;
+			$data["mensaje"]=validation_errors();
+		}
+		return $data;
+	}
+
+}
+	function _update_logo($file,$_Name_Image){
+		if(count($file)!==0){
+						$_Imagen=$file["logo"]["name"];	
+						$ruta='./assets/img/logosUsuarios/';
+						$rutatemporal=$file["logo"]["tmp_name"];
+						$nombreactual=$file["logo"]["name"];
+						try {
+							if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
+								$_data["ok"]=false;
+								$_data["mensaje"]="No se puede subir imagen";
+								return $_data;
+							}else{
+								$_data["ok"]=true;
+								$_data["nombre_imagen"]=$nombreactual;
+								return $_data;
+							}
+							
+							
+						} catch (Exception $e) {
+								$_data["ok"]=false;
+								$_data["mensaje"]=$e->getMessage();
+								return $_data;
+						}
+				}
+				else{
+					$_data["ok"]=true;
+								$_data["nombre_imagen"]=$_Name_Image;
+								return $_data;
+				}
 	}
 }
