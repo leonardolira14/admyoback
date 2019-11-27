@@ -16,7 +16,8 @@ class Follow extends REST_Controller
     	parent::__construct();
     	$this->load->model("Model_Usuario");
     	$this->load->model("Model_Empresa");
-    	$this->load->model("Model_Follow");
+		$this->load->model("Model_Follow");
+		$this->load->model("Model_General");
 	}
 	//funcion para obtener tdos loas empresas seguidas
 	public function getallfollow_post(){
@@ -32,6 +33,7 @@ class Follow extends REST_Controller
 			$_data["result"]="Error de Sesion";
 		}else{
 			$dat["datos"]=$this->Model_Follow->getAll($_ID_Empresa);
+			$_data["estados"]=$datos["Estados"]=$this->Model_General->getEstados('42');
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$dat["datos"];
