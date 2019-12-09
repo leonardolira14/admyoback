@@ -60,6 +60,7 @@ $route["visitas"]="Visitas/Visitasg";
 $route["getallfollow"]="Follow/getallfollow";
 $route["olvidarfollow"]="Follow/olvidarfollow";
 $route["addfollow"]="Follow/addfllow";
+$route["filtrofollow"]="Follow/filtro";
 
 $route["perfil"]="Busqueda/perfil";
 $route["busquedas"]="Busqueda/busquedas";

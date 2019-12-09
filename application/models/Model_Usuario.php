@@ -13,7 +13,7 @@ class Model_Usuario extends CI_Model
 		$this->constant="vkq4suQesgv6FVvfcWgc2TRQCmAc80iE";
 	}
 	//funcion para agregar un usuario de una empresa
-	public function addUsuario($_ID_Empresa,$_Nombre,$_Apellidos,$_Correo,$_Usuario,$_Clave,$_Puesto,$_Visible,$_Tipo_Usuario)
+	public function addUsuario($_ID_Empresa,$_Nombre,$_Apellidos,$_Correo,$_Usuario,$_Clave,$_Puesto,$_Visible,$_Tipo_Usuario,$_Imagen='')
 	{
 		$TokenActivar=md5($_Nombre.$_Apellidos.$_Correo.date('d/m/Y H:i:s'));
 		$clave=md5($_Clave.$this->constant).":".$this->constant;
@@ -28,7 +28,8 @@ class Model_Usuario extends CI_Model
 				"Fecha_Alta"=>date('Y-m-d H:i:s'),
 				"Token_Activar"=>$TokenActivar,
 				"IDEmpresa"=>$_ID_Empresa,
-				"Tipo_Usuario"=>$_Tipo_Usuario
+				"Tipo_Usuario"=>$_Tipo_Usuario,
+				"Imagen"=>$_Imagen
 				);
 		$this->db->insert("usuarios",$data);
 		return $TokenActivar;
@@ -76,8 +77,8 @@ class Model_Usuario extends CI_Model
 			return true;
 		}
 	}
-	public function update($_ID_Usuario,$_Nombre,$_Apellidos,$_Puesto,$_Correo,$_Visible){
-		$array=array("Nombre"=>$_Nombre,"Apellidos"=>$_Apellidos,"Puesto"=>$_Puesto,"Correo"=>$_Correo,"Visible"=>$_Visible);
+	public function update($_ID_Usuario,$_Nombre,$_Apellidos,$_Puesto,$_Correo,$_Visible,$_Imagen){
+		$array=array("Nombre"=>$_Nombre,"Apellidos"=>$_Apellidos,"Puesto"=>$_Puesto,"Correo"=>$_Correo,"Visible"=>$_Visible,"Imagen"=>$_Imagen);
 		return $this->db->where("IDUsuario='$_ID_Usuario'")->update("usuarios",$array);
 	}
 	public function updateclave($_ID_Usuario,$_Clave){

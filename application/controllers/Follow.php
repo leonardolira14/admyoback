@@ -16,7 +16,8 @@ class Follow extends REST_Controller
     	parent::__construct();
     	$this->load->model("Model_Usuario");
     	$this->load->model("Model_Empresa");
-    	$this->load->model("Model_Follow");
+		$this->load->model("Model_Follow");
+		$this->load->model("Model_General");
 	}
 	//funcion para obtener tdos loas empresas seguidas
 	public function getallfollow_post(){
@@ -32,6 +33,7 @@ class Follow extends REST_Controller
 			$_data["result"]="Error de Sesion";
 		}else{
 			$dat["datos"]=$this->Model_Follow->getAll($_ID_Empresa);
+			$_data["estados"]=$datos["Estados"]=$this->Model_General->getEstados('42');
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$dat["datos"];
@@ -99,5 +101,24 @@ class Follow extends REST_Controller
 		}else{
 			return true;
 		}
+	}
+
+	//funcion para el filtro especial
+	function filtro_post(){
+		$datos=$this->post();
+		$_Rango='';
+		$_Estado="";
+		if(isset($datos["Calificacion"])){
+			$_Rango=$datos["Calificacion"];
+		}
+		if(isset($datos["Ubicacion"])){
+			$_Estado=$datos["Ubicacion"];
+		}
+		$respuesta=$this->Model_Follow->filtro_especial($_Rango,$datos["IDEmpresaEmisora"],$_Estado);
+		$_data["code"]=0;
+		$_data["ok"]="SUCCESS";
+		$_data["result"]=$respuesta;
+		$data["response"]=$_data;
+		$this->response($data);
 	}
 }
