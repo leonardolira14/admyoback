@@ -47,7 +47,7 @@ class Model_Email extends CI_Model
 		<body>
 		<div class="container">
 		<center><div class="col-sm-7">
-		<img class="img-responsive" src='.$_SERVER['HTTP_HOST'].'/assets/img/images-mail/header-admyo-bienvenida.jpg" />
+		<img class="img-responsive" src='.$_SERVER['HTTP_HOST'].'/assets/images/header-admyo-bienvenida.jpg" />
 		</div></center>
 		<center><div class="col-sm-7">
 		<div class="col-sm-12">
@@ -755,7 +755,7 @@ class Model_Email extends CI_Model
 		</head>
 		<body>
 		<center><div class="col-sm-7">
-		<img class="img-responsive" src="'.$_SERVER['HTTP_HOST'].'/assets/img/images-mail/header-admyo-bienvenida.jpg" />
+		<img class="img-responsive" src="'.$_SERVER['HTTP_HOST'].'/assets/images/header-admyo-bienvenida.jpg" />
 		</div></center>
 		<br />
 		<div>
