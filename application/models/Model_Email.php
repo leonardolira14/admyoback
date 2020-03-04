@@ -33,7 +33,7 @@ class Model_Email extends CI_Model
 	}
 	//funcion para enviar un correo a las empresas avisandoa que la imgen de un clinte o proveedor cambio
 	public function aviso_cambio_imagen($_correo_envio,$_Razon_Social,$_Razon_social_cambio,$_tipo){
-		$this->email->to($_Correo_envio);
+		$this->email->to($_correo_envio);
 		$this->email->subject($_Razon_Social.", cambio de imagen");
 		'<html>
 		<head>
@@ -47,7 +47,7 @@ class Model_Email extends CI_Model
 		<body>
 		<div class="container">
 		<center><div class="col-sm-7">
-		<img class="img-responsive" src='.$_SERVER['HTTP_HOST'].'/assets/images/header-admyo-bienvenida.jpg" />
+		<img class="img-responsive" src="https://test.admyo.com/back/assets/images/header-admyo-bienvenida.jpg" />
 		</div></center>
 		<center><div class="col-sm-7">
 		<div class="col-sm-12">
