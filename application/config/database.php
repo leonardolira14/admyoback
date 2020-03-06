@@ -6,10 +6,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'ec2-18-188-195-242.us-east-2.compute.amazonaws.com',
-	'username' => 'root',
+	'hostname' => '3.133.125.103',
+	'username' => 'administradoronline',
 	'password' => 'admyo246',
-	'database' => 'testadmyo',
+	'database' => 'admyo',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
@@ -51,10 +51,10 @@ $db['defaultl'] = array(
 
 $db['qval'] = array(
 	'dsn'	=> '',
-	'hostname' => 'ec2-18-188-195-242.us-east-2.compute.amazonaws.com',
-	'username' => 'root',
+	'hostname' => '3.133.125.103',
+	'username' => 'administradoronline',
 	'password' => 'admyo246',
-	'database' => 'testqval',
+	'database' => 'qval',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
