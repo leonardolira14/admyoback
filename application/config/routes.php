@@ -29,7 +29,7 @@ $route['updatetel']="empresa/updatetel";
 $route["dataclienteconecta"]="empresa/getdataconecta";
 $route["updateplan"]="empresa/updateplan";
 
-$route['getestados']="datosgenerales/getestados";
+$route['getestados']= "DatosGenerales/getestados";
 
 $route['recuperarpass']="usuario/recuperar";
 $route['usuarioupdate']="usuario/update";
