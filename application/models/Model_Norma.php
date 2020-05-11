@@ -16,7 +16,7 @@ class Model_Norma extends CI_Model
 		$sql=$this->db->select("*")->where("IDEmpresa='$_ID_Empresa'")->get("normascalidad");
 		return $sql->result_array();
 	}
-	public function save($_ID_Empresa,$_Norma,$Fecha,$Calif,$_Archivo,$_Fecha_Vencimiento)
+	public function save($_ID_Empresa,$_Norma,$Fecha,$Calif,$_Archivo,$_Fecha_Vencimiento,$_Tipo,$_EmpresaCertificadoara)
 	{
 		$data=array(
 			"Norma"=>$_Norma,
@@ -24,7 +24,9 @@ class Model_Norma extends CI_Model
 			"Fecha"=>$Fecha,
 			"Calif"=>$Calif,
 			"Archivo"=>$_Archivo,
-			"FechaVencimiento"=>$_Fecha_Vencimiento
+			"FechaVencimiento"=>$_Fecha_Vencimiento,
+			"Tipo"=>$_Tipo,
+			"EmpresaCertificadora"=> $_EmpresaCertificadoara
 		);
 		return $this->db->insert("normascalidad",$data);
 	}
@@ -32,13 +34,15 @@ class Model_Norma extends CI_Model
 		$this->db->where("IDNorma='$cer'");
 		return $this->db->delete("normascalidad");
 	}
-	public function UpdateCert($cert,$norma,$fecha,$calif,$archivo,$_Fecha_Vencimiento){
+	public function UpdateCert($cert,$norma,$fecha,$calif,$archivo,$_Fecha_Vencimiento,$_Tipo, $_EmpresaCertificadora){
 		$data=array(
 			"Norma"=>$norma,
 			"Fecha"=>$fecha,
 			"Calif"=>$calif,
 			"Archivo"=>$archivo,
-			"FechaVencimiento"=>$_Fecha_Vencimiento
+			"FechaVencimiento"=>$_Fecha_Vencimiento,
+			"Tipo"=> $_Tipo,
+			"EmpresaCertificadora"=> $_EmpresaCertificadora
 		);
 		$this->db->where("IDNorma='$cert'");
 		return $this->db->update("normascalidad",$data);

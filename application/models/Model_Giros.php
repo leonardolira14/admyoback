@@ -37,6 +37,13 @@ class Model_Giros extends CI_Model
 		$array=array("IDEmpresa"=>$_Empresa,"IDGiro"=>$_giro,"IDGiro2"=>$_subGiro,"IDGiro3"=>$_Rama);
 		return $this->db->insert("giroempresa",$array);
 	}
+
+	//funcion para modificar  un nuevo giro a una empresa
+	public function update($_IDGE,$_giro, $_subGiro, $_Rama,$_principal)
+	{
+		$array = array( "IDGiro" => $_giro, "IDGiro2" => $_subGiro, "IDGiro3" => $_Rama, "Principal"=> $_principal);
+		return $this->db->where("IDGE='$_IDGE'")->update("giroempresa", $array);
+	}
 	//funcion para eliminar un giro de una empresa
 	public function delete($_IDGiro){
 		return $this->db->where("IDGE='$_IDGiro'")->delete("giroempresa");

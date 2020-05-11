@@ -160,7 +160,12 @@ class Calificaciones extends REST_Controller
 	}
 	public function calificarfinal_post(){
 		$datos=$this->post();
-		
+		if(!isset($datos["Fecha_Calificacion"])){
+
+		$fecha_Realiza = date('Y-m-d');
+		}else{
+			$fecha_Realiza = $datos["Fecha_Calificacion"];
+		}
 		$_sub_giro=$datos["Subgiro"];
 		$IDEmpresa=$datos["IDReceptor"];
 		$_tipo_imagen=$datos["TipoReceptor"];
@@ -192,7 +197,8 @@ class Calificaciones extends REST_Controller
 			$_datos_usuario_receptor["IDUsuario"],
 			$datos["IDReceptor"],
 			$_sub_giro,
-			strtoupper($datos["TipoReceptor"])
+			strtoupper($datos["TipoReceptor"]),
+			$fecha_Realiza
 		);
 		//ahora inserto los detalles de esa calificacion
 		

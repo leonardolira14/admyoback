@@ -25,10 +25,16 @@ class ClieProv extends REST_Controller
 	public function getaresumen_post(){
 		$datos=$this->post();
 		$_ID_Empresa=$datos["IDEmpresa"];
+		$fecha1='';
+		$fecha2='';
+		if(isset($datos["fechaInicio"]) && isset($datos["fechafin"])){
+			$fecha1= $datos["fechaInicio"];
+			$fecha2 = $datos["fechafin"];
+		}
 		if($datos["tipo"]=="clientes"){
-			$resumen=$this->Model_Clieprop->Resumen($_ID_Empresa);
+			$resumen=$this->Model_Clieprop->Resumen($_ID_Empresa, $fecha1, $fecha2);
 		}else{
-			$resumen=$this->Model_Proveedores->Resumen($_ID_Empresa);
+			$resumen=$this->Model_Proveedores->Resumen($_ID_Empresa, $fecha1, $fecha2);
 		}
 		$_data["code"]=0;
 		$_data["ok"]="SUCCESS";

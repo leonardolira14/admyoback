@@ -23,67 +23,82 @@ class Marca extends REST_Controller
 	public function add_post(){
 		$datos=$this->post();
 		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["empresa"];
-		$_Marca=$datos["marca"];
-		$bandera=false;
-		$banderaimg=true;
-		$_Imagen="";
+		$_ID_Empresa=$datos["IDEmpresa"];
+		$_Marca=$datos["Marca"];
+		$_Imagen = '';
+	
+		
 		//primerocheco el token
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de empresa";
-			$bandera=true;
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 		}else {
 			//verifico que plan tiene
 			$datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
 			$num=$this->Model_Marcas->getnum($_ID_Empresa);
-			
+			$_Imagen='';
 			if($num==="2" && $datos_empresa["TipoCuenta"]){
 				$_data["code"]=1990;
 				$_data["ok"]="ERROR";
-				$banderaimg=false;
 				$_data["result"]="plan_basico";
-				$data["response"]=$_data;
-				$this->response($data);
-				return false;
+				$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 			}
 			if(count($_FILES)!==0){
-				$_Imagen=$_FILES["logo"]["name"];	
+				$_Imagen=$_FILES["Logo"]["name"];	
 				$ruta='./assets/img/logosmarcas/';
-				$rutatemporal=$_FILES["logo"]["tmp_name"];
-				$nombreactual=$_FILES["logo"]["name"];
+				$rutatemporal=$_FILES["Logo"]["tmp_name"];
+				$nombreactual=$_FILES["Logo"]["name"];
 				try {
 					if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
 						$_data["code"]=1991;
 						$_data["ok"]="ERROR";
-						$banderaimg=false;
 						$_data["result"]="No se puede subir imagen";
+						
 					}
-					$_data["code"]=0;
-					$_data["ok"]="SUCCESS";
-					$this->Model_Marcas->add($_Marca,$_ID_Empresa,$_Imagen);
-					$_datas["Marcas"]=$this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
-					$_data["result"]=$_datas;
+					
 					
 				} catch (Exception $e) {
 						$_data["code"]=1991;
 						$_data["ok"]="ERROR";
-						$banderaimg=false;
 						$_data["result"]=$e->getMessage();
+						$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 				}
 		}
+			$_data["code"] = 0;
+			$_data["ok"] = "SUCCESS";
+			$this->Model_Marcas->add($_Marca, $_ID_Empresa, $_Imagen);
+			$_data["Marcas"] = $this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
+			$this->response($_data, REST_Controller::HTTP_OK);
 	}
-		$data["response"]=$_data;
-		$this->response($data);
+		
+	}
+	//funcion para obtenert todas las marcas de una empresa
+	public function getAll_post()
+	{
+		$datos = $this->post();
+		$_Token = $datos["token"];
+		$_ID_Empresa = $datos["IDEmpresa"];
+		if ($this->checksession($_Token, $_ID_Empresa) === false) {
+			$_data["code"] = 1990;
+			$_data["ok"] = "ERROR";
+			$_data["result"] = "Error de Sesion";
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
+		} else {
+			$_data["code"] = 0;
+			$_data["ok"] = "SUCCESS";
+			$_data["Marcas"] = $this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
+			$this->response($_data, REST_Controller::HTTP_OK);
+		}
 		
 	}
 	//funcion para eliminar una marca
 	public function delete_post(){
 		$datos=$this->post();
 		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["datos"]["empresa"];
-		$_ID_Marca=$datos["datos"]["marca"];
+		$_ID_Empresa=$datos["IDEmpresa"];
+		$_ID_Marca=$datos["IDMarca"];
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
@@ -103,42 +118,41 @@ class Marca extends REST_Controller
 		$datos=$this->post();
 		//primero verifico si han cambiado la imagen
 		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["empresa"];
-		$_ID_Marca=$datos["idmarca"];
-		$_Marca=$datos["marca"];
-		$_Imagen=false;
+		$_ID_Empresa=$datos["IDEmpresa"];
+		$_ID_Marca=$datos["IDMarca"];
+		$_Marca=$datos["Marca"];
+		$_Imagen= $datos["Archivo"];
 		if(count($_FILES)!==0){
-				$_Imagen=$_FILES["logo"]["name"];	
+				$_Imagen=$_FILES["Logo"]["name"];	
 				$ruta='./assets/img/logosmarcas/';
-				$rutatemporal=$_FILES["logo"]["tmp_name"];
-				$nombreactual=$_FILES["logo"]["name"];
+				$rutatemporal=$_FILES["Logo"]["tmp_name"];
+				$nombreactual=$_FILES["Logo"]["name"];
 				try {
 					if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
 						$_data["code"]=1991;
 						$_data["ok"]="ERROR";
-						$banderaimg=false;
 						$_data["result"]="No se puede subir imagen";
+						$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 					}	
-					$_data["code"]=0;
-					$_data["ok"]="SUCCESS";
-					$this->Model_Marcas->update($_ID_Marca,$_Marca,$_Imagen);
-					$_datas["Marcas"]=$this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
-					$_data["result"]=$_datas;				
+							
 				} catch (Exception $e) {
 						$_data["code"]=1991;
 						$_data["ok"]="ERROR";
-						$banderaimg=false;
 						$_data["result"]=$e->getMessage();
+						$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 				}
 			}else{
 					$_data["code"]=0;
 					$_data["ok"]="SUCCESS";
 					$this->Model_Marcas->update($_ID_Marca,$_Marca,$_Imagen);
-					$_datas["Marcas"]=$this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
-					$_data["result"]=$_datas;	
+					$_data["Marcas"]=$this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
+					$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 			}
-			$data["response"]=$_data;
-		    $this->response($data);
+		$_data["code"] = 0;
+		$_data["ok"] = "SUCCESS";
+		$this->Model_Marcas->update($_ID_Marca, $_Marca, $_Imagen);
+		$_data["Marcas"] = $this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
+		$this->response($_data, REST_Controller::HTTP_OK);
 	}
 	//funcion para saber cuantos registros tiene esta empresa
 	public function getnum($_Empresa){

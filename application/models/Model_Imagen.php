@@ -56,7 +56,7 @@ class Model_Imagen extends CI_Model
 		return $proveedores;
 	}
 	//funcion para obtenre las imagen de como cliente basado en las calificaciones de proveedores
-	public function imgcliente($IDEmpresa,$tipo_fecha,$tipo_persona,$resumen=FALSE){
+	public function imgcliente($IDEmpresa,$tipo_fecha,$tipo_persona,$resumen=FALSE,$_Rangos_Fecha=[]){
 		$fechas=docemeces();
 		$fechas2=docemecespasados();
 		$_media_calidad_actual=0;
@@ -70,27 +70,64 @@ class Model_Imagen extends CI_Model
 		$_Numero_de_calificaciones_actual=0;
 		$_Numero_de_calificaciones_pasado=0;
 		
-		if($tipo_fecha==="A")
-		{
-			$_fecha_inicio_actual=$fechas[0]."-".date("d");
-			$_fecha_fin_actual=$fechas[12]."-".date("d");
-			$_fecha_inicio_pasada=$fechas2[0]."-".date("d");
-			$_fecha_fin_pasada=$fechas2[12]."-".date("d");
-			$fecha_evolucion_inicio=explode("-",$fechas[0]);
-			$fecha_evolucion_fin=explode("-",$fechas[12]);
-			$fechas_rango=$fechas;
-		}else{
-			$_fecha_inicio_actual=$fechas[11]."-".date("d");
-			$_fecha_fin_actual=$fechas[12]."-".date("d");
-			$_fecha_inicio_pasada=$fechas[9]."-".date("d");
-			$_fecha_fin_pasada=$fechas[10]."-".date("d");
-			$fecha_evolucion_inicio=explode("-",$fechas[11]);
-			$fecha_evolucion_fin=explode("-",$fechas[12]);
-			$inicio=date("d");
-			$para=31;
-			$mes=$fecha_evolucion_inicio[1];
-			$anio=$fecha_evolucion_inicio[0];
+		switch($tipo_fecha){
+			case "A":
+				$_fecha_inicio_actual = $fechas[0] . "-" . date("d");
+				$_fecha_fin_actual = $fechas[12] . "-" . date("d");
+				$_fecha_inicio_pasada = $fechas2[0] . "-" . date("d");
+				$_fecha_fin_pasada = $fechas2[12] . "-" . date("d");
+				$fecha_evolucion_inicio = explode("-", $fechas[0]);
+				$fecha_evolucion_fin = explode("-", $fechas[12]);
+				$fechas_rango = $fechas;
+			break;
+			case "M":
+				$_fecha_inicio_actual = $fechas[11] . "-" . date("d");
+				$_fecha_fin_actual = $fechas[12] . "-" . date("d");
+				$_fecha_inicio_pasada = $fechas[9] . "-" . date("d");
+				$_fecha_fin_pasada = $fechas[10] . "-" . date("d");
+				$fecha_evolucion_inicio = explode("-", $fechas[11]);
+				$fecha_evolucion_fin = explode("-", $fechas[12]);
+				$inicio = date("d");
+				$para = 31;
+				$mes = $fecha_evolucion_inicio[1];
+				$anio = $fecha_evolucion_inicio[0];
+
+			break;
+			case "R":
+				//vdebug($_Rangos_Fecha);
+				$_fecha_inicio_actual = date("Y-m-d", strtotime($_Rangos_Fecha["fecha_I"]));
+				$_fecha_fin_actual = date("Y-m-d", strtotime($_Rangos_Fecha["fecha_F"]));				
+				$fechaI=explode("-", $_fecha_inicio_actual);
+				$fechaF = explode("-", $_fecha_fin_actual);
+				$_fecha_inicio_pasada = ((int) $fechaI[0]-1) . "-" . $fechaI[1]."-". $fechaI[2];
+				$_fecha_fin_pasada = ((int) $fechaF[0] - 1) . "-" . $fechaF[1] . "-" . $fechaF[2];
+
+				$fecha_evolucion_inicio = $fechaI;
+				$fecha_evolucion_fin = $fechaF;
+				$f1 = $fechaI[0]."-". $fechaI[1];
+				$f2 = $fechaF[0] . "-" . $fechaF[1];
+				$calendario=[];
+				$mes_ac= $fechaI[1];
+				$anio_ac = $fechaI[0];
+				while ($f1 != $f2) {
+					
+					array_push($calendario, $f1);
+					if ((int)$mes_ac === 12) {
+						$mes_ac = 1;
+						$anio_ac++;
+					} else {
+						(int)$mes_ac++;
+					}
+					($mes_ac<10)? $mes_ac='0'.$mes_ac: $mes_ac= $mes_ac;
+					$f1 = $anio_ac . "-" .  $mes_ac;
+					
+					
+				}
+				array_push($calendario, $f2);
+				$fechas_rango = $calendario;		
+			break;
 		}
+		
 		/*
 		///
 		//primero necesito numero de calificaciones 
@@ -143,38 +180,39 @@ class Model_Imagen extends CI_Model
 			$_data["aumento"]=_increment($_Numero_de_calificaciones_actual,$_Numero_de_calificaciones_pasado,"imagen");
 			
 			if($resumen===FALSE){
-			if($tipo_fecha==="A"){
-				$evolucion=[];
-				$evolucionlabel=[];
-				$_evolucion_media=[];
-				$_evolucion_media_calidad=[];
-				$_evolucion_media_cumplimiento=[];
-				$_evolucion_media_oferta=[];
-				$_evolucion_media_label=[];
-				foreach ($fechas_rango as $fechacom) {
-					$datos=explode("-", $fechacom);
-					$cuantas=$this->Total_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
-					
-					array_push($evolucionlabel,da_mes($datos[1])."-".$datos[0]);
-					array_push($evolucion,(int)$cuantas);
-					$cuantas=$this->Media_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
-					array_push($_evolucion_media_label,da_mes($datos[1])."-".$datos[0]);
-					array_push($_evolucion_media,(float)$cuantas);
-					//ahora vamos a llenar los arrays para las evoluciones de las graficas
-					$calidad=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Calidad');
-					array_push($_evolucion_media_calidad,$calidad);
-					$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
-					array_push($_evolucion_media_cumplimiento,$cumplimiento);
-					if($tipo_persona==="proveedor"):
-						$oferta=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Oferta');
+				
+				if($tipo_fecha==="A" || $tipo_fecha === "R"){
+					$evolucion=[];
+					$evolucionlabel=[];
+					$_evolucion_media=[];
+					$_evolucion_media_calidad=[];
+					$_evolucion_media_cumplimiento=[];
+					$_evolucion_media_oferta=[];
+					$_evolucion_media_label=[];
+					foreach ($fechas_rango as $fechacom) {
+						$datos=explode("-", $fechacom);
+						$cuantas=$this->Total_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
 						
-						array_push($_evolucion_media_oferta,$oferta);
-					endif;
-					
-				}
+						array_push($evolucionlabel,da_mes($datos[1])."-".$datos[0]);
+						array_push($evolucion,(int)$cuantas);
+						$cuantas=$this->Media_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
+						array_push($_evolucion_media_label,da_mes($datos[1])."-".$datos[0]);
+						array_push($_evolucion_media,(float)$cuantas);
+						//ahora vamos a llenar los arrays para las evoluciones de las graficas
+						$calidad=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Calidad');
+						array_push($_evolucion_media_calidad,$calidad);
+						$cumplimiento=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
+						array_push($_evolucion_media_cumplimiento,$cumplimiento);
+						if($tipo_persona==="proveedor"):
+							$oferta=$this->Media_calificaciones_tipo($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona,'Oferta');
+							
+							array_push($_evolucion_media_oferta,$oferta);
+						endif;
+						
+					}
 
-			}
-			if($tipo_fecha==="M"){
+				}
+				if($tipo_fecha==="M"){
 					$evolucion=[];
 					$evolucionlabel=[];
 					$_evolucion_media=[];

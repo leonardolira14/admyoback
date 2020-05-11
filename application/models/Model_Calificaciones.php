@@ -641,7 +641,7 @@ class Model_Calificaciones extends CI_Model{
 		return $data;
 		
 	}
-	public function addCalificacion($_ID_UsuarioEmisor,$_ID_EmpresaEmisor,$_ID_Grio_Emisor,$_ID_Usuario_Receptor,$_ID_Empresa_Receptor,$_IDGiro_Receptor,$_Emitido_para){
+	public function addCalificacion($_ID_UsuarioEmisor,$_ID_EmpresaEmisor,$_ID_Grio_Emisor,$_ID_Usuario_Receptor,$_ID_Empresa_Receptor,$_IDGiro_Receptor,$_Emitido_para, $_Fecha_Realizada){
 		$datos=array(
 			'IDUsuarioEmisor'=>$_ID_UsuarioEmisor,
 			'IDEmpresaEmisor'=>$_ID_EmpresaEmisor,
@@ -650,7 +650,8 @@ class Model_Calificaciones extends CI_Model{
 			"IDEmpresaReceptor"=>$_ID_Empresa_Receptor,
 			"IDGiroReceptor"=>$_IDGiro_Receptor,
 			"Status"=>"ACTIVA",
-			"Emitidopara"=>$_Emitido_para
+			"Emitidopara"=>$_Emitido_para,
+			"FechaRealizada"=>$_Fecha_Realizada
 		);
 		$this->db->insert("tbcalificaciones",$datos);
 		return $this->db->insert_id();

@@ -12,14 +12,18 @@ $route['saveregister']="Registro/addempresa";
 $route['login']="Usuario/login";
 $route['getperfil']="DatosGenerales/perfil";
 $route['getperfilempresa']="DatosGenerales/perfilempresa";
+
 $route['getallgiro']="Giro/getallempresa";
 $route['reggiro']="Giro/addnew";
 $route['deletegiro']="Giro/delete";
 $route['updategiro']="Giro/edit";
 $route['principal']="Giro/principal";
+
+$route['getallmarca'] = "Marca/getAll";
 $route['addmarca']="Marca/add";
 $route['deletemarca']="Marca/delete";
 $route['updatemarca']="Marca/update";
+
 $route['updateempresa']="Empresa/updatedatgen";
 $route['updatecontacto']="Empresa/updatecontacto";
 $route['gettels']="Empresa/gettels";
@@ -28,6 +32,9 @@ $route['deletetel']="empresa/deletetel";
 $route['updatetel']="empresa/updatetel";
 $route["dataclienteconecta"]="empresa/getdataconecta";
 $route["updateplan"]="empresa/updateplan";
+
+$route["updatelogoempresa"] = "empresa/updatelogo";
+
 
 $route['getestados']= "DatosGenerales/getestados";
 

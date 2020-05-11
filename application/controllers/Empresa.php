@@ -32,13 +32,16 @@ class Empresa extends REST_Controller
 		$_Fac_Anual=$datos["facanual"];
 		$_dias_pago_empresa=$datos["diaspagoempresa"];
 		$_perfil=$datos["perfil"];
+		$_Tel1=json_encode($datos["Tel1"]);
+		$_Tel2 = json_encode($datos["Tel2"]);
+		$_Tel3 = json_encode($datos["Tel3"]);
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
 			//primero verifico si cambiaron el logo o el banner
-			if(count($_FILES)>0){
+			/*if(count($_FILES)>0){
 				foreach ($_FILES as $archivo=>$key) {
 					if($archivo==="logo"){
 						$ruta="assets/img/logosEmpresas/";
@@ -53,9 +56,34 @@ class Empresa extends REST_Controller
 					$nombreactual=$key["name"];
 					move_uploaded_file($rutatemporal, $ruta.$nombreactual);
 				}
-			}
+			}*/
 			//ahora actualizo los datos
-			$this->Model_Empresa->update($_ID_Empresa,$_Razon_Social,$Nombre_Comercial,$rfc,$T_empresa,$_Empleados,$_Fac_Anual,$_perfil,$logo,$banner,$_dias_pago_empresa);
+			$this->Model_Empresa->update(
+				$_ID_Empresa,
+				$_Razon_Social,
+				$Nombre_Comercial,
+				$rfc,$T_empresa,
+				$_Empleados,
+				$_Fac_Anual,
+				$_perfil,
+				$logo,
+				$banner,
+				$_dias_pago_empresa,
+				$_Tel1,
+				$_Tel2,
+				$_Tel3
+
+			);
+			// ahora actualizo los datos de conctacto
+			$this->Model_Empresa->updatecontacto(
+				$_ID_Empresa,
+				$datos["Sitio_Web"],
+				$datos["Direc_Fiscal"],
+				$datos["Colonia"],
+				$datos["Deleg_Mpo"],
+				$datos["Estado"],
+				$datos["Codigo_Postal"]
+			);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$datas["empresa"]=$this->Model_Empresa->getempresa($_ID_Empresa);
@@ -63,6 +91,44 @@ class Empresa extends REST_Controller
 		}
 		$data["response"]=$_data;
 		$this->response($data);
+	}
+
+	// actualizar logo de empresa
+	public function updatelogo_post(){
+		$datos = $this->post();
+		$_Token = $datos["token"];
+		$_ID_Empresa = $datos["IDEmpresa"];
+		if ($this->checksession($_Token, $_ID_Empresa) === false) {
+			$_data["code"] = 1990;
+			$_data["ok"] = "ERROR";
+			$_data["result"] = "Error de Sesion";
+		} else {
+			$_Imagen = $_FILES["Logo"]["name"];
+			$ruta = './assets/img/logosEmpresas/';
+			$rutatemporal = $_FILES["Logo"]["tmp_name"];
+			$nombreactual = $_FILES["Logo"]["name"];
+			try {
+				if (!move_uploaded_file($rutatemporal, $ruta . $nombreactual)) {
+					$_data["code"] = 1991;
+					$_data["ok"] = "ERROR";
+					$_data["result"] = "No se puede subir imagen";
+				}
+				
+				// ahora actualizo el nombre de los logo en la empresa
+				$this->Model_Empresa->updatelogo($_ID_Empresa, $nombreactual);
+				
+				$_data["code"] = 0;
+				$_data["ok"] = "SUCCESS";			
+				$_data["Logo"] = $nombreactual;
+			
+				$this->response($_data, REST_Controller::HTTP_OK);
+			} catch (Exception $e) {
+				$_data["code"] = 1991;
+				$_data["ok"] = "ERROR";
+				$_data["result"] = $e->getMessage();
+				$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
+			}
+		}
 	}
 	//funcion para actualizar los datos de contacto
 	public function updatecontacto_post(){
@@ -74,7 +140,14 @@ class Empresa extends REST_Controller
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
 		}else{
-			$this->Model_Empresa->updatecontacto($datos["datos"]["IDEmpresa"],$datos["datos"]["Sitio_Web"],$datos["datos"]["Direc_Fiscal"],$datos["datos"]["Colonia"],$datos["datos"]["Deleg_Mpo"],$datos["datos"]["Estado"],$datos["datos"]["Codigo_Postal"]);
+			$this->Model_Empresa->updatecontacto(
+				$datos["datos"]["IDEmpresa"],
+				$datos["datos"]["Sitio_Web"],
+				$datos["datos"]["Direc_Fiscal"],
+				$datos["datos"]["Colonia"],
+				$datos["datos"]["Deleg_Mpo"],
+				$datos["datos"]["Estado"],
+				$datos["datos"]["Codigo_Postal"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$datas["empresa"]=$this->Model_Empresa->getempresa($_ID_Empresa);

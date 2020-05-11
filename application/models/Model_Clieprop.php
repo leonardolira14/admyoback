@@ -105,7 +105,7 @@ class Model_Clieprop extends CI_Model{
 		return $nueva;
 	}
 	//funcion para el resumen
-	public function Resumen($IDEmpresa){
+	public function Resumen($IDEmpresa,$fecha='', $fecha2 = ''){
 		//ahora reccorro cada uno delos clientes y veo que promedio le he dado en los meses
 		//primero obtengo en el mes que estoy menos 2
 		$serieclientespormes=[];
@@ -114,48 +114,65 @@ class Model_Clieprop extends CI_Model{
 		$calificacionespormes=[];
 		$promediopormeslabel=[];
 		$promediopormes=[];
-		if(date('m')==="01"){
-			$mes1="11";
-			$anio1=date('Y')-1;
-			$mes2="12";
-			$anio2=$anio1;
-			$mes3=date("m");
-			$anio3=date('Y');
-		}else if(date('m')==="02"){
-			$mes1="12";
-			$anio1=date('Y')-1;
-			$mes2="01";
-			$anio2=date('Y');
-			$mes3=date("m");
-			$anio3=date('Y');
+		$fechas = docemeces();
+		$calendario = [];
+		if($fecha!=='' && $fecha2!==''){
+			$fecha=explode("-",$fecha);
+			$fecha2 = explode("-", $fecha2);
+			$anio_ac = $fecha[2];
+			$mes_ac=$fecha[1];
+			$anio_ac2 = $fecha2[2];
+			$mes_ac2 = $fecha2[1];
+			
+			$f1= $anio_ac."-".  $mes_ac;
+			$f2 =  $anio_ac2. "-" .  $mes_ac2;
+			while($f1!= $f2){
+				array_push($calendario,$f1);
+				if($mes_ac===12){
+					$mes_ac=1;
+					$anio_ac++;
+				}else{
+					$mes_ac++;
+				}
+				$f1 = $anio_ac . "-" .  $mes_ac;
+				
+			}
+			array_push($calendario, $f2);
+			$fecha1 = $fechas[10];
+			$fecha2 = $fechas[11];
+			$fecha3 = $fechas[12];
+
 		}else{
-			$mes1=date("m")-2;
-			$anio1=date('Y');
-			$mes2=date("m")-1;
-			$anio2=date('Y');
-			$mes3=date("m");
-			$anio3=date('Y');
+			$fecha1= $fechas[10];
+			$fecha2= $fechas[11];
+			$fecha3= $fechas[12];
+			for($i=10;$i<=12;$i++){
+				array_push($calendario, $fechas[$i]);
+			}
+
 		}
+		
 		//ahora tengo las variables
-		$resp1=$this->cuantoscalif($IDEmpresa,$mes1,$anio1,'Cliente','Realizada');
-		$resp2=$this->cuantoscalif($IDEmpresa,$mes2,$anio2,'Cliente','Realizada');
-		$resp3=$this->cuantoscalif($IDEmpresa,$mes3,$anio3,'Cliente','Realizada');
+		$resp1=$this->cuantoscalif($IDEmpresa, $fecha1,'Cliente','Realizada');
+		$resp2=$this->cuantoscalif($IDEmpresa, $fecha2,'Cliente','Realizada');
+		$resp3=$this->cuantoscalif($IDEmpresa, $fecha3,'Cliente','Realizada');
 		//serie grafica 1
-		$seriebarraslabel=[$anio1."-".da_mes($mes1),$anio2."-".da_mes($mes2),$anio3."-".da_mes($mes3)];
+		$seriebarraslabel=[substr($fecha1, 0, 4)."-".da_mes(substr($fecha1, 5, 2)), substr($fecha2, 0, 4)."-".da_mes(substr($fecha2, 5, 2)), substr($fecha3, 0, 4)."-".da_mes(substr($fecha3, 5, 2))];
 		$seriebarras=array(array("data"=>[$resp1["totalmay8"],$resp2["totalmay8"],$resp3["totalmay8"]],"label"=>"Mayores de 8"),array("data"=>[$resp1["totalmen8"],$resp2["totalmen8"],$resp3["totalmen8"]],"label"=>"Menores de 8"),array("data"=>[$resp1["nocalificacados"],$resp2["nocalificacados"],$resp3["nocalificacados"]],"label"=>"No Calificados"));
 		
 		$data["seriecul"]=array("serie"=>$seriebarras,"labels"=>$seriebarraslabel);
+
 		//grafica nuemero de clientes registrados por mes
-		for($i=1;$i<=date('m');$i++){
-			$sql=$this->db->select("count(*) as total")->where("IDEmpresaP='$IDEmpresa' and Tipo='Cliente' and DATE(FechaRelacion) between '".date('Y')."-$i-01' and '".date('Y')."-$i-31' group by(IDEmpresaP)")->get("tbrelacion");
-			
+		for($i=0;$i<= count($calendario)-1;$i++){
+			$fecha = explode('-', $calendario[$i]);
+			$sql=$this->db->select("count(*) as total")->where("IDEmpresaP='$IDEmpresa' and Tipo='Cliente' and DATE(FechaRelacion) between '". $calendario[$i]."-01' and '". $calendario[$i]."-31' group by(IDEmpresaP)")->get("tbrelacion");
 			
 			if($sql->num_rows()===0){
 				$num=0;
 			}else{
 				$num=$sql->result()[0]->total;
 			}
-			$sql=$this->db->select("count(*) as total")->where("IDEmpresaB='$IDEmpresa' and Tipo='Cliente' and DATE(FechaRelacion) between '".date('Y')."-$i-01' and '".date('Y')."-$i-31' group by(IDEmpresaP)")->get("tbrelacion");
+			$sql=$this->db->select("count(*) as total")->where("IDEmpresaB='$IDEmpresa' and Tipo='Cliente' and DATE(FechaRelacion) between '" . $calendario[$i] . "-01' and '" . $calendario[$i] . "-31' group by(IDEmpresaP)")->get("tbrelacion");
 			
 			
 			if($sql->num_rows()===0){
@@ -163,22 +180,24 @@ class Model_Clieprop extends CI_Model{
 			}else{
 				$num=$num+(int)$sql->result()[0]->total;
 			}
-			array_push($serieclientespormeslabel,da_mes($i));
+			array_push($serieclientespormeslabel,$fecha[0]."-".da_mes($fecha[1]));
 			array_push($serieclientespormes,$num);
 			//grafica Número de calificaciones realizadas a Clientes
-			$sql=$this->db->select("count(*) as total")->where("IDEmpresaEmisor='$IDEmpresa' and Emitidopara='Cliente' and Date(FechaRealizada) between '".date('Y')."-$i-01' and '".date('Y')."-$i-31'")->get('tbcalificaciones');
+			$sql=$this->db->select("count(*) as total")->where("IDEmpresaEmisor='$IDEmpresa' and Emitidopara='Cliente' and Date(FechaRealizada) between '" . $calendario[$i] . "-01' and '" . $calendario[$i] . "-31'")->get('tbcalificaciones');
 			$num=(int)$sql->result()[0]->total;
-			$TcM=$this->db->select("(sum(tbdetallescalificaciones.PuntosObtenidos)/sum(tbdetallescalificaciones.PuntosPosibles)*10) as promedio ")->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')->where("IDEmpresaEmisor='$IDEmpresa' and Emitidopara='Cliente' and Date(FechaRealizada) between '".date('Y')."-$i-01' and '".date('Y')."-$i-31'")->get('tbcalificaciones');
+			$TcM=$this->db->select("(sum(tbdetallescalificaciones.PuntosObtenidos)/sum(tbdetallescalificaciones.PuntosPosibles)*10) as promedio ")->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')->where("IDEmpresaEmisor='$IDEmpresa' and Emitidopara='Cliente' and Date(FechaRealizada) between '" . $calendario[$i] . "-01' and '" . $calendario[$i] . "-31'")->get('tbcalificaciones');
 			if($TcM->num_rows()===0){
 				$promedio=0;
 			}else{
 				$promedio=round((float)$TcM->result()[0]->promedio,2);
 			}
-				array_push($calificacionespormeslabel,da_mes($i));
+				
+			
+				array_push($calificacionespormeslabel, $fecha[0]."-".da_mes($fecha[1]));
 				array_push($calificacionespormes,$num);
 
 				array_push($promediopormes,$promedio);
-				array_push($promediopormeslabel,da_mes($i));
+				array_push($promediopormeslabel, $fecha[0] . "-" . da_mes($fecha[1]));
 		}
 
 		$data["serieclientes"]=array("datos"=>[array("data"=>$serieclientespormes,"label"=>'Numero de Clientes')],"labels"=>$serieclientespormeslabel);
@@ -191,7 +210,7 @@ class Model_Clieprop extends CI_Model{
 	}
 
 	//funcion para saber cuantos tengo calificacados y cuantos no 
-	public function cuantoscalif($IDEmpresa,$mes,$anio,$tipo,$forma){
+	public function cuantoscalif($IDEmpresa,$fecha,$tipo,$forma){
 		$tipo=strtoupper($tipo);
 		$clientes=$this->ObtenerClientes($IDEmpresa);
 		
@@ -203,11 +222,11 @@ class Model_Clieprop extends CI_Model{
 		//ahora obtengo el totaal de calificaciones en  ese mes
 		if($forma==="Realizada")
 		{
-			$TcM=$this->db->select("IDCalificacion,IDEmpresaReceptor as IDEmpresa")->where("IDEmpresaEmisor='$IDEmpresa' and Emitidopara='$tipo' and Date(FechaRealizada) between '$anio-$mes-01' and '$anio-$mes-31'")->get('tbcalificaciones');
+			$TcM=$this->db->select("IDCalificacion,IDEmpresaReceptor as IDEmpresa")->where("IDEmpresaEmisor='$IDEmpresa' and Emitidopara='$tipo' and Date(FechaRealizada) between '$fecha-01' and '$fecha-31'")->get('tbcalificaciones');
 		}
 		else
 		{
-			$TcM=$this->db->select("tbcalificaciones.IDCalificacion,IDEmpresaEmisor as IDEmpresa,(sum(tbdetallescalificaciones.PuntosObtenidos)/sum(tbdetallescalificaciones.PuntosPosibles)*10) as Calificacion ")->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')->where("IDEmpresaReceptor='$IDEmpresa' and Emitidopara='$tipo' and Date(FechaRealizada) between '$anio-$mes-01' and '$anio-$mes-31'")->get('tbcalificaciones');
+			$TcM=$this->db->select("tbcalificaciones.IDCalificacion,IDEmpresaEmisor as IDEmpresa,(sum(tbdetallescalificaciones.PuntosObtenidos)/sum(tbdetallescalificaciones.PuntosPosibles)*10) as Calificacion ")->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')->where("IDEmpresaReceptor='$IDEmpresa' and Emitidopara='$tipo' and Date(FechaRealizada) between '$fecha-01' and '$fecha-31'")->get('tbcalificaciones');
 		}	
 		
 			foreach ($TcM->result() as $valoracion) {

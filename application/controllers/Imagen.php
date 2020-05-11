@@ -24,7 +24,8 @@ class Imagen extends REST_Controller
 		$_ID_Empresa=$datos["IDEmpresa"];
 		$_fecha=$datos["fecha"];
 		$_Tipo=$datos["tipo"];
-		$datoss["imagen"]=$this->Model_Imagen->imgcliente($_ID_Empresa,$_fecha,$_Tipo,$resumen=FALSE);
+		($_fecha==="R")?$_Rango_Fechas=$datos["Fecha_Rango"]: $_Rango_Fechas='';
+		$datoss["imagen"]=$this->Model_Imagen->imgcliente($_ID_Empresa,$_fecha,$_Tipo,$resumen=FALSE, $_Rango_Fechas);
 		$_data["code"]=0;
 		$_data["ok"]="SUCCESS";
 		$_data["result"]=$datoss;

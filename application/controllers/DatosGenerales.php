@@ -21,7 +21,8 @@ class DatosGenerales extends REST_Controller
     	$this->load->model("Model_Empresa");
     	$this->load->model("Model_Imagen");
     	$this->load->model("Model_Giros");
-    	$this->load->model("Model_Marcas");
+		$this->load->model("Model_Marcas");
+		$this->load->model("Model_Norma");
 	}
 
 	public function cerrarsession_post(){
@@ -151,6 +152,7 @@ class DatosGenerales extends REST_Controller
 			$datos["Estados"]=$this->Model_General->getEstados('42');
 				//obtener  Marcas
 			$datos["marcas"]=$this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
+			$datos["Normas"]=$this->Model_Norma->getall($_ID_Empresa);
 
 			$_data["result"]=$datos;
 		}

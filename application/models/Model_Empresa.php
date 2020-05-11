@@ -45,8 +45,34 @@ class Model_Empresa extends CI_Model
 		$array=array("IDEmpresa"=>$_ID_Empresa,"Principal"=>1,"IDGiro"=>$_ID_Giro1,"IDGiro2"=>$_ID_Giro2,"IDGiro3"=>$_ID_Giro3);
 		$this->db->insert("giroempresa",$array);
 	}
-	public function update($_ID_Empresa,$_Razon_Social,$Nombre_Comercial,$rfc,$T_empresa,$_Empleados,$_Fac_Anual,$_perfil,$logo,$banner,$dias_pago_empresa){
-		$array=array("Razon_Social"=>$_Razon_Social,"Nombre_Comer"=>$Nombre_Comercial,"RFC"=>$rfc,"Perfil"=>$_perfil,"TipoEmpresa"=>$T_empresa,"NoEmpleados"=>$_Empleados,"FacAnual"=>$_Fac_Anual,"DiasPagoEmpresa"=>$dias_pago_empresa);	
+	public function update(
+		$_ID_Empresa,
+		$_Razon_Social,
+		$Nombre_Comercial,
+		$rfc,
+		$T_empresa,
+		$_Empleados,
+		$_Fac_Anual,
+		$_perfil,
+		$logo,
+		$banner,
+		$dias_pago_empresa,
+		$Tel1,
+		$Tel2,
+		$Tel3
+		){
+		$array=array(
+			"Razon_Social"=>$_Razon_Social,
+			"Nombre_Comer"=>$Nombre_Comercial,
+			"RFC"=>$rfc,"Perfil"=>$_perfil,
+			"TipoEmpresa"=>$T_empresa,
+			"NoEmpleados"=>$_Empleados,
+			"FacAnual"=>$_Fac_Anual,
+			"DiasPagoEmpresa"=>$dias_pago_empresa,
+			"Tel1"=>$Tel1,
+			"Tel2"=>$Tel2,
+			"Tel3"=>$Tel3
+		);	
 		if($logo!==false){
 			$array["Logo"]=$logo;
 		}

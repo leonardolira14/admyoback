@@ -11,7 +11,7 @@ class Model_Email extends CI_Model
 		$this->load->library('email');
 		$this->config = Array(
 			'protocol' => 'smtp',
-			'smtp_host' => 'smtp.ionos.es',
+			'smtp_host' => 'smtp.ionos.com',
 			'smtp_port' => 587,
 			'smtp_user' => 'infoadmyo@admyo.com',
 			'smtp_pass' => 'Admyo246*',

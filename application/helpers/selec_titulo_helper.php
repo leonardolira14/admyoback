@@ -111,6 +111,7 @@ $diferencia = $fechainicial->diff($fechafinal);
 return $diferencia->days;
 }
 function da_mes($mes){
+  $mes=(int)$mes;
 	$meses=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
   ;
   return $meses[$mes-1];
