@@ -27,95 +27,116 @@ class Servicio extends REST_Controller
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 		}else{
 			$this->Model_Producto->delete($datos["IDProducto"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
-			$_data["result"]=$this->Model_Producto->getall($_ID_Empresa);
+			$this->response($_data, REST_Controller::HTTP_OK);
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
 	}
 	public function update_post(){
 		$datos=$this->post();
 		$_Token=$datos["token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
+		$_ID_Producto = $datos["IDProducto"];
+		$_Producto = $datos["Producto"];
+		$_Descripcion = $datos["Descripcion"];
 		
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 		}else{
 			$nombreactual=$datos["Foto"];
-			//ahora guardo la imagen
-			if(count($_FILES)>0){
-				foreach ($_FILES as $archivo=>$key) {
-					if($archivo==="logo"){
-						$ruta="assets/img/logoprod/";
-						$logo=$key["name"];
+			if (count($_FILES) !== 0) {
+				$_Imagen = $_FILES["Archivo"]["name"];
+				$ruta = './assets/img/logoprod/';
+				$rutatemporal = $_FILES["Archivo"]["tmp_name"];
+				$nombreactual = $_FILES["Archivo"]["name"];
+				try {
+					if (!move_uploaded_file($rutatemporal, $ruta . $nombreactual)) {
+						$_data["code"] = 1991;
+						$_data["ok"] = "ERROR";
+						$_data["result"] = "No se puede subir imagen";
+						$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 					}
-					
-					
-					$rutatemporal=$key["tmp_name"];
-					$nombreactual=$key["name"];
-					move_uploaded_file($rutatemporal, $ruta.$nombreactual);
+				} catch (Exception $e) {
+					$_data["code"] = 1991;
+					$_data["ok"] = "ERROR";
+					$_data["result"] = $e->getMessage();
+					$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 				}
+			} else {
+				$_data["code"] = 0;
+				$_data["ok"] = "SUCCESS";
+				$this->Model_Producto->update($_ID_Producto, $_Producto, $_Descripcion, $nombreactual);
+				$this->response($_data, REST_Controller::HTTP_OK);
 			}
-			//AHORA guardo el producto
-			$this->Model_Producto->update($datos["IDProducto"],$datos["Producto"],$datos["Promocion"],$datos["Descripcion"],$nombreactual);
-			$_data["code"]=0;
-			$_data["ok"]="SUCCESS";
-			$_data["result"]=$this->Model_Producto->getall($_ID_Empresa);
-		}
-		$data["response"]=$_data;
-		$this->response($data);
+			$_data["code"] = 0;
+			$_data["ok"] = "SUCCESS";
+			$this->Model_Producto->update($_ID_Producto, $_Producto, $_Descripcion, $nombreactual);
+			$this->response($_data, REST_Controller::HTTP_OK);
 	}
+}
 	public function save_post(){
 		$datos=$this->post();
 		$_Token=$datos["token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
-		
+		// vdebug($datos);
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 		}else{
 			$datos_empresa=$this->Model_Empresa->getempresa($_ID_Empresa);
 			$num=$this->Model_Producto->getnum($_ID_Empresa);
-			
 			if($num==="2" && $datos_empresa["TipoCuenta"]){
 				$_data["code"]=1990;
 				$_data["ok"]="ERROR";
-				$banderaimg=false;
 				$_data["result"]="plan_basico";
-				$data["response"]=$_data;
-				$this->response($data);
-				return false;
+				$this->response($_data, REST_Controller::HTTP_OK);
+
 			}
 			//ahora guardo la imagen
-			if(count($_FILES)>0){
-				foreach ($_FILES as $archivo=>$key) {
-					if($archivo==="logo"){
-						$ruta="assets/img/logoprod/";
-						$logo=$key["name"];
+			if (count($_FILES) !== 0) {
+				$_Imagen = $_FILES["Archivo"]["name"];
+				$ruta = './assets/img/logoprod/';
+				$rutatemporal = $_FILES["Archivo"]["tmp_name"];
+				$nombreactual = $_FILES["Archivo"]["name"];
+				try {
+					if (!move_uploaded_file($rutatemporal, $ruta . $nombreactual)) {
+						$_data["code"] = 1991;
+						$_data["ok"] = "ERROR";
+						$_data["result"] = "No se puede subir imagen";
+						$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 					}
+					//AHORA guardo el producto
+					$this->Model_Producto->save($datos["IDEmpresa"], $datos["Producto"], $datos["Descripcion"], $nombreactual);
+					$_data["code"] = 0;
+					$_data["ok"] = "SUCCESS";
+					$this->response($_data, REST_Controller::HTTP_OK);
 					
-					
-					$rutatemporal=$key["tmp_name"];
-					$nombreactual=$key["name"];
-					move_uploaded_file($rutatemporal, $ruta.$nombreactual);
+				} catch (Exception $e) {
+					$_data["code"] = 1991;
+					$_data["ok"] = "ERROR";
+					$_data["result"] = $e->getMessage();
+					$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 				}
 			}else{
 				$nombreactual='';
+				
+				//AHORA guardo el producto
+				$this->Model_Producto->save($datos["IDEmpresa"], $datos["Producto"], $datos["Descripcion"], $nombreactual);
+				$_data["code"] = 0;
+				$_data["ok"] = "SUCCESS";
+				$this->response($_data, REST_Controller::HTTP_OK);
 			}
-			//AHORA guardo el producto
-			$this->Model_Producto->save($datos["IDEmpresa"],$datos["Producto"],$datos["Promocion"],$datos["Descripcion"],$nombreactual);
-			$_data["code"]=0;
-			$_data["ok"]="SUCCESS";
-			$_data["result"]=$this->Model_Producto->getall($_ID_Empresa);
+
 		}
-		$data["response"]=$_data;
-		$this->response($data);
 		
 	}
 	//funcion para obtener los productos o serviciode una empresa

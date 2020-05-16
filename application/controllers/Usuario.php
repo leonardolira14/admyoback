@@ -106,22 +106,22 @@ class Usuario extends REST_Controller
 				$_data["code"]=1991;
 				$_data["ok"]="ERROR";
 				$_data["result"]="plan_basico";
+				$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 				
 			}else{
 				$_Imagen='';
 				if(count($_FILES)!==0){
-						$_Imagen=$_FILES["logo"]["name"];	
+						$_Imagen=$_FILES["Archivo"]["name"];	
 						$ruta='./assets/img/logosUsuarios/';
-						$rutatemporal=$_FILES["logo"]["tmp_name"];
-						$nombreactual=$_FILES["logo"]["name"];
+						$rutatemporal=$_FILES["Archivo"]["tmp_name"];
+						$nombreactual=$_FILES["Archivo"]["name"];
 						try {
 							if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
 								$_data["code"]=1991;
 								$_data["ok"]="ERROR";
 								$banderaimg=false;
 								$_data["result"]="No se puede subir imagen";
-								$data["response"]=$_data;
-								$this->response($data);
+								$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 							}else{
 								$_Imagen=$nombreactual;
 							}
@@ -132,16 +132,15 @@ class Usuario extends REST_Controller
 								$_data["ok"]="ERROR";
 								$banderaimg=false;
 								$_data["result"]=$e->getMessage();
-								$data["response"]=$_data;
-								$this->response($data);
+								$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 						}
 				}
-				$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$_POST["Correo"],$clave,$_POST["Puesto"],'0',"",$_Imagen);
-				$this->Model_Email->Activar_Usuario($_Token_Usuario,$_POST["Correo"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo"],$clave);
-				$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
+				$_Token_Usuario=$this->Model_Usuario->addUsuario($_ID_Empresa, $datos["Nombre"], $datos["Apellidos"], $datos["Correo"], $datos["Correo"],$clave, $datos["Puesto"],'0',"",$_Imagen);
+				$this->Model_Email->Activar_Usuario($_Token_Usuario, $datos["Correo"], $datos["Nombre"], $datos["Apellidos"], $datos["Correo"],$clave);
+				
 				$_data["code"]=0;
 				$_data["ok"]="SUCCESS";
-				$_data["result"]=$respuesta;
+				$this->response($_data, REST_Controller::HTTP_OK);
 			}
 
 			
@@ -149,6 +148,7 @@ class Usuario extends REST_Controller
 			$_data["code"]=1990;
 			$_data["ok"]="Error";
 			$_data["result"]=validation_errors();
+				$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 		}
 			//actualizo los datos del usuario
 			
@@ -159,50 +159,52 @@ class Usuario extends REST_Controller
 	//funcion para desactivar los usuarios
 	public function delete_post(){
 		$datos=$this->post();
+		
 		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["datos"]["IDEmpresa"];
-		$_ID_Usuario=$datos["datos"]["IDUsuario"];
-		$_Status=$datos["datos"]["Status"];
+		$_ID_Empresa=$datos["IDEmpresa"];
+		$_ID_Usuario=$datos["IDUsuario"];
+		$_Status=$datos["Status"];
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND );
 		}else{
 			//obtengo el usuario master para avisarle
 			$_datos_usuario_master=$this->Model_Usuario->GetMaster($_ID_Empresa);
+			
 			//obtengo los datos del correo del usario que se dio de baja
 			$_datos_usuario_baja=$this->Model_Usuario->DatosUsuario($_ID_Usuario);
 			//actualizo los datos del usuario
 			$this->Model_Usuario->updatestatus($_ID_Usuario,$_Status);
-			$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
 			$this->Model_Email->baja_usuario_admin($_datos_usuario_master["Correo"],$_datos_usuario_baja["Correo"]);
 			$this->Model_Email->baja_usuario($_datos_usuario_baja["Correo"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
-			$_data["result"]=$respuesta;
+			$this->response($_data, REST_Controller::HTTP_OK);
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
 	} 
 	//funcion para obtener los usarios de una empresa
 	public function getAlluser_post(){
 		$datos=$this->post();
 		$_Token=$datos["token"];
-		$_ID_Empresa=$datos["datos"];
+		$_ID_Empresa=$datos["IDEmpresa"];
 		
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 		}else{
 			//actualizo los datos del usuario
 			$respuesta=$this->Model_Usuario->getAlluser($_ID_Empresa);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$respuesta;
+			$this->response($_data, REST_Controller::HTTP_OK);
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
 	}
 	//funcion para login
 	public function login_post()
@@ -265,8 +267,10 @@ class Usuario extends REST_Controller
 	//funcion para actualizar los datos de un usuario
 	public function update_post(){
 		$datos=$this->post();
+		
 		$respuesta=$this->_check_formlario($datos,"update");
-		if($respuesta["ok"]){
+		
+		if($respuesta["ok"]=== 'success'){
 			$_Token=$datos["token"];
 			$_ID_Empresa=$datos["IDEmpresa"];
 			
@@ -274,6 +278,7 @@ class Usuario extends REST_Controller
 				$_data["code"]=1990;
 				$_data["ok"]="ERROR";
 				$_data["result"]="Error de Sesión";
+				$this->response($_data, 500);
 			}else{
 				if(isset($datos["logo"])){
 					$_Imagen=$datos["logo"];
@@ -282,28 +287,31 @@ class Usuario extends REST_Controller
 				}
 				
 				$respuesta_Imagen=$this->_update_logo($_FILES,$_Imagen);
+				
 				if($respuesta_Imagen["ok"]){
 					$_Imagen=$respuesta_Imagen["nombre_imagen"];
 					//actualizo los datos del usuario
 					$respuesta=$this->Model_Usuario->update($datos["IDUsuario"],$datos["Nombre"],$datos["Apellidos"],$datos["Puesto"],$datos["Correo"],$datos["Visible"],$_Imagen);
 					$_data["code"]=0;
 					$_data["ok"]="SUCCESS";
-					$_data["result"]=$this->Model_Usuario->getAlluser($_ID_Empresa);
+					$this->response($_data, 200);
 				}else{
-					$_data["code"]=1990;	
+					$_data["code"]=1992;	
 					$_data["ok"]="Error";
 					$_data["result"]=$respuesta_Imagen["mensaje"];
+					$this->response($_data, 500);
 				}
 				
 			}
 		}else{
-			$_data["code"]=1990;	
+			$_data["code"]=1995;	
 			$_data["ok"]="Error";
 			$_data["result"]=validation_errors();
+			$this->response($_data,500);
+			
 		}
 		
-		$data["response"]=$_data;
-		$this->response($data);
+		
 	}
 	public function master_post(){
 		$datos=$this->post();
@@ -314,14 +322,14 @@ class Usuario extends REST_Controller
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data, 500);
 		}else{
-			$this->Model_Usuario->Master($_ID_Empresa,$datos["usuario"]);
+			$this->Model_Usuario->Master($_ID_Empresa,$datos["IDUsuario"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
-			$_data["result"]=$this->Model_Usuario->getAlluser($_ID_Empresa);
+			$this->response($_data,200);
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
 	}
 	public function updateclave_post(){
 		$datos=$this->post();
@@ -336,17 +344,17 @@ class Usuario extends REST_Controller
 		}else{
 			$_POST = json_decode(file_get_contents("php://input"), true);
 			$config=array( array(
-			'field'=>'actual', 
+			'field'=> 'ClaveAnterior', 
 			'label'=>'Contraseña Actual', 
 			'rules'=>'trim|required|xss_clean'					
 			),array(
-				'field'=>'nueva', 
-				'label'=>'Contraseña Nueva', 
+				'field'=> 'ClaveNueva', 
+				'label'=> 'Nueva contraseña', 
 				'rules'=>'callback_valid_password'						
 			),array(
-				'field'=>'repetir', 
-				'label'=>'Confirmar Contraseña', 
-				'rules'=>'matches[nueva]'						
+				'field'=> 'RepetirClave', 
+				'label'=> 'Repetir contraseña ', 
+				'rules'=> 'matches[ClaveNueva]'						
 			));
 			//actualizo los datos del usuario
 			$this->form_validation->set_error_delimiters('', ',');
@@ -354,19 +362,19 @@ class Usuario extends REST_Controller
 				$array=array("required"=>'El campo %s es obligatorio',"valid_email"=>'El campo %s no es valido',"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos','alpha'=>'El campo %s debe estar compuesto solo por letras',"matches"=>"Las contraseñas no coinciden",'is_unique'=>'El contenido del campo %s ya esta registrado');
 			$this->form_validation->set_message($array);
 			if($this->form_validation->run() !=false){
-				$respuesta=$this->Model_Usuario->updateclave($_POST["IDUsuario"],$_POST["nueva"]);
+				$respuesta=$this->Model_Usuario->updateclave($_POST["IDUsuario"],$_POST["ClaveAnterior"]);
 				$_data["code"]=0;
 				$_data["ok"]="SUCCESS";
 				$_data["result"]=$respuesta;
+				$this->response($_data,200);
 			}else{
 				$_data["code"]=1990;
 				$_data["ok"]="Error";
 				$_data["result"]=validation_errors();
+				$this->response($_data, 500);
 			}
 			
 		}
-		$data["response"]=$_data;
-		$this->response($data);
 	}
 	function checksession($_Token,$_Empresa){
 		//primerocheco el token
@@ -455,9 +463,9 @@ class Usuario extends REST_Controller
 			$array=array("required"=>'El campo %s es obligatorio',"valid_email"=>'El campo %s no es valido',"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos','alpha'=>'El campo %s debe estar compuesto solo por letras',"matches"=>"Las contraseñas no coinciden",'is_unique'=>'El contenido del campo %s ya esta registrado');
 		$this->form_validation->set_message($array);
 		if($this->form_validation->run() !=false){
-			$data["ok"]=true;
+			$data["ok"]='success';
 		}else{
-			$data["ok"]=false;
+			$data["ok"]='error';
 			$data["mensaje"]=validation_errors();
 		}
 		return $data;
@@ -466,10 +474,10 @@ class Usuario extends REST_Controller
 }
 	function _update_logo($file,$_Name_Image){
 		if(count($file)!==0){
-						$_Imagen=$file["logo"]["name"];	
+						$_Imagen=$file["Archivo"]["name"];	
 						$ruta='./assets/img/logosUsuarios/';
-						$rutatemporal=$file["logo"]["tmp_name"];
-						$nombreactual=$file["logo"]["name"];
+						$rutatemporal=$file["Archivo"]["tmp_name"];
+						$nombreactual=$file["Archivo"]["name"];
 						try {
 							if(! move_uploaded_file($rutatemporal, $ruta.$nombreactual)){
 								$_data["ok"]=false;
@@ -483,13 +491,13 @@ class Usuario extends REST_Controller
 							
 							
 						} catch (Exception $e) {
-								$_data["ok"]=false;
+								$_data["ok"]='error';
 								$_data["mensaje"]=$e->getMessage();
 								return $_data;
 						}
 				}
 				else{
-					$_data["ok"]=true;
+								$_data["ok"]='success';
 								$_data["nombre_imagen"]=$_Name_Image;
 								return $_data;
 				}

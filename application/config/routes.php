@@ -106,7 +106,9 @@ $route["activar"]="registro/activarcuenta";
 $route["getallnotification"]="notificaciones/getnotification";
 $route["deletegnotification"]="notificaciones/delete";
 $route["numregistros"]="notificaciones/num";
+$route["getconfignotification"] = "notificaciones/getconfignotification";
 $route["updateconfignotification"]="notificaciones/updateconfig";
+$route["notificationfiltro"] = "notificaciones/filtro";
 
 
 //funcion para agregar un nuevo cliente

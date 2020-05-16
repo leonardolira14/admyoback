@@ -103,7 +103,7 @@ class Model_Usuario extends CI_Model
 	}
 	public function GetMaster($_ID_Empresa){
 		$sql=$this->db->select("*")->where("Tipo_Usuario='Master' and IDEmpresa='$_ID_Empresa'")->get("usuarios");
-		return $sql->result_array();
+		return $sql->row_array();
 	}
 	public function cerrar($_Token){
 		$array=array("Estatus"=>1,"FechaFin"=>date('Y-m-d'));

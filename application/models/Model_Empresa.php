@@ -182,7 +182,14 @@ class Model_Empresa extends CI_Model
 	/
 	*/
 	public function update_alerta($IDEmpresa,$_config_Alertas){
-		$this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",array("Configaletas"=>json_encode($_config_Alertas)));
+		$respuesta = $this->db->where("IDEmpresa='$IDEmpresa'")->update("empresa",array("Configaletas"=>json_encode($_config_Alertas)));
+		
+		return $respuesta;
+	}
+	public function get_conf__alerta($IDEmpresa)
+	{
+		$respuesta =  $this->db->select('Configaletas')->where("IDEmpresa='$IDEmpresa'")->get("empresa");
+		return $respuesta->row_array();
 	}	
 
 	//funcion para dar de baja una relacion
