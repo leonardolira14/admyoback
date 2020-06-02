@@ -286,7 +286,7 @@ class Model_Visitas extends CI_Model
 
 				foreach ($Clientes as $cliente) {
 					$sql = $this->db->select('count(IDEmpresa) as total')->where("IDEmpresa='$IDEmpresa' and IDEmpVisitadora='" . $cliente["num"] . "' and DATE(FechaVisita) BETWEEN '" . date('Y') . "-01' and '" . date('Y-m') . "' group by IDEmpVisitadora")->get('visitas');
-				if ($sql->num_rows() !== 0  || $sql->num_rows() !== null) {
+					if ($sql->num_rows() !== null) {
 						$TClientes = $TClientes + (int) $sql->result()[0]->total;
 						$dat = $this->DatosEmpresa($cliente["num"]);
 						array_push($TClientesM, array("Nombre_Comer" => $dat->Nombre_Comer, "Razon_Social" => $dat->Razon_Social, "num" => $cliente["num"]));
@@ -294,7 +294,7 @@ class Model_Visitas extends CI_Model
 						$TClientes = $TClientes + 0;
 					}
 					$sql2 = $this->db->select('count(IDEmpresa) as total')->where("IDEmpresa='$IDEmpresa' and IDEmpVisitadora='" . $cliente["num"] . "' and DATE(FechaVisita) BETWEEN '" . (date('Y') - 1) . "-01' and '" . (date('Y') - 1) . "-" . date('m') . "' group by IDEmpVisitadora")->get('visitas');
-					if ($sql2->num_rows() !== null) {
+					if ( $sql2->num_rows() !== null) {
 						$TClientesAN = $TClientesAN + (int) $sql2->result()[0]->total;
 					} else {
 						$TClientesAN = $TClientesAN + 0;
