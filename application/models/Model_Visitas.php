@@ -338,14 +338,14 @@ class Model_Visitas extends CI_Model
 
 
 				$sql = $this->db->select('count(IDEmpresa) as total')->where("IDEmpresa='$IDEmpresa' and IDEmpVisitadora='0' and DATE(FechaVisita) BETWEEN '" . date('Y') . "-01' and '" . date('Y-m') . "' group by IDEmpVisitadora")->get('visitas');
-				if($sql->num_rows() !== null ||  $sql->num_rows() !== 0){
+				if($sql->num_rows() !== null &&  $sql->num_rows() !== 0){
 					$TAnonimas = (int) $sql->result()[0]->total;
 				} else {
 					$TAnonimas = 0;
 				}
 
 				$sql2 = $this->db->select('count(IDEmpresa) as total')->where("IDEmpresa='$IDEmpresa' and IDEmpVisitadora='0' and DATE(FechaVisita) BETWEEN '" . (date('Y') - 1) . "-01' and '" . (date('Y') - 1) . "-" . date('m') . "' group by IDEmpVisitadora")->get('visitas');
-			if ($sql2->num_rows() !== null ||  $sql2->num_rows() !== 0) {
+			if ($sql2->num_rows() !== null && $sql2->num_rows() !== 0) {
 					$TAnonimasAN = (int) $sql2->result()[0]->total;
 				} else {
 					$TAnonimasAN = 0;
@@ -373,7 +373,7 @@ class Model_Visitas extends CI_Model
 					foreach ($VG as $cliente) {
 
 						$sql = $this->db->select('count(IDEmpresa) as total')->where("IDEmpresa='$IDEmpresa' and IDEmpVisitadora='" . $cliente['IDEmpVisitadora'] . "' and DATE(FechaVisita) BETWEEN '" . date('Y') . "-01' and '" . date('Y-m') . "' group by IDEmpVisitadora")->get('visitas');
-						if ($sql->num_rows() !== null ||  $sql->num_rows() !== 0) {
+						if ($sql->num_rows() !== null &&  $sql->num_rows() !== 0) {
 							$TOtras = $TOtras + (int) $sql->result()[0]->total;
 							$dat = $this->DatosEmpresa($cliente->IDEmpVisitadora);
 							array_push($TPotrasM, array("Nombre_Comer" => $dat->Nombre_Comer, "Razon_Social" => $dat->Razon_Social, "num" => $cliente['IDEmpVisitadora']));
@@ -382,7 +382,7 @@ class Model_Visitas extends CI_Model
 						}
 
 						$sql2 = $this->db->select('count(IDEmpresa) as total')->where("IDEmpresa='$IDEmpresa' and IDEmpVisitadora='" . $cliente['IDEmpVisitadora'] . "' and DATE(FechaVisita) BETWEEN '" . (date('Y') - 1) . "-01' and '" . (date('Y') - 1) . "-" . date('m') . "' group by IDEmpVisitadora")->get('visitas');
-					if ($sql2->num_rows() !== null ||  $sql2->num_rows() !== 0) {
+					if ($sql2->num_rows() !== null &&  $sql2->num_rows() !== 0) {
 							$TOtrasAN = $TOtrasAN + (int) $sql2->result()[0]->total;
 						} else {
 							$TOtrasAN = 0;
