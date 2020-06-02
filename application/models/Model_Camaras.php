@@ -20,6 +20,11 @@ class Model_Camaras extends CI_Model
 			$relaciones[$key]["Siglas"]=$datos_asociacion["Siglas"];
 			$relaciones[$key]["Web"]=$datos_asociacion["Web"];
 			$relaciones[$key]["Imagen"]=$datos_asociacion["Imagen"];
+			$relaciones[$key]["Direccion"]=$datos_asociacion["Direccion"];
+			$relaciones[$key]["Estado"]=$datos_asociacion["Estado"];
+			$relaciones[$key]["Municipio"]=$datos_asociacion["Municipio"];
+			$relaciones[$key]["Colonia"]=$datos_asociacion["Colonia"];
+			$relaciones[$key]["Telefono"]=$datos_asociacion["Telefono"];
 		}
 		return $relaciones;
 		
@@ -32,6 +37,9 @@ class Model_Camaras extends CI_Model
 		$data=array("Asociacion"=>$nombre,"Web"=>$web);
 		$this->db->where("IDAsocia='$asocia'");
 		return $this->db->update("asociaciones",$data);
+	}
+	public function update_camara($datos){
+		vdebug($datos);
 	}
 	public function delete($asocia){
 		$this->db->where("IDAsocia='$asocia'");

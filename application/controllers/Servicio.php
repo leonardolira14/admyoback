@@ -43,6 +43,7 @@ class Servicio extends REST_Controller
 		$_ID_Producto = $datos["IDProducto"];
 		$_Producto = $datos["Producto"];
 		$_Descripcion = $datos["Descripcion"];
+		$_Clave = $datos["Clave"];
 		
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
@@ -72,12 +73,12 @@ class Servicio extends REST_Controller
 			} else {
 				$_data["code"] = 0;
 				$_data["ok"] = "SUCCESS";
-				$this->Model_Producto->update($_ID_Producto, $_Producto, $_Descripcion, $nombreactual);
+				$this->Model_Producto->update($_ID_Producto, $_Producto, $_Descripcion, $nombreactual,$_Clave);
 				$this->response($_data, REST_Controller::HTTP_OK);
 			}
 			$_data["code"] = 0;
 			$_data["ok"] = "SUCCESS";
-			$this->Model_Producto->update($_ID_Producto, $_Producto, $_Descripcion, $nombreactual);
+			$this->Model_Producto->update($_ID_Producto, $_Producto, $_Descripcion, $nombreactual,$_Clave);
 			$this->response($_data, REST_Controller::HTTP_OK);
 	}
 }
@@ -115,7 +116,7 @@ class Servicio extends REST_Controller
 						$this->response($_data, REST_Controller::HTTP_NOT_FOUND);
 					}
 					//AHORA guardo el producto
-					$this->Model_Producto->save($datos["IDEmpresa"], $datos["Producto"], $datos["Descripcion"], $nombreactual);
+					$this->Model_Producto->save($datos["IDEmpresa"], $datos["Producto"], $datos["Descripcion"], $nombreactual, $datos["Clave"]);
 					$_data["code"] = 0;
 					$_data["ok"] = "SUCCESS";
 					$this->response($_data, REST_Controller::HTTP_OK);

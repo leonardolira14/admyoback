@@ -17,11 +17,13 @@ class Camaras extends REST_Controller
 		$this->load->model("Model_Usuario");
 		$this->load->model("Model_Empresa");
 		$this->load->model("Model_Camaras");
+		$this->load->model("Model_General");
 	}
 	public function delete_post(){
 		
 		$datos=$this->post();
 		
+		
 		$_Token=$datos["token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
 		
@@ -29,34 +31,51 @@ class Camaras extends REST_Controller
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data,500);
 		}else{
+			
 			$this->Model_Camaras->delete($datos["IDAsocia"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);
+			$this->response($_data,200);
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
+		
 	}
 	public function update_post(){
 		
 		$datos=$this->post();
-		
-		$_Token=$datos["token"];
+		vdebug($datos);
+		$_Token=$datos["Token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
 		
 		if($this->checksession($_Token,$_ID_Empresa)===false){
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($data,500);
 		}else{
-			$this->Model_Camaras->update($datos["IDAsocia"],$datos["Asociacion"],$datos["Web"]);
+			// primero actualizo los datos de la asociacion
+			/*$this->Model_Camaras->update_camara(
+				$_IDAsociacion,
+				$_Nombre,
+				$_Siglas,
+				$_Web,
+				$_Tel,
+				$_Calle,
+				$_Colonia,
+				$_Municipio,
+				$_Estado,
+				$_CP
+			);*/
+			$this->Model_Camaras->update($datos["IDAsocia"],$datos["Asociacion"]);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);
 		}
 		$data["response"]=$_data;
-		$this->response($data);
+		
 	}
 	public function save_post(){
 		
@@ -139,14 +158,18 @@ class Camaras extends REST_Controller
 			$_data["code"]=1990;
 			$_data["ok"]="ERROR";
 			$_data["result"]="Error de Sesion";
+			$this->response($_data,500);
 		}else{
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
+			$_data["estados"]=$this->Model_General->getEstados('42');
 			$_data["result"]=$this->Model_Camaras->getall($_ID_Empresa);
 			$_data["data"]=$this->Model_Camaras->getall_list();
+			$data["response"]=$_data;
+			$this->response($data,200);
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
+		
 	}
 	function checksession($_Token,$_Empresa){
 		//primerocheco el token

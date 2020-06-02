@@ -98,4 +98,29 @@ class Visitas extends REST_Controller
 			return true;
 		}
 	}
+
+
+	// nueva funcion mostra en acumulado y por año
+	// en el acumulado mostrara de enero al mes que se encuetra acttualmente
+	// y en por año mostrara de enero a diciembre
+	public function  getvisitas(){
+		$datos = $this->post();
+		//vdebug($datos);
+		$_Token = $datos["token"];
+		$_ID_Empresa = $datos["IDEmpresa"];
+		if ($this->checksession($_Token, $_ID_Empresa) === false) {
+			$_data["code"] = 1990;
+			$_data["ok"] = "ERROR";
+			$_data["result"] = "Error de Sesion";
+			$this->response($_data, 500);
+		} else {
+			$anio = $datos["Anio"];
+			$dat["datos"] = $this->Model_Visitas->VisitasGeneral($_ID_Empresa, $anio);
+			$_data["code"] = 0;
+			$_data["ok"] = "SUCCESS";
+			$_data["result"] = $dat["datos"];
+			$this->response($_data,200);
+		}
+		
+	}
 }
