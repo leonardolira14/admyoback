@@ -69,8 +69,18 @@ class Model_Imagen extends CI_Model
 		$_media_general_pasada=0;
 		$_Numero_de_calificaciones_actual=0;
 		$_Numero_de_calificaciones_pasado=0;
-		
+	
 		switch($tipo_fecha){
+			case "MA":
+			case "AC":
+				$_fecha_inicio_actual =  date('Y-m').'-01';
+				$_fecha_fin_actual = date('Y-m-d');
+				$_fecha_inicio_pasada = (date('Y')-1)."-".date('m') . "-01";
+				$_fecha_fin_pasada = (date('Y')-1)."-".date('m-d');
+				$fecha_evolucion_inicio = explode("-", $_fecha_inicio_actual);
+				$fecha_evolucion_fin = explode("-", $_fecha_fin_pasada);
+				$fechas_rango = $fechas;
+			break;
 			case "A":
 				$_fecha_inicio_actual = $fechas[0] . "-" . date("d");
 				$_fecha_fin_actual = $fechas[12] . "-" . date("d");
@@ -144,6 +154,7 @@ class Model_Imagen extends CI_Model
 			//traigo los registros de la tabla de imagen_cliente
 			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get($tb);
 			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get($tb);
+			
 			//ahora obtenemos para calidad
 		
 	
@@ -180,8 +191,6 @@ class Model_Imagen extends CI_Model
 			$_data["aumento"]=_increment($_Numero_de_calificaciones_actual,$_Numero_de_calificaciones_pasado,"imagen");
 			
 			if($resumen===FALSE){
-				
-				if($tipo_fecha==="A" || $tipo_fecha === "R"){
 					$evolucion=[];
 					$evolucionlabel=[];
 					$_evolucion_media=[];
@@ -189,6 +198,222 @@ class Model_Imagen extends CI_Model
 					$_evolucion_media_cumplimiento=[];
 					$_evolucion_media_oferta=[];
 					$_evolucion_media_label=[];
+
+
+					$evolucion_pasado=[];
+					$evolucionlabel_pasado=[];
+					$_evolucion_media_pasado=[];
+					$_evolucion_media_calidad_pasado=[];
+					$_evolucion_media_cumplimiento_pasado=[];
+					$_evolucion_media_oferta_pasado=[];
+					$_evolucion_media_label_pasado=[];
+					
+					$cuantas_actual_gen=0;
+					$cuantas_actual=0;
+					$calidad=0;
+					$cumplimiento=0;
+					$oferta=0;
+
+					$cuantas_actual_gen_pasado=0;
+					$cuantas_actual_pasado=0;
+					$calidad_pasado=0;
+					$cumplimiento_pasado=0;
+					$oferta_pasado=0;
+				if($tipo_fecha==='AC'){
+					// aqui tengo que mostrar la evolucion por mes desde enero asta el mes que se encuetra
+					$mes_inicial=1;
+					$mes_final=date('m');
+					$anio_pasado=date('Y')-1;
+					$anio_actual=date('Y');	
+
+					for($i=1;$i<=(int)$mes_final;$i++){
+						
+						($i<10)?$mes='0'.$i:$mes=$i;
+						array_push($evolucionlabel,da_mes($mes));
+
+						$cuantas_actual_gen=$this->Total_calificaciones($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						if(count($evolucion)===0){
+							array_push($evolucion,(int)$cuantas_actual_gen);
+						}else{
+							array_push($evolucion,(int)$evolucion[count($evolucion)-1]+(int)$cuantas_actual_gen);
+						}
+						
+
+						$cuantas_actual_gen_pasado=$this->Total_calificaciones($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						if(count($evolucion_pasado)===0){
+							array_push($evolucion_pasado,(int)$cuantas_actual_gen_pasado);
+						}else{
+							array_push($evolucion_pasado,(int)$evolucion_pasado[count($evolucion_pasado)-1]+(int)$cuantas_actual_gen_pasado);
+						}
+						
+		
+						
+						$cuantas_actual=$this->Media_calificaciones($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						if(count($_evolucion_media)===0){
+							array_push($_evolucion_media,(float)$cuantas_actual);
+						}else{
+							array_push($_evolucion_media,(float)$_evolucion_media[count($_evolucion_media)-1]+(float)$cuantas_actual);
+						}
+						
+			
+
+						$cuantas_actual_pasado=$this->Media_calificaciones($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						if(count($_evolucion_media_pasado)===0){
+							array_push($_evolucion_media_pasado,(float)$cuantas_actual_pasado);
+						}else{
+							array_push($_evolucion_media_pasado,(float)$_evolucion_media_pasado[count($_evolucion_media_pasado)-1]+(float)$cuantas_actual_pasado);
+						}
+						
+						
+						
+
+						$calidad=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Calidad');
+						if(count($_evolucion_media_calidad)===0){
+							array_push($_evolucion_media_calidad,(float)$calidad);
+						}else{
+							array_push($_evolucion_media_calidad,(float)$_evolucion_media_calidad[count($_evolucion_media_calidad)-1]+(float)$calidad);
+						}
+						
+
+						$calidad_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Calidad');
+						
+						if(count($_evolucion_media_calidad)===0){
+							array_push($_evolucion_media_calidad,(float)$calidad_pasado);
+						}else{
+							array_push($_evolucion_media_calidad,(float)$_evolucion_media_calidad[count($_evolucion_media_calidad)-1]+(float)$calidad_pasado);
+						}
+						
+						
+
+						$cumplimiento=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
+						if(count($_evolucion_media_cumplimiento)===0){
+							array_push($_evolucion_media_cumplimiento,(float)$cumplimiento);
+						}else{
+							array_push($_evolucion_media_cumplimiento,(float)$_evolucion_media_cumplimiento[count($_evolucion_media_cumplimiento)-1]+(float)$cumplimiento);
+						}
+						
+						
+						$cumplimiento_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
+						if(count($_evolucion_media_cumplimiento_pasado)===0){
+							array_push($_evolucion_media_cumplimiento_pasado,(float)$cumplimiento_pasado);
+						}else{
+							array_push($_evolucion_media_cumplimiento_pasado,(float)$_evolucion_media_cumplimiento_pasado[count($_evolucion_media_cumplimiento_pasado)-1]+(float)$cumplimiento_pasado);
+						}
+						
+						
+						
+						
+						if($tipo_persona==="proveedor"):
+							$oferta=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Oferta');
+							
+							if(count($_evolucion_media_oferta)===0){
+								array_push($_evolucion_media_oferta,(float)$oferta);
+							}else{
+								array_push($_evolucion_media_oferta,(float)$_evolucion_media_oferta[count($_evolucion_media_oferta)-1]+(float)$oferta);
+							}
+							$oferta_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Oferta');
+							if(count($_evolucion_media_oferta_pasado)===0){
+								array_push($_evolucion_media_oferta_pasado,(float)$oferta_pasado);
+							}else{
+								array_push($_evolucion_media_oferta_pasado,(float)$_evolucion_media_oferta_pasado[count($_evolucion_media_oferta_pasado)-1]+(float)$oferta_pasado);
+							}
+							
+						endif;
+						
+						
+					}
+					$_data['PeriodoG2'] = [(date('Y') - 1), date('Y')];
+					$_data["series1"] = array("dataActual" => $anio_actual, "dataPasado" => $anio_pasado);
+					$_data['text'] = dame_mes(date('m')) . " " . date('Y');
+					$_data['Periodo'] = [dame_mes(date('m')) . " " . (date('Y') - 1), dame_mes(date('m')) . " " . date('Y')];
+					$_data["serievolucion"]=array("data"=>array("data_actual"=>$evolucion,"data_pasado"=>$evolucion_pasado),"label"=>$evolucionlabel);
+					$_data["evolucionmedia"]=array("data"=>array("data_actual"=>$_evolucion_media,"data_pasado"=>$_evolucion_media_pasado),"label"=>$evolucionlabel);	
+					$_data["evolucion_calidad"]=array("data"=>array("data_actual"=>$_evolucion_media_calidad,"data_pasado"=>$_evolucion_media_calidad_pasado),"label"=>$evolucionlabel);
+					$_data["evolucion_cumplimiento"]=array("data"=>array("data_actual"=>$_evolucion_media_cumplimiento,"data_pasado"=>$_evolucion_media_cumplimiento_pasado),"label"=>$evolucionlabel);
+					
+					if($tipo_persona==="proveedor"):
+						$_data["evolucion_oferta"]=array("data"=>array("data_actual"=>$_evolucion_media_oferta,"data_pasado"=>$_evolucion_media_oferta_pasado),"label"=>$evolucionlabel);
+					endif;
+
+					return $_data;
+				}
+				if($tipo_fecha==='MA'){
+
+					
+					// aqui tengo que mostrar la evolucion por mes desde enero asta el mes que se encuetra
+					$mes_inicial=1;
+					$mes_final=date('m');
+					$anio_pasado=date('Y')-1;
+					$anio_actual=date('Y');
+				
+					for($i=1;$i<=(int)$mes_final;$i++){
+						
+						($i<10)?$mes='0'.$i:$mes=$i;
+						array_push($evolucionlabel,da_mes($mes));
+
+						$cuantas_actual_gen=$this->Total_calificaciones($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						array_push($evolucion,(int)$cuantas_actual_gen);
+
+						$cuantas_actual_gen_pasado=$this->Total_calificaciones($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						array_push($evolucion_pasado,(int)$cuantas_actual_gen_pasado);
+						
+						$cuantas_actual=$this->Media_calificaciones($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						array_push($_evolucion_media,(float)$cuantas_actual);
+
+						$cuantas_actual_pasado=$this->Media_calificaciones($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona);
+						array_push($_evolucion_media_pasado,(float)$cuantas_actual_pasado);
+
+						$calidad=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Calidad');
+						array_push($_evolucion_media_calidad,$calidad);
+
+						$calidad_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Calidad');
+						array_push($_evolucion_media_calidad,$calidad);
+
+						$cumplimiento=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
+						array_push($_evolucion_media_cumplimiento,$cumplimiento);
+						
+						$cumplimiento_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
+						array_push($_evolucion_media_cumplimiento_pasado,$cumplimiento_pasado);
+						
+						
+						if($tipo_persona==="proveedor"):
+							$oferta=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Oferta');
+							array_push($_evolucion_media_oferta,$oferta);
+
+							$oferta_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Oferta');
+							array_push($_evolucion_media_oferta_pasado,$oferta_pasado);
+						endif;
+						$cuantas_actual_gen=0;
+						$cuantas_actual=0;
+						$calidad=0;
+						$cumplimiento=0;
+						$oferta=0;
+
+						$cuantas_actual_gen_pasado=0;
+						$cuantas_actual_pasado=0;
+						$calidad_pasado=0;
+						$cumplimiento_pasado=0;
+						$oferta_pasado=0;
+						
+					}
+					$_data['PeriodoG2'] = [(date('Y') - 1), date('Y')];
+					$_data["series1"] = array("dataActual" => $anio_actual, "dataPasado" => $anio_pasado);
+					$_data['text'] = dame_mes(date('m')) . " " . date('Y');
+					$_data['Periodo'] = [dame_mes(date('m')) . " " . (date('Y') - 1), dame_mes(date('m')) . " " . date('Y')];
+					$_data["serievolucion"]=array("data"=>array("data_actual"=>$evolucion,"data_pasado"=>$evolucion_pasado),"label"=>$evolucionlabel);
+					$_data["evolucionmedia"]=array("data"=>array("data_actual"=>$_evolucion_media,"data_pasado"=>$_evolucion_media_pasado),"label"=>$evolucionlabel);	
+					$_data["evolucion_calidad"]=array("data"=>array("data_actual"=>$_evolucion_media_calidad,"data_pasado"=>$_evolucion_media_calidad_pasado),"label"=>$evolucionlabel);
+					$_data["evolucion_cumplimiento"]=array("data"=>array("data_actual"=>$_evolucion_media_cumplimiento,"data_pasado"=>$_evolucion_media_cumplimiento_pasado),"label"=>$evolucionlabel);
+					
+					if($tipo_persona==="proveedor"):
+						$_data["evolucion_oferta"]=array("data"=>array("data_actual"=>$_evolucion_media_oferta,"data_pasado"=>$_evolucion_media_oferta_pasado),"label"=>$evolucionlabel);
+					endif;
+
+					return $_data;
+
+				}
+				if($tipo_fecha==="A" || $tipo_fecha === "R"){
+					
 					foreach ($fechas_rango as $fechacom) {
 						$datos=explode("-", $fechacom);
 						$cuantas=$this->Total_calificaciones($fechacom."-01",$fechacom."-31",$IDEmpresa,$tipo_persona);
@@ -213,13 +438,7 @@ class Model_Imagen extends CI_Model
 
 				}
 				if($tipo_fecha==="M"){
-					$evolucion=[];
-					$evolucionlabel=[];
-					$_evolucion_media=[];
-					$_evolucion_media_label=[];	
-					$_evolucion_media_calidad=[];
-					$_evolucion_media_cumplimiento=[];
-					$_evolucion_media_oferta=[];
+					
 					while($inicio<=$para){
 						if($inicio===31){
 							$para=date("d");
@@ -267,15 +486,27 @@ class Model_Imagen extends CI_Model
 							$inicio++;
 						}
 					}
+
+					$_data["serievolucion"]=array("data"=>array("data_pasado"=>$evolucion),"label"=>$evolucionlabel);
+					$_data["evolucionmedia"]=array("data"=>array("data_pasado"=>$_evolucion_media),"label"=>$evolucionlabel);	
+					$_data["evolucion_calidad"]=array("data"=>array("data_pasado"=>$_evolucion_media_calidad),"label"=>$evolucionlabel);
+					$_data["evolucion_cumplimiento"]=array("data"=>array("data_pasado"=>$_evolucion_media_cumplimiento),"label"=>$evolucionlabel);
+					if($tipo_persona==="proveedor"):
+						$_data["evolucion_oferta"]=array("data"=>array("data_pasado"=>$_evolucion_media_oferta),"label"=>$evolucionlabel);
+					endif;
+					$_data['PeriodoG2'] = [$_fecha_inicio_actual , $_fecha_fin_actual ];
+					$_data["series1"] = array("dataActual" => $_fecha_fin_actual, "dataPasado" => $_fecha_inicio_actual);
+					$_data['text'] = $_fecha_inicio_actual."-".$_fecha_fin_actual;
+					$_data['Periodo'] = [$_fecha_inicio_actual, $_fecha_fin_actual];
+					return $_data;
 				}
-				$_data["serievolucion"]=array("data"=>array("data"=>$evolucion,"label"=>"No de calificaciones"),"label"=>$evolucionlabel);
-				$_data["evolucionmedia"]=array("data"=>array("data"=>$_evolucion_media,"label"=>"Media de calificaciones"),"label"=>$_evolucion_media_label);	
-				$_data["evolucion_calidad"]=array("data"=>array("data"=>$_evolucion_media_calidad,"label"=>"Media de calificaciones Calidad"),"label"=>$_evolucion_media_label);
-				$_data["evolucion_cumplimiento"]=array("data"=>array("data"=>$_evolucion_media_cumplimiento,"label"=>"Media de calificaciones Cumplimiento"),"label"=>$_evolucion_media_label);
 				
-				if($tipo_persona==="proveedor"):
-					$_data["evolucion_oferta"]=array("data"=>array("data"=>$_evolucion_media_oferta,"label"=>"Media de calificaciones Oferta"),"label"=>$_evolucion_media_label);
-				endif;
+				
+					
+				
+				
+				
+
 			}
 				
 			return $_data;
@@ -328,10 +559,10 @@ class Model_Imagen extends CI_Model
 			$sql=$this->db->select($sql)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio' and  '$_fecha_fin'")->get('tbimagen_proveedor');
 		}
 		//vdebug($sql->result()[0]);
-		if($sql->num_rows()===0){
+		if($sql->num_rows()===0 || $sql->result()[0]->media=== null){
 			return 0;
 		}else{
-			return ($sql->result()[0]->media=== null)? 0: $sql->result()[0]->media;
+			return  $sql->result()[0]->media;
 			
 		}
 	}
