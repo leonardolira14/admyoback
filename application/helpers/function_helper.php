@@ -264,6 +264,43 @@ if(!function_exists("dame_mes"))
 	
 
 }
+
+if (!function_exists("dame_rangos_fecha")) {
+	function dame_rangos_fecha($tiempo)
+	{
+		$array=[];
+		if($tiempo === 'MA'|| $tiempo==="AC"){
+			$mes_I=(int)date('m');
+			for($i=1;$i<= $mes_I;$i++){
+				($i<10)? $mes='0'.$i:$mes=$i;
+				array_push($array,"'".date('Y').'-'.$mes."-01' and '".date('Y').'-'.$mes."-31'");
+			};
+		}
+		if($tiempo === 'M'){
+			$mes=(int)date('m')-1;
+			$anio=date('Y');
+			$inicio = (int)date("d");
+			$para = 31;
+			($mes < 10) ? $_mes = '0' . $mes : $_mes = $mes;
+			while($inicio<=$para){
+				
+				($inicio < 10) ? $dia = '0' . $inicio : $dia = $inicio;
+				array_push($array, "'" . $anio . '-' . $_mes . "-" .  $dia . "' and '" . $anio . '-' . $_mes . "-" .  $dia . "'");
+
+				if($inicio === 31){
+					$para = date("d");
+					$inicio = 1;
+					$_mes = date('m');
+					($mes < 10) ? $mes = '0' . $_mes : $_mes = $mes;
+
+				}else{
+					$inicio++;
+				}
+			}	
+		}
+		return $array;
+	}
+}
 if(!function_exists("comentario_notificaciones")){
 	function comentario_notificaciones($descripcion,$_ID_Empresa,$Razon_Social){
 		$data=[];

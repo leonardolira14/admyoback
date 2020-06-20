@@ -14,7 +14,7 @@ class Model_Email extends CI_Model
 			'smtp_host' => 'smtp.ionos.com',
 			'smtp_port' => 587,
 			'smtp_user' => 'infoadmyo@admyo.com',
-			'smtp_pass' => 'Admyo246*',
+			'smtp_pass' => 'Ts25_Admyo246*',
 			'mailtype'  => 'html', 
 			'charset' => 'utf-8',
 			'wordwrap' => TRUE,
