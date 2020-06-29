@@ -149,13 +149,20 @@ class Model_Calificaciones extends CI_Model{
 			
 			 foreach ($sql->result() as $valoracion)
 	 			{
-					 	 				
+							  
+					
 	 				//Datos de la empresa
 	 				 $datosempresa=$this->DatosEmpresa($valoracion->IDEmpresaEmisor);
 	 				//datos del usuario receptor
 	 				 $datosuario=$this->DatosUsuario($valoracion->IDUsuarioReceptor);
 	 				 //datos del usuario emisor
-	 				 $datosuario2=$this->DatosUsuario($valoracion->IDUsuarioEmisor);
+					  $datosuario2=$this->DatosUsuario($valoracion->IDUsuarioEmisor);
+					  // obtener la media de esa calificacion
+					  $media=$this->db->select('round(sum(PuntosObtenidos)/sum(PuntosPosibles)*10,2) as media')->where("IDCalificacion='$valoracion->IDCalificacion'")->get("tbdetallescalificaciones");
+					 $media_val= $media->row()->media;
+					 
+
+
 	 				 ($valoracion->FechaModificacion==="0000-00-00") ? $fechamod="-" :$fechamod=$valoracion->FechaModificacion;
 	 				($valoracion->FechaPuesta==="0000-00-00") ? $fechapuesta="-" : $fechapuesta=$valoracion->FechaPuesta; 
 					if(isset($datosempresa->IDEmpresa)){
@@ -172,7 +179,8 @@ class Model_Calificaciones extends CI_Model{
 							"Status"=>$valoracion->Status,
 							"Fecha"=>$valoracion->FechaRealizada,
 							"FechaModificacion"=>$fechamod,
-							"FechaPuesta"=>$fechapuesta));
+							"FechaPuesta"=>$fechapuesta,
+							"Media" => $media_val));
 					}
 					
 	 				
@@ -444,8 +452,10 @@ class Model_Calificaciones extends CI_Model{
 	}
 	public function detallescalif($num){
 		$sql=$this->db->select("Pregunta,Respuesta as calificacion")->from("tbdetallescalificaciones")->join('preguntas_val',"preguntas_val.IDPregunta=tbdetallescalificaciones.IDPregunta")->where("IDCalificacion='$num'")->get();
-		
-		return($sql->result());
+		$data['lista']= $sql->result_array();
+		$sql = $this->db->select("round(sum(PuntosObtenidos)/sum(PuntosPosibles)*10,2) as media")->from("tbdetallescalificaciones")->join('preguntas_val', "preguntas_val.IDPregunta=tbdetallescalificaciones.IDPregunta")->where("IDCalificacion='$num'")->get();
+		$data['media'] = $sql->row()->media;
+		return $data;
 	}
 	public function detalletotalcuestionario($num){
 		$sql="IDValora='$num' Limit 1";

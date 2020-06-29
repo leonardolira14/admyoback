@@ -53,41 +53,56 @@ class Calificaciones extends REST_Controller
 	}
 	public function getallrecibidas_post(){
 		$datos=$this->post();
-
+		
 		$_ID_Empresa=$datos["IDEmpresa"];
-		if($datos["tipo"]=="clientes"){
+		try{
+			if($datos["tipo"]==="clientes" || $datos["tipo"]==="cliente"){
 			$resumen=$this->Model_Clieprop->listaclientes($_ID_Empresa);
 			$tip="Cliente";
 			
-		}else{
-			$resumen=$this->Model_Proveedores->listaproveedores($_ID_Empresa);
-			$tip="Proveedor";
-			
-		}
+			}else{
+				$resumen=$this->Model_Proveedores->listaproveedores($_ID_Empresa);
+				$tip="Proveedor";
+				
+			}
 
-		(!isset($datos["estatus"])?$status="":$status=$datos["estatus"]);
-		(!isset($datos["Ifechainicio"])?$fechainicio="":$fechainicio=$datos["Ifechainicio"]);
-		(!isset($datos["Ifechafin"])?$fechafin="":$fechafin=$datos["Ifechafin"]);
-		(!isset($datos["empresabuscada"])?$empresabuscada="":$empresabuscada=$datos["empresabuscada"]);
+			(!isset($datos["estatus"])?$status="":$status=$datos["estatus"]);
+			(!isset($datos["Ifechainicio"])?$fechainicio="":$fechainicio=$datos["Ifechainicio"]);
+			(!isset($datos["Ifechafin"])?$fechafin="":$fechafin=$datos["Ifechafin"]);
+			(!isset($datos["empresabuscada"])?$empresabuscada="":$empresabuscada=$datos["empresabuscada"]);
+			
+			$calificaciones=$this->Model_Calificaciones->CalificacionesAcumuladasBruto($_ID_Empresa,"Recibida",$tip,$status,$fechainicio,$fechafin,$empresabuscada);
+			
+			$_data["code"]=0;
+			$_data["ok"]="SUCCESS";
+			$_data["result"]=array("lista"=>$resumen,"calificaciones"=>$calificaciones);
+			$data["response"]=$_data;
+			$this->response($data,200);
+		} catch(Exception $e){
+			
+			$_data["ok"]="error";
+			$_data["result"]=$e->getMessage();
+			$data["response"]=$_data;
+			$this->response($_data, 500);
+		}
 		
-		$calificaciones=$this->Model_Calificaciones->CalificacionesAcumuladasBruto($_ID_Empresa,"Recibida",$tip,$status,$fechainicio,$fechafin,$empresabuscada);
-		
-		$_data["code"]=0;
-		$_data["ok"]="SUCCESS";
-		$_data["result"]=array("lista"=>$resumen,"calificaciones"=>$calificaciones);
-		$data["response"]=$_data;
-		$this->response($data);
 	}
 	public function detalles_post(){
 		$datos=$this->post();
-
+		if(!isset($datos["IDValora"])){
+				$_data["code"]=0;
+				$_data["ok"]="SUCCESS";
+				$_data["result"]="Calificacion no encontrada";
+				$data["response"]=$_data;
+				$this->response($data,500);
+		}
 		$resumen=$this->Model_Calificaciones->detallescalif($datos["IDValora"]);
 
 		$_data["code"]=0;
 		$_data["ok"]="SUCCESS";
-		$_data["result"]=array("lista"=>$resumen);
+		$_data["result"]=$resumen;
 		$data["response"]=$_data;
-		$this->response($data);
+		$this->response($data,200);
 	}
 	public function calificar_post(){
 		$datos=$this->post();
