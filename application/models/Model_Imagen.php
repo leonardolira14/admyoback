@@ -153,6 +153,7 @@ class Model_Imagen extends CI_Model
 		}
 			//traigo los registros de la tabla de imagen_cliente
 			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_actual' and  '$_fecha_fin_actual'")->get($tb);
+			
 			$promedios_pasadas=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) between '$_fecha_inicio_pasada' and  '$_fecha_fin_pasada'")->get($tb);
 			
 			//ahora obtenemos para calidad
@@ -171,6 +172,7 @@ class Model_Imagen extends CI_Model
 			}
 			if($promedios_actuales->result()[0]->mediageneral!==NULL)
 			{
+				
 				$_media_general_actual=$promedios_actuales->result()[0]->mediageneral;
 				$_media_calidad_actual=$promedios_actuales->result()[0]->mediacalidad;	
 				$_media_cumplimiento_actual=$promedios_actuales->result()[0]->mediacumplimiento;
@@ -367,7 +369,7 @@ class Model_Imagen extends CI_Model
 						array_push($_evolucion_media_calidad,$calidad);
 
 						$calidad_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Calidad');
-						array_push($_evolucion_media_calidad,$calidad);
+						array_push($_evolucion_media_calidad_pasado,$calidad_pasado);
 
 						$cumplimiento=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
 						array_push($_evolucion_media_cumplimiento,$cumplimiento);
@@ -1230,7 +1232,7 @@ class Model_Imagen extends CI_Model
 		){
 			
 			//ahora busco si es que hay algun registro de imagen en la fecha en la que se esta registrando la calificacion
-			if($_tipo_imagen==="Cliente"){
+			if($_tipo_imagen==="cliente"){
 				$_datos_imagen=$this->db->select('*')->where("IDEmpresa='$_IDEmpresa' and Fecha='".date('Y-m-d')."'")->get('tbimagen_cliente');
 			}else{
 				$_datos_imagen=$this->db->select('*')->where("IDEmpresa='$_IDEmpresa' and Fecha='".date('Y-m-d')."'")->get('tbimagen_proveedor');

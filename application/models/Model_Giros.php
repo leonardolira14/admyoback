@@ -32,6 +32,22 @@ class Model_Giros extends CI_Model
 	
 		return $giros;
 	}
+	//FUNCION para obtner los giros de una emrpesa
+	public function getGiroPrincipalEmpresa($_ID_Empresa){
+		$respuesta=$this->db->select("*")->where("IDEmpresa='$_ID_Empresa' and Principal='1'")->get("giroempresa");
+		$giros=$respuesta->result_array();
+		foreach($giros as $key=>$item){
+			$datos_rama=$this->getrama($item["IDGiro"]);
+			$datos_subgiro=$this->getsubgiro($item["IDGiro2"]);
+			$datos_sub=$this->getgiro($item["IDGiro3"]);
+			$giros[$key]["giron1"]=$datos_rama["Giro"];
+			$giros[$key]["giron2"]=$datos_subgiro["Giro"];
+			$giros[$key]["giron3"]=$datos_sub["Giro"];
+		}
+		
+	
+		return $giros;
+	}
 	//funcion para agregar un nuevo giro a una empresa
 	public function addgiro($_Empresa,$_giro,$_subGiro,$_Rama){
 		$array=array("IDEmpresa"=>$_Empresa,"IDGiro"=>$_giro,"IDGiro2"=>$_subGiro,"IDGiro3"=>$_Rama);

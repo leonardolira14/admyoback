@@ -706,7 +706,7 @@ class Model_Calificaciones extends CI_Model{
 	}
 	//funcion para ppner en pendiente de resolucion una valoracion
 	public function cambio_status($IDValora,$Motivo){
-		($Motivo==="sr")?$status="Pendiente":$status="PendienteA";
+		($Motivo==="sr")?$status="PendienteA":$status="Pendiente";
 		$datos=array("Status"=>$status,"FechaPuesta"=>date("Y-m-d"),"Motivo"=>$Motivo);
 		$this->db->where("IDCalificacion='$IDValora'")->update("tbcalificaciones",$datos);
 		

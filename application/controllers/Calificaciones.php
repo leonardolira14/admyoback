@@ -107,34 +107,38 @@ class Calificaciones extends REST_Controller
 	public function calificar_post(){
 		$datos=$this->post();
 		$_flag_paso=TRUE;
+		
 		$_datos_empresa_emisora=$this->Model_Empresa->getempresa($datos["Emisor"]["IDEmpresa"]);
-		$_datos_empresa_receptora=$this->Model_Empresa->datosRFCEm($datos["rfc"]);
-		$_Email_Empresa_receptora=$datos["email"];
-		$_Razon_Social_Empresa_receptora=$datos["Razon"];
-		$_RFC_Empresa_receptora=$datos["rfc"];
-		$_Giro_Empresa_emisora=$datos["Giro"];
-		if(array_key_exists("Subgiro",$datos)){
-			$_SubGiro_Empresa_receptora=$datos["Subgiro"];;
+		
+		$_datos_empresa_receptora=$this->Model_Empresa->datosRFCEm($datos["Receptor"]["RFC"]);
+		//vdebug($_datos_empresa_emisora);
+		$_Email_Empresa_receptora=$datos["Receptor"]["Correo"];
+		$_Razon_Social_Empresa_receptora=$datos["Receptor"]["Razon_Social"];
+		$_RFC_Empresa_receptora=$datos["Receptor"]["RFC"];
+		$_Giro_Empresa_emisora=$datos["Receptor"]["Giro"];
+		if(array_key_exists("Subgiro",$datos["Receptor"])){
+			$_SubGiro_Empresa_receptora=$datos["Receptor"]["Subgiro"];;
 		}else{
 			$_SubGiro_Empresa_receptora=0;
 		}
-		if(array_key_exists("Rama",$datos)){
-			$_Rama_Empresa_receptora=$datos["Rama"];;
+		if(array_key_exists("Rama",$datos["Receptor"])){
+			$_Rama_Empresa_receptora=$datos["Receptor"]["Rama"];
 		}else{
 			$_Rama_Empresa_receptora=0;
 		}
 		
 		
 		if($_datos_empresa_emisora["IDEmpresa"]===$_datos_empresa_receptora["IDEmpresa"]):
-			$_data["code"]=1990;
+			$_data["code"]=19901;
 			$_data["ok"]="Error";
-			$_data["mensaje"]="Usted no puede calificarse a si mismo";
+			$_data["mensaje"]="Usted no puede calificarse a si mismoo";
 			$_flag_paso=FALSE;
+			$this->response($_data,500);
 		elseif($_datos_empresa_receptora===false):
 			$_flag_paso=TRUE;
 			$this->Model_Empresa->AddEmpresa($persona='PFAE',$_Razon_Social_Empresa_receptora,"",$_RFC_Empresa_receptora,$_Giro_Empresa_emisora,$_SubGiro_Empresa_receptora,$_Rama_Empresa_receptora);
 			$_datos_empresa_receptora=$this->Model_Empresa->datosRFCEm($_RFC_Empresa_receptora);
-			$datos["IDReceptor"]=$_datos_empresa_receptora["IDEmpresa"];
+			$datos["Receptor"]["IDReceptor"]=$_datos_empresa_receptora["IDEmpresa"];
 					//registro el correo del usuario
 			$_token_usario_receptor=$this->Model_Usuario->Preusuario($_Email_Empresa_receptora,$_datos_empresa_receptora["IDEmpresa"]);
 					//mando el mail al usario para avisarle que ha sido registrado en admyo
@@ -153,17 +157,18 @@ class Calificaciones extends REST_Controller
 			$_data["ok"]="Error";
 			$_data["mensaje"]="La dirección de correo electrónico que decea calificar pertenece a otra empresa";
 			$_flag_paso=FALSE;
+			$this->response($_data,500);
 		}
-		if(array_key_exists("Subgiro",$datos)){
-			$Nivel=$datos["Subgiro"];
+		if(array_key_exists("Subgiro",$datos["Receptor"])){
+			$Nivel=$datos["Receptor"]["Subgiro"];
 		}else{
-			$Nivel=$datos["Giro"];	
+			$Nivel=$datos["Receptor"]["Giro"];	
 		}
 		
 		if($_flag_paso)
 		{
 			
-			$resumen=$this->Model_Calificaciones->cuestionario_calificar($datos["TipoReceptor"],$datos["Emisor"]["IDEmpresa"],$datos["IDReceptor"],$Nivel);
+			$resumen=$this->Model_Calificaciones->cuestionario_calificar($datos["Tipo"],$datos["Emisor"]["IDEmpresa"],$datos["Receptor"]["IDReceptor"],$Nivel);
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$resumen;
@@ -175,15 +180,17 @@ class Calificaciones extends REST_Controller
 	}
 	public function calificarfinal_post(){
 		$datos=$this->post();
-		if(!isset($datos["Fecha_Calificacion"])){
+		
+		if(!isset($datos["Receptor"]["Fecha"])){
 
 		$fecha_Realiza = date('Y-m-d');
 		}else{
-			$fecha_Realiza = $datos["Fecha_Calificacion"];
+			$fecha_Realiza = $datos["Receptor"]["Fecha"];
 		}
-		$_sub_giro=$datos["Subgiro"];
-		$IDEmpresa=$datos["IDReceptor"];
-		$_tipo_imagen=$datos["TipoReceptor"];
+		
+		$_sub_giro=$datos["Receptor"]["SubGiro"];
+		$IDEmpresa=$datos["Receptor"]["IDReceptor"];
+		$_tipo_imagen=$datos["Tipo"];
 		$_puntos_ob_calidad=0;
 		$_puntos_pos_calidad=0;
 		$_puntos_ob_cumplimiento=0;
@@ -193,15 +200,15 @@ class Calificaciones extends REST_Controller
 		//primero tengo que guardar la calificaciones netas
 		//obtener el giro de la empresa emisora
 		$_IDGiro_emisora=$this->Model_Empresa->Get_Giro_Principal($datos["Emisor"]["IDEmpresa"]);
-		$_datos_usuario_receptor=$this->Model_Usuario->DatosUsuarioCorreo($datos["email"]);
+		$_datos_usuario_receptor=$this->Model_Usuario->DatosUsuarioCorreo($datos["Receptor"]["Correo"]);
 		$_datos_usuario_emisor=$this->Model_Usuario->DatosUsuario($datos["Emisor"]["IDUsuario"]);
 		
-		if(isset($datos["IDReceptor"])){
-			$_ID_Empresa_receptora=$datos["IDReceptor"];
+		if(isset($datos["Receptor"]["IDReceptor"])){
+			$_ID_Empresa_receptora=$datos["Receptor"]["IDReceptor"];
 		}else{
 			$_datos_empresa_receptora=$this->Model_Empresa->getempresaRFC($datos["rfc"]);
 			$_ID_Empresa_receptora=$_datos_empresa_receptora["IDEmpresa"];
-			$datos["IDReceptor"]=$_ID_Empresa_receptora;
+			$datos["Receptor"]["IDReceptor"]=$_ID_Empresa_receptora;
 		}
 		
 		$_datos_empresa_emisora=$this->Model_Empresa->getempresa($datos["Emisor"]["IDEmpresa"]);
@@ -210,9 +217,9 @@ class Calificaciones extends REST_Controller
 			$datos["Emisor"]["IDEmpresa"],
 			$_IDGiro_emisora["IDGiro"],
 			$_datos_usuario_receptor["IDUsuario"],
-			$datos["IDReceptor"],
+			$datos["Receptor"]["IDReceptor"],
 			$_sub_giro,
-			strtoupper($datos["TipoReceptor"]),
+			strtoupper($datos["Tipo"]),
 			$fecha_Realiza
 		);
 		//ahora inserto los detalles de esa calificacion
@@ -263,6 +270,7 @@ class Calificaciones extends REST_Controller
 			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
 		}
 		$_promedio=round(($puntos_obtenidos/$puntos_posibles)*10,2);
+		
 		$this->Model_Imagen->updateimagen(
 									$IDEmpresa,
 									$puntos_obtenidos,
@@ -279,22 +287,22 @@ class Calificaciones extends REST_Controller
 		//ahora mando los mails
 		
 		$_ID_Empresa_emisora=$_datos_empresa_emisora["IDEmpresa"];
-		$this->Model_Empresa->addRelacion($_ID_Empresa_emisora,$_ID_Empresa_receptora,$datos["TipoReceptor"]);
+		$this->Model_Empresa->addRelacion($_ID_Empresa_emisora,$_ID_Empresa_receptora,$datos["Tipo"]);
 		/*
 		//
 		//envio de correos
 		//
 		*/
-		$this->Model_Email->recibir_valoracion($datos["email"],$_datos_empresa_emisora["Razon_Social"],$datos["Razon"],$datos["TipoReceptor"],$cuestionario_gen,$_promedio);
+		$this->Model_Email->recibir_valoracion($datos["Receptor"]["Correo"],$_datos_empresa_emisora["Razon_Social"],$datos["Receptor"]["Razon_Social"],$datos["Tipo"],$cuestionario_gen,$_promedio);
 		
-		$this->Model_Email->enviar_valoracion($datos["Emisor"]["Correo"],$datos["TipoReceptor"],$_datos_empresa_emisora["Razon_Social"],$_promedio,$datos["Razon"],$cuestionario_gen);
+		$this->Model_Email->enviar_valoracion($datos["Emisor"]["Correo"],$datos["Tipo"],$_datos_empresa_emisora["Razon_Social"],$_promedio,$datos["Receptor"]["Razon_Social"],$cuestionario_gen);
 		/*
 		//
 		//envio de respuesta
 		//
 		*/
 		// agregamos la notificacion de quien realizo la calificacion
-		if($datos["TipoReceptor"]==='CLIENTE'){
+		if($datos["Tipo"]==='cliente'){
 			$descripemisor="calificacionp";
 			$descripreceptor="calificacionrp";
 			$_riesgo_notificaion="riesgop";
@@ -330,9 +338,10 @@ class Calificaciones extends REST_Controller
 		
 		//ahora mando las notificaciones a las empresas que siguen a esta empresa
 		$_lista_follow =$this->Model_Follow->getAll_que_la_siguen($_ID_Empresa_receptora);
+		
 		foreach ($_lista_follow as $_empresa) {
-			$this->Model_Notificaciones->add($_empresa["num"],$_riesgo_notificaion_seguida,$_ID_Empresa_receptora,"0",$_riesgo_notificaion_seguida);
-			$this->Model_Notificaciones->add($_empresa["num"],$_imagen_notificaion_seguida,$_ID_Empresa_receptora,"0",$_imagen_notificaion_seguida);
+			$this->Model_Notificaciones->add($_empresa["IDEmpresaSeguida"],$_riesgo_notificaion_seguida,$_ID_Empresa_receptora,"0",$_riesgo_notificaion_seguida);
+			$this->Model_Notificaciones->add($_empresa["IDEmpresaSeguida"],$_imagen_notificaion_seguida,$_ID_Empresa_receptora,"0",$_imagen_notificaion_seguida);
 		}
 		
 		

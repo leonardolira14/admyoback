@@ -159,5 +159,24 @@ class DatosGenerales extends REST_Controller
 		$data["response"]=$_data;
 		$this->response($data);
 	}
+	// function para datos para calificar retorno empresas y sectotes
+	public function gedataqualify_get(){
+		$data["allgiros"]=$this->Model_General->getAllsector();
+		$data['empresas']=$this->Model_Empresa->getempresa_calificar();
+		$this->response($data,200);
+	}
 
+	// funcion para llenar los campos al selccionar una empresa para calificar
+	public function getdataqualifyC_post(){
+		$datos=$this->post();
+		$_ID_Empresa=$datos["IDEmpresa"];
+		// necesito el el correo del usuario principal
+		$data["Usuarios"]=$this->Model_Usuario->getAlluser($_ID_Empresa);
+		// obtengo el giro principal
+		$data["GiroPrincipal"]=$this->Model_Giros->getGiroPrincipalEmpresa($_ID_Empresa);
+		$data["Subgiros"]=$this->Model_General->getSubsector($data["GiroPrincipal"][0]['IDGiro']);
+		$data["Ramas"]=$this->Model_General->getRama($data["GiroPrincipal"][0]['IDGiro2']);
+		$this->response($data,200);
+		
+	}
 }
