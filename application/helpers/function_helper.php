@@ -48,6 +48,35 @@ if(!function_exists("_compracion"))
 		}
 
 }
+
+if (!function_exists("_fechas_array")){
+	function _fechas_array($_Tiempo,$Fechas)
+	{
+		$_fecha=[];
+		
+		if($_Tiempo==='A' || $_Tiempo === 'MA'){
+			for($i=5;$i<=count($Fechas)-1;$i++){
+				
+				$mes_anio=explode('-', $Fechas[$i]);
+				array_push($_fecha, ['mes' => $mes_anio[1], "anio" => $mes_anio[0],"anio_anterior"=> $mes_anio[0]-1]);
+			}
+		}
+
+		if($_Tiempo === 'M'){
+		
+			$fechaactual=date('Y-m-d');
+			$fechaanterior=date('Y-m-d', strtotime($fechaactual."- 31days"));
+
+			for ($i = $fechaanterior; $i <= $fechaactual; $i = date("Y-m-d", strtotime($i . "+ 1 days"))) {
+			
+				array_push($_fecha,$i);
+
+			}
+
+		}
+		return $_fecha;
+	}
+}
 if(!function_exists("validar_clave")){
 	function validar_clave($clave){
    if(strlen($clave) < 6){

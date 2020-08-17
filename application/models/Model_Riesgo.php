@@ -86,7 +86,7 @@ class Model_Riesgo extends CI_Model
 		
 	}
 	//funcion obtener el riesgo general
-	public function obtenerrisgos($IDEmpresa,$_tipo_persona,$_tipo_fecha,$resumen=FALSE,$Tipo_Persona,$_rama){
+	public function obtenerrisgos($IDEmpresa,$_tipo_fecha,$resumen=FALSE,$Tipo_Persona,$_rama,$Personas_como){
 		
 		
 		$mejorados=0;
@@ -112,7 +112,67 @@ class Model_Riesgo extends CI_Model
 		$fechas2=docemecespasados();
 		$evolucion=[];
 		$evolucionlabel=[];	
-		if($_tipo_fecha==="A")
+		
+
+		$fechas_= _fechas_array($_tipo_fecha,$fechas);
+		
+
+		
+		//ahora obtengo el giro de la empresa si es que no esta
+		if($_rama===''){
+			$giro_principal=$this->Model_Empresa->Get_Giro_Principal($IDEmpresa);
+			$giro_principal=$giro_principal["IDGiro2"];
+		}else{
+			$giro_principal=$_rama;
+		}
+		
+		//empiezo para la grafica de evolucion
+		if($Tipo_Persona==="cliente"){
+			$clientes=$this->ObtenerClientes($IDEmpresa);
+			
+			
+		}else{
+			$clientes=$this->ObtenerProveedores($IDEmpresa);
+			
+			
+		}
+		
+		switch($Personas_como){
+			case 'cliente':
+				$tbimagen="tbimagen_cliente";
+				break;
+			case 'proveedor':
+				$tbimagen="tbimagen_proveedor";
+				break;
+		}
+
+		$Tipo_Persona=strtoupper($Tipo_Persona);
+
+		// ahora recorro las fechas con los clientes que tengo para obtener sus calificaciones
+	
+		if($_tipo_fecha === "M"){
+			
+			$fech1="'".$fechas_[0]."' and '".$fechas_[31]."'";
+			
+			$fechaanterio_1r=date('Y-m-d', strtotime($fechas_[0]."- 30days"));
+			$fechaanterio_0r=date('Y-m-d', strtotime($fechaanterio_1r."- 30days"));
+		
+			$fech2="'".$fechaanterio_0r."' and '".$fechaanterio_1r."'";
+
+			
+		}else{
+			
+			// obtengo el segundo valor y el primer del array
+			$fech1="'".$fechas_[1]['anio']."-".$fechas_[1]['mes']."-01' and '".$fechas_[count($fechas_)-1]['anio']."-".$fechas_[count($fechas_)-1]['mes']."-31'";
+			$fech2="'".$fechas_[0]['anio']."-".$fechas_[0]['mes']."-01' and '".$fechas_[count($fechas_)-2]['anio']."-".$fechas_[count($fechas_)-2]['mes']."-31'";
+			
+		}
+		
+
+
+
+
+		/*if($_tipo_fecha==="A")
 		{
 			$fech1="'".$fechas[0]."-".date('d')."' and '".$fechas[12]."-".date('d')."'";
 			$fech2="'".$fechas2[0]."-".date('d')."' and '".$fechas2[12]."-".date('d')."'";
@@ -126,40 +186,17 @@ class Model_Riesgo extends CI_Model
 			$_fecha_actual=$fechas[12];
 			$_fecha_pasada=$fechas[11];
 				
-		}
+		}*/
 		
 		
-		//ahora obtengo el giro de la empresa si es que no esta
-		if($_rama===''){
-			$giro_principal=$this->Model_Empresa->Get_Giro_Principal($IDEmpresa);
-			$giro_principal=$giro_principal["IDGiro2"];
-		}else{
-			$giro_principal=$_rama;
-		}
 		
-		//empiezo para la grafica de evolucion
-		if($Tipo_Persona==="cliente"){
-			$clientes=$this->ObtenerClientes($IDEmpresa);
-			$tb="tbriesgo_clientes";
-			
-		}else{
-			$clientes=$this->ObtenerProveedores($IDEmpresa);
-			$tb="tbriesgo_proveedores";
-			
-		}
 		
-		switch($Tipo_Persona){
-			case 'Cliente':
-				$tbimagen="tbimagen_cliente";
-				break;
-			case 'Proveedor':
-				$tbimagen="tbimagen_proveedor";
-				break;
-		}
-		$Tipo_Persona=strtoupper($Tipo_Persona);
+		
+		
 		foreach($clientes as $cliente){
 			$general_actual=$this->getPuntos_generales($cliente["num"],$giro_principal,$fech1,$Tipo_Persona);
 			$general_pasada=$this->getPuntos_generales($cliente["num"],$giro_principal,$fech2,$Tipo_Persona);
+
 			switch(_comparacion((float)$general_actual["promedio"],(float)$general_pasada["promedio"])){
 				case 1:
 					$mantenidos++;
@@ -174,79 +211,149 @@ class Model_Riesgo extends CI_Model
 			
 			
 			
-			$calidad_actual=$this->MeediaCategoria("P_Obt_Calidad","P_Pos_Calidad",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen,$giro_principal);
-			$calidad_pasada=$this->MeediaCategoria("P_Obt_Calidad","P_Pos_Calidad",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen,$giro_principal);
-			switch(_comparacion($calidad_actual,$calidad_pasada)){
-				case 1:
-					$mantenidoscalidad++;
-					break;
-				case 2:
-					$mejoradoscalidad++;
-					break;
-				case 3:
-					$empeoradoscalidad++;
-					break;
-			}
+		}
+		$data['numero_generales']= array("mantenidos"=>$mantenidos,"mejorados"=>$mejorados,"empeorado"=>$empeorados);
+		//  ahora obtengo por cada mes, dia o acumulado
+		if($_tipo_fecha === "M"){
+			 // iteramos en las fechas para abtener la grafica general
+			 $grafica_general['datas']=[];
+			 $grafica_general['labels']=[];
+			$mantenidos_data=[];
+			$mejorados_data=[];
+			$empeorados_data=[];
+			 foreach($fechas_ as $fecha){
+				 $mantenidos=0;
+				 $mejorados=0;
+				 $empeorados=0;
+				 // obteniendo las fechas
+				 $fecha_actual= $fecha;
+				 $fecha_pasada= date('Y-m-d', strtotime($fecha."- 30days"));
+				 
+				 // concatenando las fechas para la comparacion
+				 $fech1="'".$fecha_actual."' and '".$fecha_actual."'";
+				 $fech2="'".$fecha_pasada."' and '".$fecha_pasada."'";
+
+				foreach($clientes as $cliente){
+					// grafica general
+					$general_actual=$this->getPuntos_generales($cliente["num"],$giro_principal,$fech1,$Tipo_Persona);
+					$general_pasada=$this->getPuntos_generales($cliente["num"],$giro_principal,$fech2,$Tipo_Persona);
+
+					switch(_comparacion((float)$general_actual["promedio"],(float)$general_pasada["promedio"])){
+						case 1:
+							$mantenidos++;
+							break;
+						case 2:
+							$mejorados++;
+							break;
+						case 3:
+							$empeorados++;
+							break;
+					}
 			
-			//cumplimento
-			$cumplimiento_actual=$this->MeediaCategoria("P_Obt_Cumplimiento","P_Pos_Cumplimiento",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen,$giro_principal);
-			$cumplimiento_pasada=$this->MeediaCategoria("P_Obt_Cumplimiento","P_Pos_Cumplimiento",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen,$giro_principal);
-			
-			switch(_comparacion($cumplimiento_actual,$cumplimiento_pasada)){
-				case 1:
-					$mantenidoscumplimiento++;
-					break;
-				case 2:
-					$mejoradoscumplimiento++;
-					break;
-				case 3:
-					$empeoradoscumplimiento++;
-					break;
-			}
-			if($Tipo_Persona!=="CLIENTE"){
-				//oferta
-				$oferta_actual=$this->MeediaCategoria("P_Obt_Oferta","P_Pos_Oferta",$cliente["num"],$_fecha_actual,$_fecha_actual,$tbimagen,$giro_principal);
-				
-				$oferta_pasada=$this->MeediaCategoria("P_Obt_Oferta","P_Pos_Oferta",$cliente["num"],$_fecha_pasada,$_fecha_pasada,$tbimagen,$giro_principal);
-				switch(_comparacion($oferta_actual,$oferta_pasada)){
-					case 1:
-						$mantenidosoferta++;
-						break;
-					case 2:
-						$mejoradosoferta++;
-						break;
-					case 3:
-						$empeoradosoferta++;
-						break;
 				}
-			}
+				array_push($mantenidos_data,$mantenidos);
+				array_push($mejorados_data,$mejorados);
+				array_push($empeorados_data,$empeorados);
+				 array_push($grafica_general["labels"], $fecha);
+				 
+			 }
+			 array_push($grafica_general["datas"],array("data_mantendio"=>$mantenidos_data,"data_mejorado"=>$mejorados_data,"data_empeorado"=>$empeorados_data));
+			 
+			// vdebug( $grafica_general);
+		}
+		if($_tipo_fecha === "MA"){
+			 // iteramos en las fechas para abtener la grafica general
+				$grafica_general['datas']=[];
+				$grafica_general['labels']=[];
+				$mantenidos_data=[];
+				$mejorados_data=[];
+				$empeorados_data=[];
+			 foreach($fechas_ as $fecha){
+				  $mantenidos=0;
+				  $mejorados=0;
+				  $empeorados=0;
+				 foreach($clientes as $cliente){
+					 
+					$general_actual=$this->getPuntos_generales_mes_anio($cliente["num"],$giro_principal,$fecha['mes'],$fecha['anio'],$Tipo_Persona);
+					$general_pasada=$this->getPuntos_generales_mes_anio($cliente["num"],$giro_principal,$fecha['mes'],$fecha['anio_anterior'],$Tipo_Persona);
+					
+					switch(_comparacion((float)$general_actual["promedio"],(float)$general_pasada["promedio"])){
+						case 1:
+							$mantenidos++;
+							break;
+						case 2:
+							$mejorados++;
+							break;
+						case 3:
+							$empeorados++;
+							break;
+					}
+				}
+				
+				array_push($mantenidos_data,$mantenidos);
+				array_push($mejorados_data,$mejorados);
+				array_push($empeorados_data,$empeorados);
+				$fechass=dame_mes((int)$fecha['mes'])."-".$fecha['anio'];
+				array_push($grafica_general["labels"], $fechass);
+			 }
+			 array_push($grafica_general["datas"],array("data_mantendio"=>$mantenidos_data,"data_mejorado"=>$mejorados_data,"data_empeorado"=>$empeorados_data));
+			
+
+		}
+		if($_tipo_fecha === "A"){
+			 $mantenidos=0;
+				  $mejorados=0;
+				  $empeorados=0;
+			 // iteramos en las fechas para abtener la grafica general
+				$grafica_general['datas']=[];
+				$grafica_general['labels']=[];
+				$mantenidos_data=[];
+				$mejorados_data=[];
+				$empeorados_data=[];
+			 foreach($fechas_ as $fecha){
+				 $mantenidos=0;
+				 $mejorados=0;
+				 $empeorados=0;
+				 foreach($clientes as $cliente){
+					 
+					$general_actual=$this->getPuntos_generales_mes_anio($cliente["num"],$giro_principal,$fecha['mes'],$fecha['anio'],$Tipo_Persona);
+					$general_pasada=$this->getPuntos_generales_mes_anio($cliente["num"],$giro_principal,$fecha['mes'],$fecha['anio_anterior'],$Tipo_Persona);
+					
+					switch(_comparacion((float)$general_actual["promedio"],(float)$general_pasada["promedio"])){
+						case 1:
+							$mantenidos++;
+							break;
+						case 2:
+							$mejorados++;
+							break;
+						case 3:
+							$empeorados++;
+							break;
+					}
+				}
+				//vdebug($clientes);
+				array_push($mantenidos_data,$mantenidos);
+				array_push($mejorados_data,$mejorados);
+				array_push($empeorados_data,$empeorados);
+				$fechass=dame_mes((int)$fecha['mes'])."-".$fecha['anio'];
+				array_push($grafica_general["labels"], $fechass);
+			 }
+			 array_push($grafica_general["datas"],array("data_mantendio"=>$mantenidos_data,"data_mejorado"=>$mejorados_data,"data_empeorado"=>$empeorados_data));
+			
 		}
 		
-		$total=$mejorados+$empeorados+$mantenidos;
-		$data["mejorados"]=array("numero"=>$mejorados,"porcentaje"=>porcentaje($total,$mejorados));
-		$data["empeorados"]=array("numero"=>$empeorados,"porcentaje"=>porcentaje($total,$empeorados));
-		$data["mantenidos"]=array("numero"=>$mantenidos,"porcentaje"=>porcentaje($total,$mantenidos));
-		$data["seriecir"]=array("label"=>["Mejorados","Empeorados","Mantenidos"],"data"=>[$mejorados,$empeorados,$mantenidos]);
-		$totalcalidad=$mejoradoscalidad+$empeoradoscalidad+$mantenidoscalidad;
-		$data["mejoradoscalidad"]=array("num"=>$mejoradoscalidad,"porcentaje"=>porcentaje($totalcalidad,$mejorados));
-		$data["empeoradoscalidad"]=array("num"=>$empeoradoscalidad,"porcentaje"=>porcentaje($totalcalidad,$empeorados));
-		$data["mantenidoscalidad"]=array("num"=>$mantenidoscalidad,"porcentaje"=>porcentaje($totalcalidad,$mantenidos));
-
-		$totalcumplimento=$mejoradoscumplimiento+$empeoradoscumplimiento+$mantenidoscumplimiento;
-		$data["mejoradoscumplimiento"]=array("num"=>$mejoradoscumplimiento,"porcentaje"=>porcentaje($totalcumplimento,$mejorados));
-		$data["empeoradoscumplimiento"]=array("num"=>$empeoradoscumplimiento,"porcentaje"=>porcentaje($totalcumplimento,$empeorados));
-		$data["mantenidoscumplimiento"]=array("num"=>$mantenidoscumplimiento,"porcentaje"=>porcentaje($totalcumplimento,$mantenidos));
-		if($Tipo_Persona!=="Cliente"){
-			$totaloferta=$mejoradosoferta+$empeoradosoferta+$mantenidosoferta;
-			$data["mejoradosoferta"]=array("num"=>$mejoradosoferta,"porcentaje"=>porcentaje($totaloferta,$mejoradosoferta));
-			$data["empeoradosoferta"]=array("num"=>$empeoradosoferta,"porcentaje"=>porcentaje($totaloferta,$empeoradosoferta));
-			$data["mantenidosoferta"]=array("num"=>$mantenidosoferta,"porcentaje"=>porcentaje($totaloferta,$mantenidosoferta));
 			
-		}
+		$data['graficageneral']=$grafica_general;
 		
 		return $data;	
 	}
 	
+	// funcion para puntos generales 
+
+
+
+
+
 	//funcion para obtener el promedio de una categoria en una fecha
 	public function MeediaCategoria($categoria,$categoria2,$IDEmpresa,$_fecha_inicio,$_fecha_fin,$_tb,$giro=0)
 	{
@@ -807,14 +914,41 @@ class Model_Riesgo extends CI_Model
 	//funcion para obtener los puntos obtenidos y posibles  y el total de calificaciones generales
 	public function getPuntos_generales($_IDEmpresa,$_Giro,$Fecha,$_para){
 		$_para=strtoupper($_para);
+		
 		$respuesta=$this->db->select('ROUND(((SUM(PuntosObtenidos) / SUM(PuntosPosibles))*10),2) as promedio')
 		->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')
 		->where("IDEmpresaReceptor='$_IDEmpresa' AND IDGiroReceptor='$_Giro' AND Emitidopara='$_para' and  date(FechaRealiza) BETWEEN  $Fecha")
 		->from('tbcalificaciones')->get();
+
+		($respuesta->row_array()['promedio']===null)?$data['promedio']=0:$data['promedio']=$respuesta->row_array()['promedio'];
 		
-		return $respuesta->row_array();
+		$respuesta=$this->db->select('count(*) as num')
+		->where("IDEmpresaReceptor='$_IDEmpresa' AND IDGiroReceptor='$_Giro' AND Emitidopara='$_para' and  date(FechaRealizada) BETWEEN  $Fecha")
+		->from('tbcalificaciones')->get();
+
+		$data['num']= $respuesta->row_array()['num'];
+		
+		return $data;
 	}
-	
+	//funcion para obtener los puntos obtenidos y posibles  y el total de calificaciones generales
+	public function getPuntos_generales_mes_anio($_IDEmpresa,$_Giro,$mes,$anio,$_para){
+		$_para=strtoupper($_para);
+		
+		$respuesta=$this->db->select('ROUND(((SUM(PuntosObtenidos) / SUM(PuntosPosibles))*10),2) as promedio')
+		->join('tbdetallescalificaciones','tbdetallescalificaciones.IDCalificacion=tbcalificaciones.IDCalificacion')
+		->where("IDEmpresaReceptor='$_IDEmpresa' AND IDGiroReceptor='$_Giro' AND Emitidopara='$_para' and MONTH(FechaRealiza) = '$mes' AND YEAR(FechaRealiza) = '$anio'")
+		->from('tbcalificaciones')->get();
+
+		($respuesta->row_array()['promedio']===null)?$data['promedio']=0:$data['promedio']=$respuesta->row_array()['promedio'];
+		
+		$respuesta=$this->db->select('count(*) as num')
+		->where("IDEmpresaReceptor='$_IDEmpresa' AND IDGiroReceptor='$_Giro' AND Emitidopara='$_para' and MONTH(FechaRealizada) = '$mes' AND YEAR(FechaRealizada) = '$anio'")
+		->from('tbcalificaciones')->get();
+
+		$data['num']= $respuesta->row_array()['num'];
+		
+		return $data;
+	}
 	//funcion para obtener los puntos obtenidos y posibles  y el total de calificaciones por pregunta
 	public function getPuntos($_IDPregunta,$_IDEmpresa,$_Giro,$Fecha){
 		$respuesta=$this->db->select('count(*) as num, SUM(PuntosObtenidos) as obtenidos,SUM(PuntosPosibles) AS posibles')

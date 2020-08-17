@@ -23,9 +23,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-//$config['base_url'] = 'http://localhost/admyo_web/back/';
+$config['base_url'] = 'http://localhost/admyo_web/back/';
  //$config['base_url'] = 'http://localhost/admyo/web/admyoback/';
-$config['base_url'] = 'https://backend.admyo.com/';
+//$config['base_url'] = 'https://backend.admyo.com/';
 /*
 |--------------------------------------------------------------------------
 | Index File

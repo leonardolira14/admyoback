@@ -19,8 +19,9 @@ class Riesgo extends REST_Controller
 	}
 	public function getriesgo_post(){
 		$datos=$this->post();
-		
-		$data["Riesgo"]=$this->Model_Riesgo->obtenerrisgos($datos["IDEmpresa"],$datos["tipo"],$datos["fecha"],False,$datos["Tipo_Persona"],$datos["rama"]);
+	
+
+		$data["Riesgo"]=$this->Model_Riesgo->obtenerrisgos($datos["IDEmpresa"],$datos["tiempo"],False,$datos["quienes"],$datos["subSector"],$datos["TipoPersonasComo"]);
 		//necesito las ramas que tiene esta empresa
 		$data["Ramas"]=$this->Model_Giros->getrama_empresa($datos["IDEmpresa"]);
 		$_data["code"]=0;

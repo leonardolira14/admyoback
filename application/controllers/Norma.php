@@ -102,6 +102,10 @@ class Norma extends REST_Controller
 				'field' => 'EmpresaCertificadora',
 				'label' => 'Empresa certificadora',
 				'rules' => 'trim|xss_clean'
+			), array(
+				'field' => 'Clase',
+				'label' => 'Clase de certificación',
+				'rules' => 'trim|xss_clean'
 			));
 		$this->form_validation->set_error_delimiters('<li>', '</li>');
 		$this->form_validation->set_rules($config);
@@ -117,7 +121,8 @@ class Norma extends REST_Controller
 					$nombreactual,
 					$_POST["FechaVencimiento"],
 					$_POST["Tipo"],
-					$_POST["EmpresaCertificadora"]
+					$_POST["EmpresaCertificadora"],
+					$_POST["Clase"]
 				);
 				$_data["code"]=0;
 				$_data["ok"]="SUCCESS";
@@ -175,12 +180,17 @@ class Norma extends REST_Controller
 				'field' => 'EmpresaCertificadora',
 				'label' => 'Empresa certificadora',
 				'rules' => 'trim|xss_clean'
+			), array(
+				'field' => 'Clase',
+				'label' => 'Clase de certificación',
+				'rules' => 'trim|xss_clean'
 			));
 		$this->form_validation->set_error_delimiters('<li>', '</li>');
 		$this->form_validation->set_rules($config);
 			$array=array("required"=>'El campo %s es obligatorio',"valid_email"=>'El campo %s no es valido',"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos','alpha'=>'El campo %s debe estar compuesto solo por letras',"matches"=>"Las contraseñas no coinciden",'is_unique'=>'El contenido del campo %s ya esta registrado');
 		$this->form_validation->set_message($array);
 			if($this->form_validation->run() !=false){
+				
 				//ahora guardo la norma
 				$this->Model_Norma->save(
 					$_ID_Empresa,
@@ -190,7 +200,8 @@ class Norma extends REST_Controller
 					$nombreactual,
 					$_POST["FechaVencimiento"],
 					$_POST["Tipo"],
-					$_POST["EmpresaCertificadora"]
+					$_POST["EmpresaCertificadora"],
+					$_POST["Clase"]
 				);
 				$_data["code"]=0;
 				$_data["ok"]="SUCCESS";
