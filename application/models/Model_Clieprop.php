@@ -6,6 +6,7 @@ class Model_Clieprop extends CI_Model{
 		$this->load->database();
 		$this->load->helper('selec_Titulo');
 		$this->constant="vkq4suQesgv6FVvfcWgc2TRQCmAc80iE";
+		$this->load->model("Model_Norma");
 	}
 	public function DatosEmpresa($IDEmpresa){
 		$this->db->select('*');
@@ -33,8 +34,25 @@ class Model_Clieprop extends CI_Model{
 			
 			// primer obtengo la ultima calificacion que realizada la empresa del cliente
 			$datos_utima_realizada=$this->ultima_clalif($datos[0]->IDEmpresa,$IDEmpresa);
-			
-			array_push($listaproveedores,array("IDRelacion"=>$proveedor["IDRelacion"],"status_relacion"=>$proveedor["Status"],"CerA"=>$proveedor["CerA"],"CerB"=>$proveedor["CerB"],"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],"num"=>$datos[0]->IDEmpresa,"Razon_Social"=>$datos[0]->Razon_Social,"Nombre_Comer"=>$datos[0]->Nombre_Comer,"RFC"=>$datos[0]->RFC,"Logo"=>$datos[0]->Logo,"Visible"=>"Invisible","Banner"=>$datos[0]->Banner));
+			$normas=$this->Model_Norma->getnumero($datos[0]->IDEmpresa);
+			array_push($listaproveedores,
+					array(
+						"IDRelacion"=>$proveedor["IDRelacion"],
+						"status_relacion"=>$proveedor["Status"],
+						"CerA"=>$proveedor["CerA"],
+						"CerB"=>$proveedor["CerB"],
+						"ultimarealizada"=>$datos_utima_realizada["FechaRealizada"],
+						"ultimarecibida"=>$datos_utima_recibida["FechaRealizada"],
+						"num"=>$datos[0]->IDEmpresa,
+						"Razon_Social"=>$datos[0]->Razon_Social,
+						"Nombre_Comer"=>$datos[0]->Nombre_Comer,
+						"RFC"=>$datos[0]->RFC,
+						"Logo"=>$datos[0]->Logo,
+						"Visible"=>"Invisible",
+						"Banner"=>$datos[0]->Banner,
+						"numeroCertificacos"=> $normas
+					)
+				);
 		}
 		return $listaproveedores;
 	}
@@ -45,8 +63,12 @@ class Model_Clieprop extends CI_Model{
 		foreach ($lis as $proveedor) {
 			
 			$datos=$this->DatosEmpresa($proveedor["num"]);
-			$pos = strpos($datos[0]->Razon_Social, $palabra);
-			if($pos!== false){
+			//vdebug(strlen(strstr($datos[0]->Razon_Social, $palabra)));
+
+			//$pos = strpos($datos[0]->Razon_Social, $palabra);
+			//vdebug($datos[0]->Razon_Social);
+			
+			if (strlen(stristr($datos[0]->Razon_Social, $palabra)) > 0) {
 				// primer obtengo la ultima calificacion que recibio la empresa del cliente
 				$datos_utima_recibida=$this->ultima_clalif($IDEmpresa,$datos[0]->IDEmpresa);
 				

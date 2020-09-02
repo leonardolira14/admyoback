@@ -160,7 +160,7 @@ class Model_Calificaciones extends CI_Model{
 					  // obtener la media de esa calificacion
 					  $media=$this->db->select('round(sum(PuntosObtenidos)/sum(PuntosPosibles)*10,2) as media')->where("IDCalificacion='$valoracion->IDCalificacion'")->get("tbdetallescalificaciones");
 					 $media_val= $media->row()->media;
-					 
+					 vdebug($media->row());
 
 
 	 				 ($valoracion->FechaModificacion==="0000-00-00") ? $fechamod="-" :$fechamod=$valoracion->FechaModificacion;
@@ -196,8 +196,13 @@ class Model_Calificaciones extends CI_Model{
 	 				 //datos del usuario emisor
 	 				 $datosuario2=$this->DatosUsuario($valoracion->IDUsuarioEmisor);
 	 				 ($valoracion->FechaModificacion==="0000-00-00") ? $fechamod="-" :$fechamod=$valoracion->FechaModificacion;
-	 				($valoracion->FechaPuesta==="0000-00-00") ? $fechapuesta="-" : $fechapuesta=$valoracion->FechaPuesta; 
-					if(isset($datosempresa->IDEmpresa)){
+	 				($valoracion->FechaPuesta==="0000-00-00") ? $fechapuesta="-" : $fechapuesta=$valoracion->FechaPuesta;
+				// obtener la media de esa calificacion
+				$media = $this->db->select('round(sum(PuntosObtenidos)/sum(PuntosPosibles)*10,2) as media')->where("IDCalificacion='$valoracion->IDCalificacion'")->get("tbdetallescalificaciones");
+				$media_val = $media->row()->media;
+				
+					
+					 if(isset($datosempresa->IDEmpresa)){
 						array_push($listascalificaciones,array(
 							"IDValora"=>$valoracion->IDCalificacion,
 							"num_empresa_receptora"=>$datosempresa->IDEmpresa,
@@ -211,7 +216,8 @@ class Model_Calificaciones extends CI_Model{
 							"Status"=>$valoracion->Status,
 							"Fecha"=>$valoracion->FechaRealizada,
 							"FechaModificacion"=>$fechamod,
-							"FechaPuesta"=>$fechapuesta));
+							"FechaPuesta"=>$fechapuesta,
+							"Media" => $media_val));
 					}
 					
 	 				

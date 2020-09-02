@@ -30,7 +30,7 @@ class Calificaciones extends REST_Controller
 		$datos=$this->post();
 
 		$_ID_Empresa=$datos["IDEmpresa"];
-		if($datos["tipo"]=="clientes"){
+		if($datos["tipo"]=="cliente"){
 			$resumen=$this->Model_Clieprop->listaclientes($_ID_Empresa);
 			$tip="Cliente";
 		}else{

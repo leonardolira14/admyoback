@@ -16,6 +16,11 @@ class Model_Norma extends CI_Model
 		$sql=$this->db->select("*")->where("IDEmpresa='$_ID_Empresa'")->get("normascalidad");
 		return $sql->result_array();
 	}
+	// funcion para obtener el numero de normas 
+	public function getnumero($_ID_Empresa){
+		$sql=$this->db->select("count(*) as total")->where("IDEmpresa='$_ID_Empresa'")->get("normascalidad");
+		return $sql->row_array()['total'];
+	}
 	public function save($_ID_Empresa,$_Norma,$Fecha,$Calif,$_Archivo,$_Fecha_Vencimiento,$_Tipo,$_EmpresaCertificadoara,$_Clase)
 	{
 		$data=array(

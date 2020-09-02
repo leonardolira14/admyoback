@@ -26,7 +26,7 @@ $db['default'] = array(
 	'save_queries' => TRUE
 );
 
-$db['defaultl'] = array(
+$db['test'] = array(
 
 	'dsn'	=> '',
 	'hostname' => '127.0.0.1',

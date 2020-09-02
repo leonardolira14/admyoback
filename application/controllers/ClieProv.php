@@ -46,7 +46,7 @@ class ClieProv extends REST_Controller
 		$datos=$this->post();
 		$_ID_Empresa=$datos["IDEmpresa"];
 		
-		if($datos["tipo"]==="clientes"){
+		if($datos["tipo"]==="cliente"){
 			$resumen=$this->Model_Clieprop->listaclientes($_ID_Empresa);
 		}else{
 			$resumen=$this->Model_Proveedores->listaproveedores($_ID_Empresa);
@@ -64,16 +64,17 @@ class ClieProv extends REST_Controller
 	public function fillter_post(){
 		$datos=$this->post();
 		$_ID_Empresa=$datos["IDEmpresa"];
+		
 		// primero vefico si se filtro por nombre
 		if(!isset($datos["filtros"]["nombre"]) || $datos["filtros"]["nombre"]===''){
-			if($datos["tipo"]==="clientes"){
+			if($datos["tipo"]==="cliente"){
 				$lista=$this->Model_Clieprop->listaclientes($_ID_Empresa);
 			}else{
 				$lista=$this->Model_Proveedores->listaproveedores($_ID_Empresa);	
 			}
 			
 		}else{
-			if($datos["tipo"]==="clientes"){
+			if($datos["tipo"]==="cliente"){
 				$lista=$this->Model_Clieprop->listaclientespalabra($_ID_Empresa,$datos["filtros"]["nombre"]);
 			}else{
 				$lista=$this->Model_Proveedores->listaproveedorespalabra($_ID_Empresa,$datos["filtros"]["nombre"]);	
@@ -242,4 +243,5 @@ class ClieProv extends REST_Controller
 		}
 		$this->response(array("response"=>$_data));
 	}
+	
 }
