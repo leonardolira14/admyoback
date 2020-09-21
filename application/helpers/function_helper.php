@@ -48,7 +48,61 @@ if(!function_exists("_compracion"))
 		}
 
 }
+if (!function_exists("promedio_array_riesgo")) {
+	function promedio_array_riesgo($array)
+	{
+		$arriba = 0;
+		$abajo = 0;
+		$promedio=0;
+		//vdebug($array);
+		try{
+			foreach ($array as $item) {
+				
+				$arriba = $arriba + ($item['porcentaje'] * $item['Peso']);
+				$abajo = $abajo + $item['Peso'];
+			}
+			if ($abajo === 0) {
+				return 0;
+			}
+			$promedio = $arriba / $abajo;
+			return $promedio;
+		}catch(Exception $e){
+			
+		}
+		
+	}
+}
+if (!function_exists("_fechas_array_List")) {
+	function _fechas_array_List($_Tiempo)
+	{
+		$_fecha = [];
 
+		if ($_Tiempo === 'A' || $_Tiempo === 'MA') {
+			for ($i = 1; $i <= (int)date('m'); $i++) {
+				if($i<10){
+					$mes = '0'.$i;
+				}else{
+					$mes = $i;
+				}
+				array_push($_fecha,  date('Y')."-".$mes);
+				
+			}
+		}
+
+		if ($_Tiempo === 'M') {
+
+			$fechaactual = date('Y-m-d');
+			$fechaanterior = date('Y-m-d', strtotime($fechaactual . "- 31days"));
+
+			for ($i = $fechaanterior; $i <= $fechaactual; $i = date("Y-m-d", strtotime($i . "+ 1 days"))) {
+
+				array_push($_fecha, $i);
+				
+			}
+		}
+		return $_fecha;
+	}
+}
 if (!function_exists("_fechas_array")){
 	function _fechas_array($_Tiempo,$Fechas)
 	{
@@ -294,6 +348,9 @@ if(!function_exists("dame_mes"))
 
 }
 
+
+
+
 if (!function_exists("dame_rangos_fecha")) {
 	function dame_rangos_fecha($tiempo)
 	{
@@ -407,6 +464,20 @@ if(!function_exists("_is_respcorrect"))
 		}
 	}	
 }
+
+if(!function_exists("procentaje_riesgo")){
+	function procentaje_riesgo($a,$b)
+	{
+
+		if((int)$b===0 || (int)$a === 0)
+		{
+			return 0;
+		}
+		return ($a/$b)*100;
+	}
+}
+
+
 if(!function_exists("token1")){
 	 function token1($pass){
 		$fecha = date_create();

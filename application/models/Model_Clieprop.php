@@ -91,6 +91,7 @@ class Model_Clieprop extends CI_Model{
 	}
 	//funcion para obtener los clientes
 	public function ObtenerClientes($idempresa){
+		
 		$clientes1=[];
 		//esta relacion es para obtener en la tabla tbrelacion las que esten como IDEmpresaPque es la principal
 		$sql=$this->db->select('*')->where("IDEmpresaP='$idempresa' and Tipo='cliente'")->get("tbrelacion");
@@ -124,6 +125,95 @@ class Model_Clieprop extends CI_Model{
 				}
 		}
 		
+		return $nueva;
+	}
+	public function ObtenerClientesFecha($idempresa, $fecha, $periodo)
+	{
+
+		if( $periodo === 'MA' || $periodo === 'AC'){
+			$tip=explode('-', $fecha);
+			$fecha = "Month(FechaRelacion)='".$tip[1]. "' and Year(FechaRelacion)='" . $tip[0] . "' ";
+		}
+		if ($periodo === 'M') {
+			$fecha = "('$fecha' >=  DATE(FechaRelacion) )";
+		}
+
+		
+		$clientes1 = [];
+		//esta relacion es para obtener en la tabla tbrelacion las que esten como IDEmpresaPque es la principal
+		$sql = $this->db->select('*')->where("IDEmpresaP='$idempresa' and $fecha and Tipo='cliente'")->get("tbrelacion");
+
+		if ($sql->num_rows() != 0) {
+			foreach ($sql->result() as $provedor) {
+				array_push($clientes1, array("IDRelacion" => $provedor->IDRelacion, "Status" => $provedor->Status, "num" => $provedor->IDEmpresaB, "CerA" => $provedor->CerA, "CerB" => $provedor->CerB));
+			}
+		}
+		//ahora obtengo las que estan en la IDEmpresaB pero como cliente
+		$sql = $this->db->select('*')->where("IDEmpresaB='$idempresa' and $fecha and Tipo='proveedor'")->get("tbrelacion");
+		$clientes2 = [];
+		if ($sql->num_rows() != 0) {
+			foreach ($sql->result() as $provedor) {
+				array_push($clientes2, array("IDRelacion" => $provedor->IDRelacion, "Status" => $provedor->Status, "num" => $provedor->IDEmpresaP, "CerA" => $provedor->CerA, "CerB" => $provedor->CerB));
+			}
+		}
+		$clientes = array_merge($clientes1, $clientes2);
+		$nueva = [];
+		foreach ($clientes as $cliente) {
+			$bandera = false;
+			foreach ($nueva as $item) {
+				if ($item["num"] === $cliente["num"]) {
+
+					$bandera = true;
+					break;
+				}
+			}
+			if ($bandera === false) {
+				array_push($nueva, $cliente);
+			}
+		}
+
+		return $nueva;
+	}
+
+	// funcion para obtner la lista de proveedores
+	public function ObtenerProveedoresFecha($idempresa, $fecha, $periodo)
+	{
+		$clientes1 = [];
+		//esta relacion es para obtener en la tabla tbrelacion las que esten como IDEmpresaPque es la principal
+		$sql = $this->db->select('*')->where("IDEmpresaP='$idempresa'  and Fecha>='$fecha' and Tipo='cliente'")->get("tbrelacion");
+
+		if ($sql->num_rows() != 0) {
+			foreach ($sql->result() as $provedor) {
+				array_push($clientes1, array("IDRelacion" => $provedor->IDRelacion, "Status" => $provedor->Status, "num" => $provedor->IDEmpresaB, "CerA" => $provedor->CerA, "CerB" => $provedor->CerB));
+			}
+		}
+		//ahora obtengo las que estan en la IDEmpresaB pero como cliente
+		$sql = $this->db->select('*')->where("IDEmpresaB='$idempresa' and Fecha>='$fecha' and Tipo='proveedor'")->get("tbrelacion");
+		$clientes2 = [];
+		if ($sql->num_rows() != 0) {
+			foreach ($sql->result() as $provedor) {
+				array_push($clientes2, array("IDRelacion" => $provedor->IDRelacion, "Status" => $provedor->Status, "num" => $provedor->IDEmpresaP, "CerA" => $provedor->CerA, "CerB" => $provedor->CerB));
+			}
+		}
+		$clientes = array_merge($clientes1, $clientes2);
+		$nueva = [];
+		foreach ($clientes as $cliente) {
+			$bandera = false;
+			foreach ($nueva as $item) {
+				if ($item["num"] === $cliente["num"]
+				) {
+
+					$bandera = true;
+					break;
+				}
+			}
+			if ($bandera === false) {
+				array_push($nueva,
+					$cliente
+				);
+			}
+		}
+
 		return $nueva;
 	}
 	//funcion para el resumen

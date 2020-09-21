@@ -14,31 +14,35 @@ class Riesgo extends REST_Controller
     	header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
     	header("Access-Control-Allow-Origin: *");
     	parent::__construct();
-		$this->load->model("Model_Riesgo");
+		$this->load->model("Model_RiesgoN");
 		$this->load->model("Model_Giros");
 	}
 	public function getriesgo_post(){
 		$datos=$this->post();
-	
-
-		$data["Riesgo"]=$this->Model_Riesgo->obtenerrisgos($datos["IDEmpresa"],$datos["tiempo"],False,$datos["quienes"],$datos["subSector"],$datos["TipoPersonasComo"]);
-		//necesito las ramas que tiene esta empresa
-		$data["Ramas"]=$this->Model_Giros->getrama_empresa($datos["IDEmpresa"]);
+		
+		$data["Riesgo"]=$this->Model_RiesgoN->RiesgoGen(
+			$datos["IDEmpresa"],
+			$datos["IDGiro"],
+			$datos["Periodo"],
+			$datos["Quienes"],
+			$datos["comoQue"]
+		);
+		
 		$_data["code"]=0;
 		$_data["ok"]="SUCCES";
-		$_data["response"]=array("result"=>$data);
-		$this->response($_data);
+		$_data["response"]=$data["Riesgo"];
+		$this->response($_data,200);
 		
 	}
 	//funcion para obtener el detalle del riesgo
 	public function detalle_post(){
 		$datos=$this->post();
 		
-		$data["datos"]=$this->Model_Riesgo->detalles_riesgo($datos["IDEmpresa"],$datos["tipo"],$datos["fecha"],$datos["rama"]);
-		$data["Ramas"]=$this->Model_Giros->getrama_empresa($datos["IDEmpresa"]);
+		$data["datos"]=$this->Model_RiesgoN->detalleRiesgo($datos["IDEmpresa"],$datos["IDSector"],$datos["Quienes"],$datos["ComoQue"],$datos["Periodo"]);
+		
 		$_data["code"]=0;
 		$_data["ok"]="SUCCES";
-		$_data["response"]=array("result"=>$data);
+		$_data["response"]=$data;
 		$this->response($_data);
 	}
 	//funcion para obtener la lista de los clientes que han mejorado, emperorado, o mantenido en el riesgo

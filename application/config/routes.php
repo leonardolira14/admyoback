@@ -15,6 +15,7 @@ $route['login']="Usuario/login";
 $route['getperfil']="DatosGenerales/perfil";
 $route['getperfilempresa']="DatosGenerales/perfilempresa";
 
+$route['getallgiroG'] = "Giro/getAll";
 $route['getallgiro']="Giro/getallempresa";
 $route['reggiro']="Giro/addnew";
 $route['deletegiro']="Giro/delete";
@@ -80,7 +81,7 @@ $route["getimagen"]="imagen/getImagen";
 $route["detallesimagen"]="imagen/detalle";
 
 $route["getriesgo"]="Riesgo/getriesgo";
-$route["getdetalle"]="Riesgo/detalle";
+$route["getdetalleriesgo"]="Riesgo/detalle";
 $route["listpersonriesgo"]="Riesgo/listperson";
 
 
