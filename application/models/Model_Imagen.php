@@ -1268,5 +1268,27 @@ class Model_Imagen extends CI_Model
 		
 	}
 
+	//funcion para obtener la media de la imagen de una empresa
+	public function ImagenGen($IDEmpresa,$tipo_persona){
+		
+		if($tipo_persona==="cliente"){
+			$tb='tbimagen_cliente';
+			$linoferta="";
+		}else{
+			$tb='tbimagen_proveedor';
+			$linoferta=",round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta";
+		}
+			//traigo los registros de la tabla de imagen_cliente
+			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' ")->get($tb);
+			
+			if($promedios_actuales->result()[0]->mediageneral === NULL){
+				return 0;
+			}else{
+				return $promedios_actuales->result()[0]->mediageneral;
+			}
+			
+		
+	}
+
 	
 }

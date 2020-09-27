@@ -10,9 +10,13 @@ class Model_Buscar extends CI_Model
 	function __construct()
 	{
 		$this->load->database();
+		$this->load->model("Model_Norma");
+		$this->load->model("Model_Imagen");
+		$this->load->model("Model_Follow");
+		$this->load->model("Model_Imagen");
 	}
 	//function para buscar una empresa
-	public function busquda_Filtro($_Palabra,$_Orden,$_Estado,$_Calificaciones,$_Certificaciones,$_Asociaciones){
+	public function busquda_Filtro($_Palabra,$_Orden,$_Estado,$_Calificaciones,$_Certificaciones,$_Asociaciones,$IDEMpresa){
 		//primero verifico en que ordern las voy a solicitar
 		if($_Orden===''){
 			$_Orden="";
@@ -46,9 +50,7 @@ class Model_Buscar extends CI_Model
 		$_Resultadospprodd=$_Resultadospprodd->result_array();
 		
 
-		//buscos por sus productos y servicios de su promocion
-		$_Resultadospprodp=$this->db->query("SELECT IDEmpresa FROM  productos WHERE Promocion LIKE '%$_Palabra%'");
-		$_Resultadospprodp=$_Resultadospprodp->result_array();
+	
 	
 
 		//buscos por sus marca
@@ -60,7 +62,7 @@ class Model_Buscar extends CI_Model
 		$_Resultadosnormas=$_Resultadosnormas->result_array();
 
 		// ahohora tengo que unir todos los resultados en un solo array para obtener sus datos
-		$todos=array_merge($_Resultadosr, $_Resultadosnc,$_Resultadosrfc,$_Resultadosprefil,$_Resultadospprod,$_Resultadospprodd,$_Resultadospprodp,$_Resultadosmarcas,$_Resultadosnormas);
+		$todos=array_merge($_Resultadosr, $_Resultadosnc,$_Resultadosrfc,$_Resultadosprefil,$_Resultadospprod,$_Resultadospprodd,$_Resultadosmarcas,$_Resultadosnormas);
 		
 		$_Resultados=[];
 		//ahora elimino los repetidos
@@ -117,10 +119,28 @@ class Model_Buscar extends CI_Model
 			
 			foreach($_Resultados as $_Empresa){
 				$_DatosEmpresa=$this->Datos_Empresa($_Empresa["IDEmpresa"]);
+				$_DatosNormas=$this->Model_Norma->getall($_Empresa["IDEmpresa"]);
+				$_seguida = $this->Model_Follow->getfollowtrue($IDEMpresa,$_Empresa["IDEmpresa"]);
+				$ImagenCliente= $this->Model_Imagen->ImagenGen($_Empresa["IDEmpresa"],'cliente');
+				$ImagenProveedor=  $this->Model_Imagen->ImagenGen($_Empresa["IDEmpresa"],'proveedor');
 				$_total=$this->db->query("SELECT COUNT('*') AS total FROM tbcalificaciones where IDEmpresaReceptor='".$_Empresa["IDEmpresa"]."'");
 				$_total=$_total->row_array();
 				if((int)$_total["total"]>=(int)$_DatosCalificaciones[0] && (int)$_total["total"]<=(int)$_DatosCalificaciones[1] ){
-					array_push($_Datos,array("IDEmpresa"=>$_DatosEmpresa["IDEmpresa"],"Razon_Social"=>$_DatosEmpresa["Razon_Social"],"RFC"=>$_DatosEmpresa["RFC"],"Nombre_Comer"=>$_DatosEmpresa["Nombre_Comer"],"Perfil"=>$_DatosEmpresa["Perfil"],"Logo"=>$_DatosEmpresa["Logo"],"Banner"=>$_DatosEmpresa["Banner"]));
+					array_push(
+						$_Datos,
+						array(
+							"IDEmpresa"=>$_DatosEmpresa["IDEmpresa"],
+							"Razon_Social"=>$_DatosEmpresa["Razon_Social"],
+							"RFC"=>$_DatosEmpresa["RFC"],
+							"Nombre_Comer"=>$_DatosEmpresa["Nombre_Comer"],
+							"Perfil"=>$_DatosEmpresa["Perfil"],
+							"Logo"=>$_DatosEmpresa["Logo"],
+							"Banner"=>$_DatosEmpresa["Banner"],
+							"Normas"=>$_DatosNormas,
+							"Follow"=>$_seguida,
+							"ImagenCliente"=>$ImagenCliente,
+							"ImagenProveedor"=>$ImagenProveedor
+						));
 				}
 				
 			}
@@ -129,8 +149,25 @@ class Model_Buscar extends CI_Model
 			foreach($_Resultados as $_Empresa){
 				
 				$_DatosEmpresa=$this->Datos_Empresa($_Empresa["IDEmpresa"]);
+				$_DatosNormas=$this->Model_Norma->getall($_Empresa["IDEmpresa"]);
+				$_seguida = $this->Model_Follow->getfollowtrue($IDEMpresa,$_Empresa["IDEmpresa"]);
+				$ImagenCliente= $this->Model_Imagen->ImagenGen($_Empresa["IDEmpresa"],'cliente');
+				$ImagenProveedor=  $this->Model_Imagen->ImagenGen($_Empresa["IDEmpresa"],'proveedor');
 				$_total=$this->db->query("SELECT COUNT('*') AS total FROM tbcalificaciones where IDEmpresaReceptor='".$_Empresa["IDEmpresa"]."'");
-				array_push($_Datos,array("IDEmpresa"=>$_DatosEmpresa["IDEmpresa"],"Razon_Social"=>$_DatosEmpresa["Razon_Social"],"RFC"=>$_DatosEmpresa["RFC"],"Nombre_Comer"=>$_DatosEmpresa["Nombre_Comer"],"Perfil"=>$_DatosEmpresa["Perfil"],"Logo"=>$_DatosEmpresa["Logo"],"Banner"=>$_DatosEmpresa["Banner"]));
+				array_push($_Datos,
+				array(
+					"IDEmpresa"=>$_DatosEmpresa["IDEmpresa"],
+					"Razon_Social"=>$_DatosEmpresa["Razon_Social"],
+					"RFC"=>$_DatosEmpresa["RFC"],
+					"Nombre_Comer"=>$_DatosEmpresa["Nombre_Comer"],
+					"Perfil"=>$_DatosEmpresa["Perfil"],
+					"Logo"=>$_DatosEmpresa["Logo"],
+					"Banner"=>$_DatosEmpresa["Banner"],
+					"Normas"=>$_DatosNormas,
+					"Follow"=>$_seguida,
+					"ImagenCliente"=>$ImagenCliente,
+					"ImagenProveedor"=>$ImagenProveedor
+				));
 							
 			}
 		}

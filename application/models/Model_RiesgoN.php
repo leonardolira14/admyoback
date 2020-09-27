@@ -733,7 +733,808 @@ class Model_RiesgoN extends CI_Model
             return $data;
             
 
-        }        
+    }        
+
+    public function RiesgoGenPerfil($IDEmpresa,$IDGiro,$Periodo,$Quienes,$comoQue){
+        
+       //obtengo el periodo
+         $listas_fechas=dame_rangos_fecha($Periodo);
+         //vdebug($listas_fechas);
+        $lista_clientes = [];
+        
+        // obtengo el giro principal de la empresa si no traigo filtros
+        if($IDGiro === ''){
+            $IDGiro = '1';
+        }
+         // obtener las preguntas de ese giro 
+        $listado_preguntas = $this->Model_Preguntas->configuracion_cuestionario($IDGiro,$comoQue);
+        //vdebug($listado_preguntas);
+        $preguntas_cumplimiento=explode(',',$listado_preguntas[0]['Cumplimiento']);
+        $preguntas_calidad=explode(',',$listado_preguntas[0]['Calidad']);
+        $preguntas_oferta=explode(',',$listado_preguntas[0]['Oferta']);
+
+      
+       //vdebug($listas_fechas);
+
+
+
+
+
+
+        
+        $cantidad_por_categoria=[];
+        $porcentaje_categoria_cumplimiento=[];
+        $porcentaje_categoria_calidad = [];
+         $porcentaje_categoria_oferta = [];
+        $listas_fechas_ = _fechas_array_List($Periodo);
+        //vdebug($listas_fechas_);
+            $label_Grafica=[];
+            $data_grafica_General_SD = [];
+            $data_grafica_General_Mejorados =[];
+            $data_grafica_General_Empeorados = [];
+
+            $data_grafica_Calidad_SD = [];
+            $data_grafica_Calidad_Mejorados =[];
+            $data_grafica_Calidad_Empeorados = [];
+
+            $data_grafica_Cumplimiento_SD = [];
+            $data_grafica_Cumplimiento_Mejorados =[];
+            $data_grafica_Cumplimiento_Empeorados = [];
+
+            $data_grafica_Oferta_SD = [];
+            $data_grafica_Oferta_Mejorados =[];
+            $data_grafica_Oferta_Empeorados = [];
+            
+            $porcentaje_por_clientes["Cumplimiento"]= [];
+            $porcentaje_por_clientes["Calidad"] = [];
+            $porcentaje_por_clientes["Oferta"]= [];
+
+             $datos_anterior_general=[];
+            
+             $Porcentaje_Calidad_General= 0;
+             $Porcentaje_Cumplimiento_General= 0;
+             $Porcentaje_Oferta_General= 0;
+            //$listas_fechas_ = ['2016-12-30','2016-12-31'];
+            // ahora obtengo las graficas
+            $total_Empeorados=0;
+            $total_Mejorados=0;
+            foreach($listas_fechas_ as $fecha){
+                //vdebug($fecha);
+                $listaClientes= $this->getClientesProveedores($IDEmpresa,$fecha,$Periodo,$Quienes);
+                
+                $Total_Cumplimiento_SD = 0;
+                $Total_Cumplimiento_Mejorado = 0;
+                $Total_Cumplimiento_Empeorado = 0;
+                $Total_Calidad_SD = 0;
+                $Total_Calidad_Mejorado = 0;
+                $Total_Calidad_Empeorado = 0;
+                $Total_Oferta_SD = 0;
+                $Total_Oferta_Mejorado = 0;
+                $Total_Oferta_Empeorado = 0;
+                $Total_SD_gen=0;
+                $Total_Empeorado_gen=0;
+                $Total_Mejorado_gen=0;
+
+                foreach ($listaClientes as $cliente) {
+                   
+                    //vdebug($cliente);
+                    $porcentaje_array_pasado = [];
+                    $porcentaje_array_actual = [];
+                    $dato_anterior_cumplimiento= [];
+                    $dato_anterior_calidad= [];
+                    $dato_anterior_oferta= [];
+                    
+                    $Suma_porcentaje_general_pasado = 0;
+                    $Suma_porcentaje_general_actual = 0;
+
+
+                    
+                    // cumplimiento 
+                     foreach($preguntas_cumplimiento as $pregunta){
+                        $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                        if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                           
+                            // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                            if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                            }else{
+                                 $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                            }
+                          
+                            
+                            // porcentaje pasado
+                            $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                           
+                            if($porcentaje_pasado['Porcentaje'] === null){
+                                $porcentaje_pas = 0;
+                            }else{
+                                $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                            }
+                            
+                             array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                            // porcentaje actual
+                            $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                            if($porcentaje_actual['Porcentaje'] === null){
+                                $porcentaje_actu = 0;
+                            }else{
+                                $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                            }
+                            array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                           
+                        }
+                    }
+                    // ahora obtengo el procentaje pasado y actual para poder comparar
+                    $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                    $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                    
+                    $Porcentaje_Cumplimiento_General= $Porcentaje_Cumplimiento_General + $_Porcentaje_actual;
+            
+                    $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                    $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                    // guardo el procentaje actual del cliente 
+                    array_push($porcentaje_por_clientes["Cumplimiento"],$_Porcentaje_actual);
+
+
+                    if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                        $Total_Cumplimiento_SD ++;
+                        array_push($dato_anterior_cumplimiento,'SD');
+                    }else if($_Porcentaje_pasado   > $_Porcentaje_actual  ){
+                        $Total_Cumplimiento_Empeorado ++;
+                        array_push($dato_anterior_cumplimiento,'E');
+                    }else if($_Porcentaje_pasado < $_Porcentaje_actual  ){
+                        $Total_Cumplimiento_Mejorado ++;
+                        array_push($dato_anterior_cumplimiento,'M');
+                    }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                        if($dato_anterior_cumplimiento[count($dato_anterior_cumplimiento)-1]==='E'){
+                            $Total_Cumplimiento_Empeorado ++;
+                        }
+                        if($dato_anterior_cumplimiento[count($dato_anterior_cumplimiento)-1]==='SD'){
+                             $Total_Cumplimiento_SD++;   
+                        }
+                        if($dato_anterior_cumplimiento[count($dato_anterior_cumplimiento)-1]==='M'){
+                            $Total_Cumplimiento_Mejorado ++;    
+                        }
+                    }
+
+
+                   
+                    
+                    
+                    $porcentaje_array_pasado = [];
+                    $porcentaje_array_actual = [];
+                    // calidad
+                         foreach($preguntas_calidad as $pregunta){
+                            $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            
+                                // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                                if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                            }else{
+                                 $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                            }
+                            
+                                // porcentaje pasado
+                                $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                            
+                                if($porcentaje_pasado['Porcentaje'] === null){
+                                    $porcentaje_pas = 0;
+                                }else{
+                                    $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                                }
+                                
+                                 array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                                // porcentaje actual
+                                $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                                if($porcentaje_actual['Porcentaje'] === null){
+                                    $porcentaje_actu = 0;
+                                }else{
+                                    $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                                }
+                                
+                                 array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                           
+                            
+                            }
+                            
+                        }
+                        // ahora obtengo el procentaje pasado y actual para poder comparar
+                        $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                        $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                         $Porcentaje_Calidad_General= $Porcentaje_Calidad_General + $_Porcentaje_actual;
+            
+                        $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                        $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                        
+                        array_push($porcentaje_por_clientes["Calidad"],$_Porcentaje_actual);
+
+                        if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                            $Total_Calidad_SD ++;
+                            array_push($dato_anterior_calidad,'SD');
+                        }else if($_Porcentaje_pasado  > $_Porcentaje_actual ){
+                            $Total_Calidad_Empeorado ++;
+                            array_push($dato_anterior_calidad,'E');
+                        }else if($_Porcentaje_pasado  < $_Porcentaje_actual  ){
+                            $Total_Calidad_Mejorado ++;
+                            array_push($dato_anterior_calidad,'M');
+                        }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                            if($dato_anterior_calidad[count($dato_anterior_calidad)-1]==='E'){
+                                $Total_Calidad_Empeorado ++;
+                            }
+                            if($dato_anterior_calidad[count($dato_anterior_calidad)-1]==='SD'){
+                                $Total_Calidad_SD++;   
+                            }
+                            if($dato_anterior_calidad[count($dato_anterior_calidad)-1]==='M'){
+                                $Total_Calidad_Mejorado ++;    
+                            }
+                        }
+
+                   if($comoQue === 'proveedor'){
+
+                    
+                     $porcentaje_array_pasado = [];
+                     $porcentaje_array_actual = [];
+                    // oferta
+                        foreach($preguntas_oferta as $pregunta){
+                            $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            
+                                // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                                if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                                }else{
+                                    $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                                }
+                            
+                                // porcentaje pasado
+                                $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                            
+                                if($porcentaje_pasado['Porcentaje'] === null){
+                                    $porcentaje_pas = 0;
+                                }else{
+                                    $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                                }
+                                 array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                                
+                                // porcentaje actual
+                                $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                                if($porcentaje_actual['Porcentaje'] === null){
+                                    $porcentaje_actu = 0;
+                                }else{
+                                    $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                                }
+                               
+                                array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                           
+                            
+                            }
+                            
+                        }
+                        // ahora obtengo el procentaje pasado y actual para poder comparar
+                        $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                        $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                         $Porcentaje_Oferta_General=  $Porcentaje_Oferta_General +$_Porcentaje_actual;
+                        $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                        $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                        
+                        array_push($porcentaje_por_clientes["Oferta"],$_Porcentaje_actual);
+
+                        if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                            $Total_Oferta_SD ++;
+                            array_push($dato_anterior_oferta,'SD');
+                        }else if($_Porcentaje_pasado  > $_Porcentaje_actual ){
+                            $Total_Oferta_Empeorado ++;
+                            array_push($dato_anterior_oferta,'E');
+                        }else if($_Porcentaje_pasado  < $_Porcentaje_actual  ){
+                            $Total_Oferta_Mejorado ++;
+                            array_push($dato_anterior_oferta,'M');
+                        }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                            if($dato_anterior_oferta[count($dato_anterior_oferta)-1]==='E'){
+                                $Total_Oferta_Empeorado ++;
+                            }
+                            if($dato_anterior_oferta[count($dato_anterior_oferta)-1]==='SD'){
+                                $Total_Oferta_SD++;   
+                            }
+                            if($dato_anterior_oferta[count($dato_anterior_oferta)-1]==='M'){
+                                $Total_Oferta_Mejorado ++;    
+                            }
+                        }
+                     }
+                     if($Suma_porcentaje_general_pasado === 0  && $Suma_porcentaje_general_actual === 0 ){
+                            $Total_SD_gen ++;
+                            array_push($datos_anterior_general,array("Status"=>'SD',"IDCliente"=>$cliente['IDEmpresaB']));
+                        }else if($Suma_porcentaje_general_pasado  > $Suma_porcentaje_general_actual ){
+                            $Total_Empeorado_gen ++;
+                            array_push($datos_anterior_general,array("Status"=>'E',"IDCliente"=>$cliente['IDEmpresaB']));
+                        }else if($Suma_porcentaje_general_pasado  < $Suma_porcentaje_general_actual  ){
+                            $Total_Mejorado_gen ++;
+                             array_push($datos_anterior_general,array("Status"=>'M',"IDCliente"=>$cliente['IDEmpresaB']));
+                        }else if($Suma_porcentaje_general_pasado === $Suma_porcentaje_general_actual ){
+                            for($i=count($datos_anterior_general);$i>=0; $i--){
+                                if($dato["IDCliente"]===$cliente['IDEmpresaB']){
+                                    if($dato["Status"]==='E'){
+                                    $Total_Empeorado_gen ++;
+                                    }
+                                    if($dato["Status"]==='SD'){
+                                        $Total_SD_gen++;   
+                                    }
+                                    if($dato["Status"]==='M'){
+                                        $Total_Mejorado_gen ++;    
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+
+
+               array_push($data_grafica_General_SD,$Total_SD_gen);
+                array_push($data_grafica_General_Mejorados,$Total_Mejorado_gen);
+                array_push($data_grafica_General_Empeorados,$Total_Empeorado_gen);
+                    
+
+                array_push($data_grafica_Calidad_SD,$Total_Calidad_SD);
+                array_push($data_grafica_Calidad_Mejorados,$Total_Calidad_Mejorado);
+                array_push($data_grafica_Calidad_Empeorados,$Total_Calidad_Empeorado);
+
+                array_push($data_grafica_Cumplimiento_SD,$Total_Cumplimiento_SD);
+                array_push($data_grafica_Cumplimiento_Mejorados,$Total_Cumplimiento_Mejorado);
+                array_push($data_grafica_Cumplimiento_Empeorados,$Total_Cumplimiento_Empeorado);
+
+                array_push($data_grafica_Oferta_SD,$Total_Oferta_SD);
+                array_push($data_grafica_Oferta_Mejorados,$Total_Oferta_Mejorado);
+                array_push($data_grafica_Oferta_Empeorados,$Total_Oferta_Empeorado);
+            
+                
+            }
+            $data['graficas']=array(
+                "Calidad"=>array(
+                    "SD"=>$data_grafica_Calidad_SD,
+                    "Mejorados"=>$data_grafica_Calidad_Mejorados,
+                    "Empeorado"=>$data_grafica_Calidad_Empeorados
+                ),
+                "Cumplimiento"=>array(
+                    "SD"=>$data_grafica_Cumplimiento_SD,
+                    "Mejorados"=>$data_grafica_Cumplimiento_Mejorados,
+                    "Empeorado"=>$data_grafica_Cumplimiento_Empeorados
+                ),
+                "Oferta"=>array(
+                    "SD"=>$data_grafica_Oferta_SD,
+                    "Mejorados"=>$data_grafica_Oferta_Mejorados,
+                    "Empeorado"=>$data_grafica_Oferta_Empeorados
+                ),
+
+                 "General"=>array(
+                    "SD"=>$data_grafica_General_SD,
+                    "Mejorados"=>$data_grafica_General_Mejorados,
+                    "Empeorado"=>$data_grafica_General_Empeorados
+                ),
+                
+
+            );
+
+            $data["labels"]=$listas_fechas_;
+            $data["NumMejorados"]= $Total_Mejorado_gen;
+            $data["NumEmpeorados"]= $Total_Empeorado_gen;
+            $data["NumSD"]= $Total_SD_gen;
+            $data["porcentajes"]= array(
+                "General"=>$Porcentaje_Oferta_General+$Porcentaje_Calidad_General+$Porcentaje_Cumplimiento_General,
+                "Oferta"=>$Porcentaje_Oferta_General,
+                "Calidad"=>$Porcentaje_Calidad_General,
+                "Cumplimiento"=>$Porcentaje_Cumplimiento_General
+
+            );
+            
+            $data["periodo"]=$listas_fechas_[0]."-".$listas_fechas_[count($listas_fechas_)-1];
+            return $data;
+            
+
+    }
+    public function RiesgoGenListadoClientes($IDEmpresa,$IDGiro,$Periodo,$Quienes,$comoQue){
+        
+       //obtengo el periodo
+         $listas_fechas=dame_rangos_fecha($Periodo);
+         //vdebug($listas_fechas);
+        $lista_clientes = [];
+        
+        // obtengo el giro principal de la empresa si no traigo filtros
+        if($IDGiro === ''){
+            $IDGiro = '1';
+        }
+         // obtener las preguntas de ese giro 
+        $listado_preguntas = $this->Model_Preguntas->configuracion_cuestionario($IDGiro,$comoQue);
+        //vdebug($listado_preguntas);
+        $preguntas_cumplimiento=explode(',',$listado_preguntas[0]['Cumplimiento']);
+        $preguntas_calidad=explode(',',$listado_preguntas[0]['Calidad']);
+        $preguntas_oferta=explode(',',$listado_preguntas[0]['Oferta']);
+
+      
+       //vdebug($listas_fechas);
+
+
+
+
+
+
+        
+        $cantidad_por_categoria=[];
+        $porcentaje_categoria_cumplimiento=[];
+        $porcentaje_categoria_calidad = [];
+         $porcentaje_categoria_oferta = [];
+        $listas_fechas_ = _fechas_array_List($Periodo);
+        //vdebug($listas_fechas_);
+            $label_Grafica=[];
+            $data_grafica_General_SD = [];
+            $data_grafica_General_Mejorados =[];
+            $data_grafica_General_Empeorados = [];
+
+            $data_grafica_Calidad_SD = [];
+            $data_grafica_Calidad_Mejorados =[];
+            $data_grafica_Calidad_Empeorados = [];
+
+            $data_grafica_Cumplimiento_SD = [];
+            $data_grafica_Cumplimiento_Mejorados =[];
+            $data_grafica_Cumplimiento_Empeorados = [];
+
+            $data_grafica_Oferta_SD = [];
+            $data_grafica_Oferta_Mejorados =[];
+            $data_grafica_Oferta_Empeorados = [];
+            
+            $porcentaje_por_clientes["Cumplimiento"]= [];
+            $porcentaje_por_clientes["Calidad"] = [];
+            $porcentaje_por_clientes["Oferta"]= [];
+
+             $datos_anterior_general=[];
+            
+             $Porcentaje_Calidad_General= 0;
+             $Porcentaje_Cumplimiento_General= 0;
+             $Porcentaje_Oferta_General= 0;
+            //$listas_fechas_ = ['2016-12-30','2016-12-31'];
+            // ahora obtengo las graficas
+            $total_Empeorados=0;
+            $total_Mejorados=0;
+            foreach($listas_fechas_ as $fecha){
+                //vdebug($fecha);
+                $listaClientes= $this->getClientesProveedores($IDEmpresa,$fecha,$Periodo,$Quienes);
+                
+                $Total_Cumplimiento_SD = 0;
+                $Total_Cumplimiento_Mejorado = 0;
+                $Total_Cumplimiento_Empeorado = 0;
+                $Total_Calidad_SD = 0;
+                $Total_Calidad_Mejorado = 0;
+                $Total_Calidad_Empeorado = 0;
+                $Total_Oferta_SD = 0;
+                $Total_Oferta_Mejorado = 0;
+                $Total_Oferta_Empeorado = 0;
+                $Total_SD_gen=0;
+                $Total_Empeorado_gen=0;
+                $Total_Mejorado_gen=0;
+
+                foreach ($listaClientes as $cliente) {
+                   
+                    //vdebug($cliente);
+                    $porcentaje_array_pasado = [];
+                    $porcentaje_array_actual = [];
+                    $dato_anterior_cumplimiento= [];
+                    $dato_anterior_calidad= [];
+                    $dato_anterior_oferta= [];
+                    
+                    $Suma_porcentaje_general_pasado = 0;
+                    $Suma_porcentaje_general_actual = 0;
+
+
+                    
+                    // cumplimiento 
+                     foreach($preguntas_cumplimiento as $pregunta){
+                        $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                        if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                           
+                            // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                            if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                            }else{
+                                 $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                            }
+                          
+                            
+                            // porcentaje pasado
+                            $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                           
+                            if($porcentaje_pasado['Porcentaje'] === null){
+                                $porcentaje_pas = 0;
+                            }else{
+                                $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                            }
+                            
+                             array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                            // porcentaje actual
+                            $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                            if($porcentaje_actual['Porcentaje'] === null){
+                                $porcentaje_actu = 0;
+                            }else{
+                                $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                            }
+                            array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                           
+                        }
+                    }
+                    // ahora obtengo el procentaje pasado y actual para poder comparar
+                    $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                    $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                    
+                    $Porcentaje_Cumplimiento_General= $Porcentaje_Cumplimiento_General + $_Porcentaje_actual;
+            
+                    $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                    $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                    // guardo el procentaje actual del cliente 
+                    array_push($porcentaje_por_clientes["Cumplimiento"],$_Porcentaje_actual);
+
+
+                    if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                        $Total_Cumplimiento_SD ++;
+                        array_push($dato_anterior_cumplimiento,'SD');
+                    }else if($_Porcentaje_pasado   > $_Porcentaje_actual  ){
+                        $Total_Cumplimiento_Empeorado ++;
+                        array_push($dato_anterior_cumplimiento,'E');
+                    }else if($_Porcentaje_pasado < $_Porcentaje_actual  ){
+                        $Total_Cumplimiento_Mejorado ++;
+                        array_push($dato_anterior_cumplimiento,'M');
+                    }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                        if($dato_anterior_cumplimiento[count($dato_anterior_cumplimiento)-1]==='E'){
+                            $Total_Cumplimiento_Empeorado ++;
+                        }
+                        if($dato_anterior_cumplimiento[count($dato_anterior_cumplimiento)-1]==='SD'){
+                             $Total_Cumplimiento_SD++;   
+                        }
+                        if($dato_anterior_cumplimiento[count($dato_anterior_cumplimiento)-1]==='M'){
+                            $Total_Cumplimiento_Mejorado ++;    
+                        }
+                    }
+
+
+                   
+                    
+                    
+                    $porcentaje_array_pasado = [];
+                    $porcentaje_array_actual = [];
+                    // calidad
+                         foreach($preguntas_calidad as $pregunta){
+                            $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            
+                                // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                                if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                            }else{
+                                 $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                            }
+                            
+                                // porcentaje pasado
+                                $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                            
+                                if($porcentaje_pasado['Porcentaje'] === null){
+                                    $porcentaje_pas = 0;
+                                }else{
+                                    $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                                }
+                                
+                                 array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                                // porcentaje actual
+                                $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                                if($porcentaje_actual['Porcentaje'] === null){
+                                    $porcentaje_actu = 0;
+                                }else{
+                                    $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                                }
+                                
+                                 array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                           
+                            
+                            }
+                            
+                        }
+                        // ahora obtengo el procentaje pasado y actual para poder comparar
+                        $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                        $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                         $Porcentaje_Calidad_General= $Porcentaje_Calidad_General + $_Porcentaje_actual;
+            
+                        $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                        $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                        
+                        array_push($porcentaje_por_clientes["Calidad"],$_Porcentaje_actual);
+
+                        if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                            $Total_Calidad_SD ++;
+                            array_push($dato_anterior_calidad,'SD');
+                        }else if($_Porcentaje_pasado  > $_Porcentaje_actual ){
+                            $Total_Calidad_Empeorado ++;
+                            array_push($dato_anterior_calidad,'E');
+                        }else if($_Porcentaje_pasado  < $_Porcentaje_actual  ){
+                            $Total_Calidad_Mejorado ++;
+                            array_push($dato_anterior_calidad,'M');
+                        }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                            if($dato_anterior_calidad[count($dato_anterior_calidad)-1]==='E'){
+                                $Total_Calidad_Empeorado ++;
+                            }
+                            if($dato_anterior_calidad[count($dato_anterior_calidad)-1]==='SD'){
+                                $Total_Calidad_SD++;   
+                            }
+                            if($dato_anterior_calidad[count($dato_anterior_calidad)-1]==='M'){
+                                $Total_Calidad_Mejorado ++;    
+                            }
+                        }
+
+                   if($comoQue === 'proveedor'){
+
+                    
+                     $porcentaje_array_pasado = [];
+                     $porcentaje_array_actual = [];
+                    // oferta
+                        foreach($preguntas_oferta as $pregunta){
+                            $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            
+                                // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                                if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                                }else{
+                                    $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                                }
+                            
+                                // porcentaje pasado
+                                $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                            
+                                if($porcentaje_pasado['Porcentaje'] === null){
+                                    $porcentaje_pas = 0;
+                                }else{
+                                    $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                                }
+                                 array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                                
+                                // porcentaje actual
+                                $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                                if($porcentaje_actual['Porcentaje'] === null){
+                                    $porcentaje_actu = 0;
+                                }else{
+                                    $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                                }
+                               
+                                array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                           
+                            
+                            }
+                            
+                        }
+                        // ahora obtengo el procentaje pasado y actual para poder comparar
+                        $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                        $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                         $Porcentaje_Oferta_General=  $Porcentaje_Oferta_General +$_Porcentaje_actual;
+                        $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                        $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                        
+                        array_push($porcentaje_por_clientes["Oferta"],$_Porcentaje_actual);
+
+                        if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                            $Total_Oferta_SD ++;
+                            array_push($dato_anterior_oferta,'SD');
+                        }else if($_Porcentaje_pasado  > $_Porcentaje_actual ){
+                            $Total_Oferta_Empeorado ++;
+                            array_push($dato_anterior_oferta,'E');
+                        }else if($_Porcentaje_pasado  < $_Porcentaje_actual  ){
+                            $Total_Oferta_Mejorado ++;
+                            array_push($dato_anterior_oferta,'M');
+                        }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                            if($dato_anterior_oferta[count($dato_anterior_oferta)-1]==='E'){
+                                $Total_Oferta_Empeorado ++;
+                            }
+                            if($dato_anterior_oferta[count($dato_anterior_oferta)-1]==='SD'){
+                                $Total_Oferta_SD++;   
+                            }
+                            if($dato_anterior_oferta[count($dato_anterior_oferta)-1]==='M'){
+                                $Total_Oferta_Mejorado ++;    
+                            }
+                        }
+                     }
+                     if($Suma_porcentaje_general_pasado === 0  && $Suma_porcentaje_general_actual === 0 ){
+                            $Total_SD_gen ++;
+                            array_push($datos_anterior_general,array("Status"=>'SD',"IDCliente"=>$cliente['IDEmpresaB']));
+                        }else if($Suma_porcentaje_general_pasado  > $Suma_porcentaje_general_actual ){
+                            $Total_Empeorado_gen ++;
+                            array_push($datos_anterior_general,array("Status"=>'E',"IDCliente"=>$cliente['IDEmpresaB']));
+                        }else if($Suma_porcentaje_general_pasado  < $Suma_porcentaje_general_actual  ){
+                            $Total_Mejorado_gen ++;
+                             array_push($datos_anterior_general,array("Status"=>'M',"IDCliente"=>$cliente['IDEmpresaB']));
+                        }else if($Suma_porcentaje_general_pasado === $Suma_porcentaje_general_actual ){
+                            for($i=count($datos_anterior_general);$i>=0; $i--){
+                                if($dato["IDCliente"]===$cliente['IDEmpresaB']){
+                                    if($dato["Status"]==='E'){
+                                    $Total_Empeorado_gen ++;
+                                    }
+                                    if($dato["Status"]==='SD'){
+                                        $Total_SD_gen++;   
+                                    }
+                                    if($dato["Status"]==='M'){
+                                        $Total_Mejorado_gen ++;    
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+
+
+               array_push($data_grafica_General_SD,$Total_SD_gen);
+                array_push($data_grafica_General_Mejorados,$Total_Mejorado_gen);
+                array_push($data_grafica_General_Empeorados,$Total_Empeorado_gen);
+                    
+
+                array_push($data_grafica_Calidad_SD,$Total_Calidad_SD);
+                array_push($data_grafica_Calidad_Mejorados,$Total_Calidad_Mejorado);
+                array_push($data_grafica_Calidad_Empeorados,$Total_Calidad_Empeorado);
+
+                array_push($data_grafica_Cumplimiento_SD,$Total_Cumplimiento_SD);
+                array_push($data_grafica_Cumplimiento_Mejorados,$Total_Cumplimiento_Mejorado);
+                array_push($data_grafica_Cumplimiento_Empeorados,$Total_Cumplimiento_Empeorado);
+
+                array_push($data_grafica_Oferta_SD,$Total_Oferta_SD);
+                array_push($data_grafica_Oferta_Mejorados,$Total_Oferta_Mejorado);
+                array_push($data_grafica_Oferta_Empeorados,$Total_Oferta_Empeorado);
+            
+                
+            }
+            $data['graficas']=array(
+                "Calidad"=>array(
+                    "SD"=>$data_grafica_Calidad_SD,
+                    "Mejorados"=>$data_grafica_Calidad_Mejorados,
+                    "Empeorado"=>$data_grafica_Calidad_Empeorados
+                ),
+                "Cumplimiento"=>array(
+                    "SD"=>$data_grafica_Cumplimiento_SD,
+                    "Mejorados"=>$data_grafica_Cumplimiento_Mejorados,
+                    "Empeorado"=>$data_grafica_Cumplimiento_Empeorados
+                ),
+                "Oferta"=>array(
+                    "SD"=>$data_grafica_Oferta_SD,
+                    "Mejorados"=>$data_grafica_Oferta_Mejorados,
+                    "Empeorado"=>$data_grafica_Oferta_Empeorados
+                ),
+
+                 "General"=>array(
+                    "SD"=>$data_grafica_General_SD,
+                    "Mejorados"=>$data_grafica_General_Mejorados,
+                    "Empeorado"=>$data_grafica_General_Empeorados
+                ),
+                
+
+            );
+
+            $data["labels"]=$listas_fechas_;
+            $data["NumMejorados"]= $Total_Mejorado_gen;
+            $data["NumEmpeorados"]= $Total_Empeorado_gen;
+            $data["NumSD"]= $Total_SD_gen;
+            $data["porcentajes"]= array(
+                "General"=>$Porcentaje_Oferta_General+$Porcentaje_Calidad_General+$Porcentaje_Cumplimiento_General,
+                "Oferta"=>$Porcentaje_Oferta_General,
+                "Calidad"=>$Porcentaje_Calidad_General,
+                "Cumplimiento"=>$Porcentaje_Cumplimiento_General
+
+            );
+            
+            $data["periodo"]=$listas_fechas_[0]."-".$listas_fechas_[count($listas_fechas_)-1];
+            return $data;
+            
+
+    } 
 
 
 

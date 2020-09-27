@@ -18,6 +18,7 @@ class Follow extends REST_Controller
     	$this->load->model("Model_Empresa");
 		$this->load->model("Model_Follow");
 		$this->load->model("Model_General");
+		$this->load->model("Model_Notificaciones");
 	}
 	//funcion para obtener tdos loas empresas seguidas
 	public function getallfollow_post(){
@@ -83,7 +84,7 @@ class Follow extends REST_Controller
 			$dat["datos"]="Aumentar";
 		}
 
-		$this->Model_Notificaciones->add($IDEmpresaN,$descripemisor,$_ID_Empresa_emisora,$datos["Emisor"]["IDUsuario"]); 
+		//$this->Model_Notificaciones->add($_EmpresaB,'follow',$_Empresa,''); 
 
 			$_data["ok"]="SUCCESS";
 			$_data["result"]=$dat;

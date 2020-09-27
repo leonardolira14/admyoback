@@ -89,4 +89,14 @@ class Model_Follow extends CI_Model
 		}
 		
 	}
+
+	// funcion para saver si sigo o no a esta emprsa
+	public function getfollowtrue($IDEmpresa,$IDEmpresaseguida){
+		$respuesta = $this->db->select('*')->where("IDEmpresaA='$IDEmpresa' AND IDEmpresaSeguida='$IDEmpresaseguida'")->get('tb_follow_empresas');
+		
+		if($respuesta->num_rows()===0){
+			return false;
+		}
+			return true;
+	}
 }

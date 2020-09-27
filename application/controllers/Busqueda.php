@@ -32,7 +32,7 @@ class Busqueda extends REST_Controller
     public function busquedas_post(){
         $datos=$this->post();
         $_Empresa_Emisora=$this->Model_Empresa->getempresa($datos["IDEmpresaEmisora"]);
-
+        
         if(isset($datos["Orden"])){
             $orden=$datos["Orden"];
         }else{
@@ -60,8 +60,7 @@ class Busqueda extends REST_Controller
         }
         
         //ahora obtengo los resultados deacuerdo a lo que se haya solicitado
-        $_data["resultados"]=$this->Model_Buscar->busquda_Filtro($datos["Palabra"],$orden,$Estado,$calificaciones,$Certificado,$Asociacion);
-        $_data["estados"]=$datos["Estados"]=$this->Model_General->getEstados('42');
+        $_data["resultados"]=$this->Model_Buscar->busquda_Filtro($datos["Palabra"],$orden,$Estado,$calificaciones,$Certificado,$Asociacion,$datos["IDEmpresaEmisora"]);
         $_data["numeroresultados"]=count( $_data["resultados"]);
         $this->response($_data);
     }
