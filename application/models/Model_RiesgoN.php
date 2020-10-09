@@ -1599,11 +1599,11 @@ class Model_RiesgoN extends CI_Model
     // funcion para obtener los ID de los clientes o de los proveedores
     public function getClientesProveedores($IDEmprsa,$Fecha,$Tiempo,$Tipo){
 
-        if( $Tiempo === 'MA'|| $Tiempo === 'AC'){
+        if( $Tiempo === 'MA'|| $Tiempo === 'AC' || $Tiempo === 'A'){
             $fecha =$Fecha."-31";
             $respuesta = $this->db->query("SELECT IDEmpresaB FROM tbrelacion WHERE IDEmpresaP ='$IDEmprsa' AND date(FechaRelacion) <= '$fecha'  AND Tipo ='$Tipo'");
         }
-        if( $Tiempo === 'M'){
+        if( $Tiempo === 'M' ){
              $respuesta = $this->db->query("SELECT IDEmpresaB FROM tbrelacion WHERE IDEmpresaP ='$IDEmprsa' AND DATE(FechaRelacion) <= '$Fecha' AND Tipo ='$Tipo'");
         }
 

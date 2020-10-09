@@ -23,6 +23,7 @@ class DatosGenerales extends REST_Controller
     	$this->load->model("Model_Giros");
 		$this->load->model("Model_Marcas");
 		$this->load->model("Model_Norma");
+		$this->load->model("Model_RiesgoN");
 	}
 
 	public function cerrarsession_post(){
@@ -178,5 +179,32 @@ class DatosGenerales extends REST_Controller
 		$data["Ramas"]=$this->Model_General->getRama($data["GiroPrincipal"][0]['IDGiro2']);
 		$this->response($data,200);
 		
+	}
+	// funcion para obtener el riesgo y la imagen del cliente
+	public function getDataPerfil_post(){
+		$datos=$this->post();
+		
+		$respuesta = $this->Model_Imagen->ImagenGenFecha($datos['IDEmpresa'],'cliente',$datos['Periodo']);
+		$respuesta_ = $this->Model_Imagen->ImagenGenFecha($datos['IDEmpresa'],'proveedor',$datos['Periodo']);
+		// Riesgo
+		$riesgo_cliente_cliente =  $this->Model_RiesgoN->RiesgoGenPerfil($datos['IDEmpresa'],'',$datos['Periodo'],'cliente','cliente');
+		$riesgo_cliente_proveedor =  $this->Model_RiesgoN->RiesgoGenPerfil($datos['IDEmpresa'],'',$datos['Periodo'],'cliente','proveedor');
+		
+		$riesgo_proveedor_cliente =  $this->Model_RiesgoN->RiesgoGenPerfil($datos['IDEmpresa'],'',$datos['Periodo'],'proveedor','cliente');
+		$riesgo_proveedor_proveedor =  $this->Model_RiesgoN->RiesgoGenPerfil($datos['IDEmpresa'],'',$datos['Periodo'],'proveedor','proveedor');
+
+
+		$_data["code"]=0;
+		$_data["ok"]="SUCCESS";
+		$_data["imagen"]['cliente']=$respuesta;
+		$_data["imagen"]['proveedor'] = $respuesta_;
+		
+		$_data["riesgo"]['cliente']['cliente'] = $riesgo_cliente_cliente;
+		$_data["riesgo"]['cliente']['proveedor'] = $riesgo_cliente_proveedor;
+		$_data["riesgo"]['proveedor']['cliente'] = $riesgo_proveedor_cliente;
+		$_data["riesgo"]['proveedor']['proveedor'] = $riesgo_proveedor_proveedor;
+
+		
+		$this->response($_data);
 	}
 }

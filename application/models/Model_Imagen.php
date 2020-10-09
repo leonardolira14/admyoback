@@ -1290,5 +1290,63 @@ class Model_Imagen extends CI_Model
 		
 	}
 
+	// funcion para obtener la imagen de una empresa con fecha general
+	public function ImagenGenFecha($IDEmpresa,$tipo_persona,$periodo){
+		$rangos=_fechas_array_List($periodo);
+		//vdebug($rangos);
+		if( $periodo === 'M'){
+			$fecha_Inicio=$rangos[0];
+			$fecha_Fin=$rangos[count($rangos)-1];
+		}else{
+			$fecha_Inicio=$rangos[0]."-01";
+			$fecha_Fin=$rangos[count($rangos)-1].date('-d');
+		}
+
+		$data['periodo'] = $fecha_Inicio.' / '.$fecha_Fin;
+		
+		if($tipo_persona==="cliente"){
+			$tb='tbimagen_cliente';
+			$linoferta="";
+		}else{
+			$tb='tbimagen_proveedor';
+			$linoferta=",round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta";
+		}
+			//traigo los registros de la tabla de imagen_cliente
+			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) BETWEEN '$fecha_Inicio' and '$fecha_Fin'")->get($tb);
+			$respuesta = $promedios_actuales->result_array();
+			
+			if($respuesta[0]['mediageneral'] === NULL){
+				$data['mediageneral'] = 0;
+			}else{
+				$data['mediageneral']= $respuesta[0]['mediageneral'];
+			}
+			if($respuesta[0]['mediacalidad'] === NULL){
+				$data['mediacalidad'] = 0;
+			}else{
+				$data['mediacalidad']= $respuesta[0]['mediacalidad'];
+			}
+
+			if($respuesta[0]['mediacumplimiento'] === NULL){
+				$data['mediacumplimiento'] = 0;
+			}else{
+				$data['mediacumplimiento']= $respuesta[0]['mediacumplimiento'];
+			}
+
+			if($tipo_persona==="proveedor"){
+				if($respuesta[0]['mediaoferta'] === NULL){
+					$data['mediaoferta'] = 0;
+				}else{
+					$data['mediaoferta']= $respuesta[0]['mediaoferta'];
+				}
+			}
+			
+			if($respuesta[0]['numcalif'] === NULL){
+				$data['numcalif'] = 0;
+			}else{
+				$data['numcalif']= $respuesta[0]['numcalif'];
+			}
+			return $data;
+	}
+
 	
 }

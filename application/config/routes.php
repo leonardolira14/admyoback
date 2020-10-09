@@ -72,13 +72,16 @@ $route["olvidarfollow"]="Follow/olvidarfollow";
 $route["addfollow"]="Follow/addfllow";
 $route["filtrofollow"]="Follow/filtro";
 
-$route["perfil"]="Busqueda/perfil";
+$route["perfilBus"]="Busqueda/perfil";
 $route["busquedas"]="Busqueda/busquedas";
 
 $route["cerrarsession"]="DatosGenerales/cerrarsession";
 
 $route["getimagen"]="imagen/getImagen";
 $route["detallesimagen"]="imagen/detalle";
+
+
+$route["perfildata"] = "DatosGenerales/getDataPerfil";
 
 $route["getriesgo"]="Riesgo/getriesgo";
 $route["getdetalleriesgo"]="Riesgo/detalle";

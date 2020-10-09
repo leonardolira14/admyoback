@@ -82,24 +82,14 @@ class Busqueda extends REST_Controller
             //ahora obtengo los correos de los usuarios master
             $_Datos_Usuario_Receptor=$this->Model_Usuario->GetMaster($datos["IDEmpresa"]);
             //envio un correo a la empresa que buscaron avisandole que lo han buscado
-
+            
             if(count($_Datos_Usuario_Receptor)!=0){
-                $this->Model_Email->visita($_Empresa_Receptora["IDEmpresa"], $_Datos_Usuario_Receptor[0]["Correo"]);
+                $this->Model_Email->visita($_Empresa_Receptora["IDEmpresa"], $_Datos_Usuario_Receptor["Correo"]);
                 $this->Model_Notificaciones->add($datos["IDEmpresa"],"vista",$_Empresa_Receptora["IDEmpresa"],'0','vista'); 
             }
             
         }
         $dat["datosempresa"]=$_Empresa_Receptora;
-        $dat["usuarios"]=$this->Model_Usuario->getAlluser($_ID_Empresa);
-        $dat["marcas"]=$this->Model_Marcas->getMarcasEmpresa($_ID_Empresa);
-        $dat["giros"]=$this->Model_Giros->getGirosEmpresa($_ID_Empresa);
-        $dat["Normas"]=$this->Model_Norma->getall($_ID_Empresa);
-        $dat["Productos"]=$this->Model_Producto->getall($_ID_Empresa);
-        $dat["telefonos"]=$this->Model_Empresa->getTels($_ID_Empresa);
-        $dat["ImagenCliente"]=$this->Model_Imagen->imgcliente($_ID_Empresa,'A','cliente',$resumen=FALSE);
-        $dat["ImagenProveedor"]=$this->Model_Imagen->imgcliente($_ID_Empresa,'A','proveedor',$resumen=FALSE);
-        $dat["detalleImagenCliente"]=$this->Model_Imagen->detalleImagen("cliente",$_ID_Empresa,'A');
-        $dat["detalleImagenProveedor"]=$this->Model_Imagen->detalleImagen("proveedor",$_ID_Empresa,'A');
 
         $_data["code"]=0;
         $_data["ok"]="SUCCESS";
