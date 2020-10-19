@@ -185,7 +185,9 @@ class DatosGenerales extends REST_Controller
 		$datos=$this->post();
 		
 		$respuesta = $this->Model_Imagen->ImagenGenFecha($datos['IDEmpresa'],'cliente',$datos['Periodo']);
+		
 		$respuesta_ = $this->Model_Imagen->ImagenGenFecha($datos['IDEmpresa'],'proveedor',$datos['Periodo']);
+		
 		// Riesgo
 		$riesgo_cliente_cliente =  $this->Model_RiesgoN->RiesgoGenPerfil($datos['IDEmpresa'],'',$datos['Periodo'],'cliente','cliente');
 		$riesgo_cliente_proveedor =  $this->Model_RiesgoN->RiesgoGenPerfil($datos['IDEmpresa'],'',$datos['Periodo'],'cliente','proveedor');
