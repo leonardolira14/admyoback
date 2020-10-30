@@ -24,6 +24,7 @@ class DatosGenerales extends REST_Controller
 		$this->load->model("Model_Marcas");
 		$this->load->model("Model_Norma");
 		$this->load->model("Model_RiesgoN");
+		$this->load->model('Model_Configuraciongeneral');
 	}
 
 	public function cerrarsession_post(){
@@ -198,6 +199,7 @@ class DatosGenerales extends REST_Controller
 
 		$_data["code"]=0;
 		$_data["ok"]="SUCCESS";
+		$_data["categorias"]=$this->Model_Configuraciongeneral->getCategorias();
 		$_data["imagen"]['cliente']=$respuesta;
 		$_data["imagen"]['proveedor'] = $respuesta_;
 		

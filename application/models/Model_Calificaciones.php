@@ -347,7 +347,7 @@ class Model_Calificaciones extends CI_Model{
 				$dtp=$this->detpreguntas($num[0]);
 				$peso=($dtp->PorTotal/$pt)*100;
 				if(is_numeric($num[1])){
-					if($num[1]==0){
+					if($num[1]===0){
 						$cal=10;
 						$Val=$dtp->PorTotal;
 					}else{
@@ -355,7 +355,7 @@ class Model_Calificaciones extends CI_Model{
 						$Val = $peso-(((int)$num[1]/30)*$peso);
 					}
 				}else{
-					if($num[1]==$dtp->Condicion){
+					if($num[1]===$dtp->Condicion){
 						$cal=10;
 						$Val=$peso;
 					}else{

@@ -10,6 +10,7 @@ class Model_Imagen extends CI_Model
 		parent::__construct();
 		$this->load->database();
 		$this->load->helper('selec_Titulo');
+		$this->load->model('Model_Configuraciongeneral');
 	}
 	//funcion para obtener los clientes
 	public function ObtenerClientes($idempresa){
@@ -199,6 +200,8 @@ class Model_Imagen extends CI_Model
 					$_evolucion_media_calidad=[];
 					$_evolucion_media_cumplimiento=[];
 					$_evolucion_media_oferta=[];
+					$_evolucion_media_sanidad=[];
+					$_evolucion_media_socioambiental=[];
 					$_evolucion_media_label=[];
 
 
@@ -209,10 +212,15 @@ class Model_Imagen extends CI_Model
 					$_evolucion_media_cumplimiento_pasado=[];
 					$_evolucion_media_oferta_pasado=[];
 					$_evolucion_media_label_pasado=[];
+
+					$_evolucion_media_sanidad_pasado=[];
+					$_evolucion_media_socioambiental_pasado=[];
 					
 					$cuantas_actual_gen=0;
 					$cuantas_actual=0;
 					$calidad=0;
+					$sanidad=0;
+					$socioambiental=0;
 					$cumplimiento=0;
 					$oferta=0;
 
@@ -220,6 +228,8 @@ class Model_Imagen extends CI_Model
 					$cuantas_actual_pasado=0;
 					$calidad_pasado=0;
 					$cumplimiento_pasado=0;
+					$sanidad_pasado=0;
+					$socioambiental_pasado=0;
 					$oferta_pasado=0;
 				if($tipo_fecha==='AC'){
 					// aqui tengo que mostrar la evolucion por mes desde enero asta el mes que se encuetra
@@ -302,6 +312,40 @@ class Model_Imagen extends CI_Model
 							array_push($_evolucion_media_cumplimiento_pasado,(float)$_evolucion_media_cumplimiento_pasado[count($_evolucion_media_cumplimiento_pasado)-1]+(float)$cumplimiento_pasado);
 						}
 						
+						// sanidad
+
+
+						$sanidad=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Sanidad');
+						if(count($_evolucion_media_sanidad)===0){
+							array_push($_evolucion_media_sanidad,(float)$sanidad);
+						}else{
+							array_push($_evolucion_media_sanidad,(float)$_evolucion_media_sanidad[count($_evolucion_media_sanidad)-1]+(float)$sanidad);
+						}
+						
+						
+						$sanidad_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Sanidad');
+						if(count($_evolucion_media_sanidad_pasado)===0){
+							array_push($_evolucion_media_sanidad_pasado,(float)$sanidad_pasado);
+						}else{
+							array_push($_evolucion_media_sanidad_pasado,(float)$_evolucion_media_sanidad_pasado[count($_evolucion_media_sanidad_pasado)-1]+(float)$sanidad_pasado);
+						}
+
+						// socioambiental
+
+						$socioambiental=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Socioambiental');
+						if(count($_evolucion_media_socioambiental)===0){
+							array_push($_evolucion_media_socioambiental,(float)$socioambiental);
+						}else{
+							array_push($_evolucion_media_socioambiental,(float)$_evolucion_media_socioambiental[count($_evolucion_media_socioambiental)-1]+(float)$socioambiental);
+						}
+						
+						
+						$socioambiental_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Socioambiental');
+						if(count($_evolucion_media_socioambiental_pasado)===0){
+							array_push($_evolucion_media_socioambiental_pasado,(float)$socioambiental_pasado);
+						}else{
+							array_push($_evolucion_media_socioambiental_pasado,(float)$_evolucion_media_socioambiental_pasado[count($_evolucion_media_socioambiental_pasado)-1]+(float)$socioambiental_pasado);
+						}
 						
 						
 						
@@ -332,7 +376,8 @@ class Model_Imagen extends CI_Model
 					$_data["evolucionmedia"]=array("data"=>array("data_actual"=>$_evolucion_media,"data_pasado"=>$_evolucion_media_pasado),"label"=>$evolucionlabel);	
 					$_data["evolucion_calidad"]=array("data"=>array("data_actual"=>$_evolucion_media_calidad,"data_pasado"=>$_evolucion_media_calidad_pasado),"label"=>$evolucionlabel);
 					$_data["evolucion_cumplimiento"]=array("data"=>array("data_actual"=>$_evolucion_media_cumplimiento,"data_pasado"=>$_evolucion_media_cumplimiento_pasado),"label"=>$evolucionlabel);
-					
+					$_data["evolucion_sanidad"]=array("data"=>array("data_actual"=>$_evolucion_media_sanidad,"data_pasado"=>$_evolucion_media_sanidad_pasado),"label"=>$evolucionlabel);	
+					$_data["evolucion_socioambiental"]=array("data"=>array("data_actual"=>$_evolucion_media_socioambiental,"data_pasado"=>$_evolucion_media_socioambiental_pasado),"label"=>$evolucionlabel);
 					if($tipo_persona==="proveedor"):
 						$_data["evolucion_oferta"]=array("data"=>array("data_actual"=>$_evolucion_media_oferta,"data_pasado"=>$_evolucion_media_oferta_pasado),"label"=>$evolucionlabel);
 					endif;
@@ -377,7 +422,22 @@ class Model_Imagen extends CI_Model
 						$cumplimiento_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Cumplimiento');
 						array_push($_evolucion_media_cumplimiento_pasado,$cumplimiento_pasado);
 						
+						// sanidad
+						$sanidad=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Sanidad');
+						array_push($_evolucion_media_sanidad,$sanidad);
 						
+						$sanidad_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Sanidad');
+						array_push($_evolucion_media_sanidad_pasado,$sanidad_pasado);
+
+						//socioambiental
+						$socioambiental=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Socioambiental');
+						array_push($_evolucion_media_sanidad,$socioambiental);
+						
+						$socioambiental_pasado=$this->Media_calificaciones_tipo($anio_pasado.'-'.$mes."-01",$anio_pasado.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Socioambiental');
+						array_push($_evolucion_media_socioambiental_pasado,$socioambiental_pasado);
+
+
+
 						if($tipo_persona==="proveedor"):
 							$oferta=$this->Media_calificaciones_tipo($anio_actual.'-'.$mes."-01",$anio_actual.'-'.$mes."-31",$IDEmpresa,$tipo_persona,'Oferta');
 							array_push($_evolucion_media_oferta,$oferta);
@@ -389,10 +449,14 @@ class Model_Imagen extends CI_Model
 						$cuantas_actual=0;
 						$calidad=0;
 						$cumplimiento=0;
+						$sanidad=0;
+						$socioambiental=0;
 						$oferta=0;
 
 						$cuantas_actual_gen_pasado=0;
 						$cuantas_actual_pasado=0;
+						$socioambiental_pasado=0;
+						$sanidad_pasado=0;
 						$calidad_pasado=0;
 						$cumplimiento_pasado=0;
 						$oferta_pasado=0;
@@ -406,6 +470,8 @@ class Model_Imagen extends CI_Model
 					$_data["evolucionmedia"]=array("data"=>array("data_actual"=>$_evolucion_media,"data_pasado"=>$_evolucion_media_pasado),"label"=>$evolucionlabel);	
 					$_data["evolucion_calidad"]=array("data"=>array("data_actual"=>$_evolucion_media_calidad,"data_pasado"=>$_evolucion_media_calidad_pasado),"label"=>$evolucionlabel);
 					$_data["evolucion_cumplimiento"]=array("data"=>array("data_actual"=>$_evolucion_media_cumplimiento,"data_pasado"=>$_evolucion_media_cumplimiento_pasado),"label"=>$evolucionlabel);
+					$_data["evolucion_sanidad"]=array("data"=>array("data_actual"=>$_evolucion_media_sanidad,"data_pasado"=>$_evolucion_media_sanidad_pasado),"label"=>$evolucionlabel);
+					$_data["evolucion_socioambiental"]=array("data"=>array("data_actual"=>$_evolucion_media_socioambiental,"data_pasado"=>$_evolucion_media_socioambiental_pasado),"label"=>$evolucionlabel);
 					
 					if($tipo_persona==="proveedor"):
 						$_data["evolucion_oferta"]=array("data"=>array("data_actual"=>$_evolucion_media_oferta,"data_pasado"=>$_evolucion_media_oferta_pasado),"label"=>$evolucionlabel);
@@ -552,6 +618,12 @@ class Model_Imagen extends CI_Model
 				break;
 			case 'Oferta':
 				$sql='round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as media';
+				break;
+			case 'Sanidad':
+				$sql='round(sum(P_Obt_Sanidad)/sum(P_Pos_Sanidad)*10,2) as media';
+				break;
+			case 'Socioambiental':
+				$sql='round(sum(P_Obt_Socioambiental)/sum(P_Obt_Socioambiental)*10,2) as media';
 				break;
 			
 		}
@@ -937,7 +1009,8 @@ class Model_Imagen extends CI_Model
 		
 		$listapreguntascalidad=$this->listpreguntas("Calidad",$forma,$_Giro_Principal);
 		$listapreguntascumplimento=$this->listpreguntas("Cumplimiento",$forma,$_Giro_Principal);
-
+		$listapreguntassanidad=$this->listpreguntas("Sanidad",$forma,$_Giro_Principal);
+		$listapreguntassocioambiental=$this->listpreguntas("Socioambiental",$forma,$_Giro_Principal);
 		
 			if($promedios_actuales->result()[0]->mediageneral!==NULL)
 			{
@@ -956,8 +1029,17 @@ class Model_Imagen extends CI_Model
 
 		$listapreguntascalidad=explode(",",$listapreguntascalidad->Calidad);
 		$_data["listCalidad"]=$this->Grafics_($listapreguntascalidad,$tipo_fecha,$_fecha_Inicio_Actual,$_fecha_Fin_Actual,$IDEmpresa,$tipo_persona);
+		
 		$listapreguntascumplimento=explode(",",$listapreguntascumplimento->Cumplimiento);
 		$_data["listCumplimiento"]=$this->Grafics_($listapreguntascumplimento,$tipo_fecha,$_fecha_Inicio_Actual,$_fecha_Fin_Actual,$IDEmpresa,$tipo_persona);
+		
+		$listapreguntassanidad=explode(",",$listapreguntassanidad->Sanidad);
+		$_data["listSanidad"]=$this->Grafics_($listapreguntassanidad,$tipo_fecha,$_fecha_Inicio_Actual,$_fecha_Fin_Actual,$IDEmpresa,$tipo_persona);
+		
+		$listapreguntassocioambiental=explode(",",$listapreguntassocioambiental->Socioambiental);
+		$_data["listSociambiental"]=$this->Grafics_($listapreguntassocioambiental,$tipo_fecha,$_fecha_Inicio_Actual,$_fecha_Fin_Actual,$IDEmpresa,$tipo_persona);
+		
+		
 		if($tipo_persona==="proveedor")
 		{
 			$listapreguntasoferta=explode(",",$listapreguntasoferta->Oferta);
@@ -1292,6 +1374,7 @@ class Model_Imagen extends CI_Model
 
 	// funcion para obtener la imagen de una empresa con fecha general
 	public function ImagenGenFecha($IDEmpresa,$tipo_persona,$periodo){
+		$_categorias  = $this->Model_Configuraciongeneral->getCategorias();
 		$rangos=_fechas_array_List($periodo);
 		//vdebug($rangos);
 		if( $periodo === 'M'){
@@ -1310,41 +1393,42 @@ class Model_Imagen extends CI_Model
 		}else{
 			$tb='tbimagen_proveedor';
 			$linoferta=",round(sum(P_Obt_Oferta)/sum(P_Pos_Oferta)*10,2) as mediaoferta";
+			array_push($_categorias,'Oferta');
 		}
 			//traigo los registros de la tabla de imagen_cliente
-			$promedios_actuales=$this->db->select("round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,round(sum(P_Obt_Calidad)/sum(P_Pos_Calidad)*10,2) mediacalidad,round(sum(P_Obt_Cumplimiento)/sum(P_Pos_Cumplimiento)*10,2) as mediacumplimiento,sum(N_Calificaciones)as numcalif".$linoferta)->where("IDEmpresa='$IDEmpresa' and date(Fecha) BETWEEN '$fecha_Inicio' and '$fecha_Fin'")->get($tb);
-			$respuesta = $promedios_actuales->result_array();
+			$strin_cadena = "count(*) AS numcalif,round(sum(P_Ob_Generales)/sum(P_Pos_Generales)*10,2) as mediageneral,";
 			
+			for($i=0; $i<=count($_categorias)-1;$i++){
+				$item = $_categorias[$i];
+				$strin_cadena = $strin_cadena."round(sum(P_Obt_$item)/sum(P_Pos_$item)*10,2) as media$item";
+				if($i!==count($_categorias)-1){
+					$strin_cadena = $strin_cadena. ",";
+				}
+			}
+			$strin_cadena = $strin_cadena.$linoferta;
+			$promedios_actuales=$this->db->select($strin_cadena)->where("IDEmpresa='$IDEmpresa' and date(Fecha) BETWEEN '$fecha_Inicio' and '$fecha_Fin'")->get($tb);
+			$respuesta = $promedios_actuales->result_array();
 			if($respuesta[0]['mediageneral'] === NULL){
 				$data['mediageneral'] = 0;
 			}else{
 				$data['mediageneral']= $respuesta[0]['mediageneral'];
 			}
-			if($respuesta[0]['mediacalidad'] === NULL){
-				$data['mediacalidad'] = 0;
-			}else{
-				$data['mediacalidad']= $respuesta[0]['mediacalidad'];
-			}
-
-			if($respuesta[0]['mediacumplimiento'] === NULL){
-				$data['mediacumplimiento'] = 0;
-			}else{
-				$data['mediacumplimiento']= $respuesta[0]['mediacumplimiento'];
-			}
-
-			if($tipo_persona==="proveedor"){
-				if($respuesta[0]['mediaoferta'] === NULL){
-					$data['mediaoferta'] = 0;
+			foreach ($_categorias as $value) {
+				
+				$cadena = "media$value";
+				$miniscula = strtolower($cadena);
+				if($respuesta[0][$cadena] === NULL){
+					$data[$miniscula ] = 0;
 				}else{
-					$data['mediaoferta']= $respuesta[0]['mediaoferta'];
+					$data[$miniscula]= $respuesta[0][$cadena ];
 				}
 			}
-			
 			if($respuesta[0]['numcalif'] === NULL){
 				$data['numcalif'] = 0;
 			}else{
 				$data['numcalif']= $respuesta[0]['numcalif'];
 			}
+			$data['categorias'] = $_categorias;
 			return $data;
 	}
 
