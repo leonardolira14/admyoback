@@ -195,6 +195,13 @@ class Calificaciones extends REST_Controller
 		$_puntos_pos_calidad=0;
 		$_puntos_ob_cumplimiento=0;
 		$_puntos_pos_cumplimiento=0;
+
+		$_puntos_ob_sanidad=0;
+		$_puntos_pos_sanidad=0;
+
+		$_puntos_ob_socioambiental=0;
+		$_puntos_pos_socioambiental=0;
+
 		$_puntos_ob_oferta=0;
 		$_puntos_pos_oferta=0;
 		//primero tengo que guardar la calificaciones netas
@@ -223,7 +230,7 @@ class Calificaciones extends REST_Controller
 			$fecha_Realiza
 		);
 		//ahora inserto los detalles de esa calificacion
-		
+		//vdebug($datos["cuestionarios"]);
 		//primero voy con calidad
 		$Cuestionario_calidad=$datos["cuestionarios"]["calidad"];
 		$cuestionario_gen=[];
@@ -237,9 +244,11 @@ class Calificaciones extends REST_Controller
 			$_puntos_ob_calidad=$_puntos_ob_calidad+(int)$respuesta["PuntosObtenidos"];
 			$_puntos_pos_calidad=$_puntos_pos_calidad+(int)$respuesta["PuntosPosibles"];
 		}
+
+	//cumplimiento
 		$Cuestionario_cumplimiento=$datos["cuestionarios"]["cumplimiento"];
 				
-		//cumplimiento
+	
 		foreach ($Cuestionario_cumplimiento as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
@@ -248,10 +257,37 @@ class Calificaciones extends REST_Controller
 			$_puntos_ob_cumplimiento=$_puntos_ob_cumplimiento+(int)$respuesta["PuntosObtenidos"];
 			$_puntos_pos_cumplimiento=$_puntos_pos_cumplimiento+(int)$respuesta["PuntosPosibles"];
 		}
-		$Cuestionario_oferta=$datos["cuestionarios"]["oferta"];
+
+		//sanidad
+		$Cuestionario_oferta=$datos["cuestionarios"]["sanidad"];
 		
-	
+		
+		foreach ($Cuestionario_cumplimiento as $value) {
+			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
+			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
+			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
+			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
+			$_puntos_ob_sanidad=$_puntos_ob_sanidad+(int)$respuesta["PuntosObtenidos"];
+			$_puntos_pos_sanidad=$_puntos_pos_sanidad+(int)$respuesta["PuntosPosibles"];
+		}
+
+		//socioambiental
+		$Cuestionario_oferta=$datos["cuestionarios"]["socioambiental"];
+
+		
+		foreach ($Cuestionario_oferta as $value) {
+			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
+			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
+			$puntos_obtenidos=$puntos_obtenidos+(int)$respuesta["PuntosObtenidos"];
+			$puntos_posibles=$puntos_posibles+(int)$respuesta["PuntosPosibles"];
+			$_puntos_ob_socioambiental=$_puntos_ob_socioambiental+(int)$respuesta["PuntosObtenidos"];
+			$_puntos_pos_socioambiental=$_puntos_pos_socioambiental+(int)$respuesta["PuntosPosibles"];
+		}
 		//oferta
+		$Cuestionario_oferta=$datos["cuestionarios"]["oferta"];
+
+
+		
 		foreach ($Cuestionario_oferta as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
@@ -260,9 +296,10 @@ class Calificaciones extends REST_Controller
 			$_puntos_ob_oferta=$_puntos_ob_oferta+(int)$respuesta["PuntosObtenidos"];
 			$_puntos_pos_oferta=$_puntos_pos_oferta+(int)$respuesta["PuntosPosibles"];
 		}
+		//recomendacion
 		$Cuestionario_recomendacion=$datos["cuestionarios"]["recomendacion"];
 		
-		//recomendacion
+		
 		foreach ($Cuestionario_recomendacion as $value) {
 			$respuesta=$this->Model_Calificaciones->AddDetalleValoracion2($IDValora,$value["Nump"],$value["Respuesta_usuario"]);
 			array_push($cuestionario_gen,array("Pregunta"=>$value["Pregunta"],"Respuesta"=>$value["Respuesta_usuario"]));
@@ -279,6 +316,10 @@ class Calificaciones extends REST_Controller
 									$_puntos_pos_calidad,
 									$_puntos_ob_cumplimiento,
 									$_puntos_pos_cumplimiento,
+									$_puntos_ob_socioambiental,
+									$_puntos_pos_socioambiental,
+									$_puntos_ob_sanidad,
+									$_puntos_pos_sanidad,
 									$_puntos_ob_oferta,
 									$_puntos_pos_oferta,
 									$_tipo_imagen,

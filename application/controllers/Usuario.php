@@ -388,6 +388,30 @@ class Usuario extends REST_Controller
 			return true;
 		}
 	}
+
+	public function active_post(){
+		//primerocheco el token
+		$_token = $this->post('token');
+
+		// ahora valido la cuenta
+		$respuesta = $this->Model_Usuario->checktokenuser($_token);
+		if($respuesta === false){
+			$_data['response']=array(
+				'ok'=>false
+			);
+			return $this->response($_data,403);
+		}else{
+			$_data['response']=array(
+				'ok'=> true
+			);
+			return $this->response($_data,200);
+			
+		}
+		
+		
+	}
+
+
 	//funcion para recuperar contraseña
 	public function recuperar_post(){
 		$datos=$this->post();

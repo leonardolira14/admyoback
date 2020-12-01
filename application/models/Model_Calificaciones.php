@@ -582,12 +582,14 @@ class Model_Calificaciones extends CI_Model{
 		$cuestionario_calidad=[];
 		$cuestionario_cumplimiento=[];
 		$cuestionario_recomendacion=[];
+		$cuestionario_sanidad = [];
+		$cuestionario_socioambiental= [];
 		$cuestionario_oferta=[];
 		$total=0;
 		$nomenltura=$respu->row_array();
 		$_listas_dependencias=[];
 		$flag=TRUE;
-
+		//vdebug($nomenltura);
 		//ahora obtengo los datos de cada una de las categorias
 		//empiezo con calidad
 		$cuestionarioIDS=explode(",",$nomenltura["Calidad"]);
@@ -608,6 +610,24 @@ class Model_Calificaciones extends CI_Model{
 					array_push($_listas_dependencias,array("ID_Pregunta"=>$respu->PreguntaDependencia,"Respuesta"=>$respu->RespuestaDepen,"S_ID_Pregunta"=>$respu->IDPregunta));
 			}
 		}
+		//empiezo con Socioambiental
+		$cuestionarioIDS = explode(",", $nomenltura["Socioambiental"]);
+		foreach ($cuestionarioIDS as $key) {
+			$respu = $this->detpreguntas($key);
+			array_push($cuestionario_socioambiental, array("Pregunta" => $respu->Pregunta, "Forma" => trim($respu->Forma), "Nump" => $respu->IDPregunta, "respuesta" => $respu->Condicion, "dependecia" => $respu->Dependencia, "PreguntaDependencia" => $respu->PreguntaDependencia, "RespuestaDepen" => $respu->RespuestaDepen, "Respuesta_usuario" => ''));
+			if ($respu->Dependencia === "SI") {
+				array_push($_listas_dependencias, array("ID_Pregunta" => $respu->PreguntaDependencia, "Respuesta" => $respu->RespuestaDepen, "S_ID_Pregunta" => $respu->IDPregunta));
+			}
+		}
+		//empiezo con Sanidad
+		$cuestionarioIDS = explode(",", $nomenltura["Sanidad"]);
+		foreach ($cuestionarioIDS as $key) {
+			$respu = $this->detpreguntas($key);
+			array_push($cuestionario_sanidad, array("Pregunta" => $respu->Pregunta, "Forma" => trim($respu->Forma), "Nump" => $respu->IDPregunta, "respuesta" => $respu->Condicion, "dependecia" => $respu->Dependencia, "PreguntaDependencia" => $respu->PreguntaDependencia, "RespuestaDepen" => $respu->RespuestaDepen, "Respuesta_usuario" => ''));
+			if ($respu->Dependencia === "SI") {
+				array_push($_listas_dependencias, array("ID_Pregunta" => $respu->PreguntaDependencia, "Respuesta" => $respu->RespuestaDepen, "S_ID_Pregunta" => $respu->IDPregunta));
+			}
+		}
 		//empiezo con oferta solo para los proveedores
 		if($Tipo==="Proveedor"){
 			$cuestionarioIDS=explode(",",$nomenltura["Oferta"]);
@@ -620,7 +640,7 @@ class Model_Calificaciones extends CI_Model{
 			}
 		}
 		
-		//empiezo con calidad
+		//empiezo con Recomendacion
 		$cuestionarioIDS=explode(",",$nomenltura["Recomendacion"]);
 		foreach ($cuestionarioIDS as $key) {
 			$respu=$this->detpreguntas($key);
@@ -652,7 +672,14 @@ class Model_Calificaciones extends CI_Model{
 		
 			//$total=$total+$respu->result()[0]->PorTotal;
 		}
-		$data["Preguntas"]=array("Calidad"=>$cuestionario_calidad,"Cumplimiento"=>$cuestionario_cumplimiento,"Oferta"=>$cuestionario_oferta,"Recomendacion"=>$cuestionario_recomendacion);
+		$data["Preguntas"]=array(
+			"Calidad"=>$cuestionario_calidad,
+			"Cumplimiento"=>$cuestionario_cumplimiento,
+			"Sanidad" => $cuestionario_sanidad,
+			"Socioambiental" => $cuestionario_socioambiental,
+			"Oferta"=>$cuestionario_oferta,
+			"Recomendacion"=>$cuestionario_recomendacion
+		);
 		$data["listas_dependencias"]=$_listas_dependencias;
 		return $data;
 		

@@ -12,6 +12,16 @@ class Model_Empresa extends CI_Model
 		$this->load->database();
 
 	}
+
+	//funcion para validar la empresa por la razon social
+	public function getempresaRazon($_Razon_Social){
+		$respuesta=$this->db->select("*")->where("Razon_Social='$_Razon_Social'")->get("empresa");
+		if($respuesta->num_rows()===0){
+			return false;
+		}else{
+			return $respuesta->row_array();
+		}
+	}
 	//funcion para obter los daros de la empresa 
 	public function getempresa($_ID_Empresa){
 		$respuesta=$this->db->select("*")->where("IDEmpresa='$_ID_Empresa'")->get("empresa");

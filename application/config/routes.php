@@ -49,6 +49,7 @@ $route['updatestatususer']='usuario/delete';
 $route['update']='usuario/update';
 $route['saveususer']="usuario/saveususer";
 $route['master']="usuario/master";
+$route['activecuenta'] = "usuario/active";
 
 $route['getallprducts']="Servicio/getall";
 $route['saveprducts']="Servicio/save";

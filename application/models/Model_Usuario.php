@@ -70,7 +70,7 @@ class Model_Usuario extends CI_Model
 	//funcion para revisar un token
 	public function checktokenuser($token){
 		$respuesta=$this->db->select("*")->where("Token_Activar='$token'")->get('usuarios');
-		if($respuesta->num_rows===0){
+		if($respuesta->num_rows()===0){
 			return false;
 		}else{
 			$this->db->where("Token_Activar='$token'")->update('usuarios',array("Status"=>'1'));

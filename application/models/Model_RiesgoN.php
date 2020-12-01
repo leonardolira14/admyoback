@@ -40,6 +40,8 @@ class Model_RiesgoN extends CI_Model
             //vdebug($listado_preguntas);
             $preguntas_cumplimiento=explode(',',$listado_preguntas[0]['Cumplimiento']);
             $preguntas_calidad=explode(',',$listado_preguntas[0]['Calidad']);
+            $preguntas_sanidad=explode(',',$listado_preguntas[0]['Sanidad']);
+            $preguntas_socioambiental=explode(',',$listado_preguntas[0]['Socioambiental']);
             $preguntas_oferta=explode(',',$listado_preguntas[0]['Oferta']);
 
             //vdebug($preguntas_cumplimiento);
@@ -53,10 +55,13 @@ class Model_RiesgoN extends CI_Model
 
 
             $ListaCumplimineto=[];
+            $ListaSocioambiental=[];
+            $ListaSanidad=[];
             $ListaOferta=[];
             // calidad
            $ListaCalidad['datospregunta']=[];
             foreach($preguntas_calidad as $pregunta){
+                
                 //vdebug($pregunta);
                 $ListaCalidad_data['totalContestadas']=[];
                $ListaCalidad_data['Si']=[];
@@ -67,8 +72,8 @@ class Model_RiesgoN extends CI_Model
                 
                 $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
                  $total_contestadas =0;
-               
-                if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                // vdebug($datos_pregunta['Forma']);
+                if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                     //  con las fechas enlistadas 
                    
                     foreach($listas_fechas as $fecha){
@@ -85,32 +90,32 @@ class Model_RiesgoN extends CI_Model
                         foreach($listaClientes as $cliente){
                             $Respuesta =$this-> PreguntaRespondidaFecha($ComoQue,$pregunta,$fecha,$cliente['IDEmpresaB'],$datos_pregunta['Forma'],$Periodo);
                             $total_contestadas = $total_contestadas +$Respuesta['NumeroTotal'];
-                            if($datos_pregunta['Forma']==='Si/No'){
+                            if($datos_pregunta['Forma']==='SI/NO'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                             }
-                            if($datos_pregunta['Forma']==='Si/No/NA'){
+                            if($datos_pregunta['Forma']==='SI/NO/NA'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                                  $total_na=$total_na + $Respuesta['NA'];
                             }
-                            if($datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO/NS'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                                 $total_ns=$total_ns + $Respuesta['NS'];
                             }
                         }
                         array_push($ListaCalidad_data['totalContestadas'],$total_contestadas);
-                        if($datos_pregunta['Forma']==='Si/No'){
+                        if($datos_pregunta['Forma']==='SI/NO'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                         }
-                        if($datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                             array_push($ListaCalidad_data['Na'],$total_na);
                         }
-                        if($datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO/NS'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                             array_push($ListaCalidad_data['Ns'],$total_ns);
@@ -152,7 +157,7 @@ class Model_RiesgoN extends CI_Model
                 $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
                  $total_contestadas =0;
                
-                if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                     //  con las fechas enlistadas 
                    
                     foreach($listas_fechas as $fecha){
@@ -169,32 +174,32 @@ class Model_RiesgoN extends CI_Model
                         foreach($listaClientes as $cliente){
                             $Respuesta =$this-> PreguntaRespondidaFecha($ComoQue,$pregunta,$fecha,$cliente['IDEmpresaB'],$datos_pregunta['Forma'],$Periodo);
                             $total_contestadas = $total_contestadas +$Respuesta['NumeroTotal'];
-                            if($datos_pregunta['Forma']==='Si/No'){
+                            if($datos_pregunta['Forma']==='SI/NO'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                             }
-                            if($datos_pregunta['Forma']==='Si/No/NA'){
+                            if($datos_pregunta['Forma']==='SI/NO/NA'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                                  $total_na=$total_na + $Respuesta['NA'];
                             }
-                            if($datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO/NS'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                                 $total_ns=$total_ns + $Respuesta['NS'];
                             }
                         }
                         array_push($ListaCalidad_data['totalContestadas'],$total_contestadas);
-                        if($datos_pregunta['Forma']==='Si/No'){
+                        if($datos_pregunta['Forma']==='SI/NO'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                         }
-                        if($datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                             array_push($ListaCalidad_data['Na'],$total_na);
                         }
-                        if($datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO/NS'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                             array_push($ListaCalidad_data['Ns'],$total_ns);
@@ -222,11 +227,9 @@ class Model_RiesgoN extends CI_Model
                           
             }
 
-            // oferta
-
-            // cumplimiento
-            $ListaOferta['datospregunta']=[];
-            foreach($preguntas_oferta as $pregunta){
+            // Socioambiental
+            $ListaSocioambiental['datospregunta']=[];
+            foreach($preguntas_socioambiental as $pregunta){
                 //vdebug($pregunta);
                 $ListaCalidad_data['totalContestadas']=[];
                $ListaCalidad_data['Si']=[];
@@ -238,7 +241,7 @@ class Model_RiesgoN extends CI_Model
                 $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
                  $total_contestadas =0;
                
-                if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                     //  con las fechas enlistadas 
                    
                     foreach($listas_fechas as $fecha){
@@ -255,32 +258,205 @@ class Model_RiesgoN extends CI_Model
                         foreach($listaClientes as $cliente){
                             $Respuesta =$this-> PreguntaRespondidaFecha($ComoQue,$pregunta,$fecha,$cliente['IDEmpresaB'],$datos_pregunta['Forma'],$Periodo);
                             $total_contestadas = $total_contestadas +$Respuesta['NumeroTotal'];
-                            if($datos_pregunta['Forma']==='Si/No'){
+                            if($datos_pregunta['Forma']==='SI/NO'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                             }
-                            if($datos_pregunta['Forma']==='Si/No/NA'){
+                            if($datos_pregunta['Forma']==='SI/NO/NA'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                                  $total_na=$total_na + $Respuesta['NA'];
                             }
-                            if($datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO/NS'){
                                 $total_si= $total_si + $Respuesta['SI'] ;
                                 $total_no= $total_no + $Respuesta['NO'];
                                 $total_ns=$total_ns + $Respuesta['NS'];
                             }
                         }
                         array_push($ListaCalidad_data['totalContestadas'],$total_contestadas);
-                        if($datos_pregunta['Forma']==='Si/No'){
+                        if($datos_pregunta['Forma']==='SI/NO'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                         }
-                        if($datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                             array_push($ListaCalidad_data['Na'],$total_na);
                         }
-                        if($datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO/NS'){
+                            array_push($ListaCalidad_data['Si'],$total_si);
+                            array_push($ListaCalidad_data['No'],$total_no);
+                            array_push($ListaCalidad_data['Ns'],$total_ns);
+                        }
+                       
+                        
+                    }
+                   
+                    array_push($ListaSocioambiental['datospregunta'],array(
+                        "Pregunta"=>$datos_pregunta['Pregunta'],
+                        "labels"=>$ListaCalidad_data['labels'],
+                        "data"=>[
+                            (object)["data"=>$ListaCalidad_data['Si'],"label"=> 'Si',"backgroundColor"=> '#10E0D0'],
+                            (object)["data"=>$ListaCalidad_data['No'],"label"=>'No',"backgroundColor"=> '#F2143F'],
+                             (object)["data"=>$ListaCalidad_data['Na'],"label"=>'Na',"backgroundColor"=> '#8F8F8F'],
+                            (object)["data"=>$ListaCalidad_data['Ns'],"label"=>'NS',"backgroundColor"=> '#8F8F8F'],
+                        ],
+                        "dataTotal"=>[
+                            (object)["data"=>$ListaCalidad_data['totalContestadas'],"label"=> 'Calificaciones Recibidas'],
+                            
+                        ]
+                    ));
+                    
+                }
+                          
+            }
+            // fin de socioambiental
+
+            // Sanidad
+            $ListaSanidad['datospregunta']=[];
+            foreach($preguntas_sanidad as $pregunta){
+                //vdebug($pregunta);
+                $ListaCalidad_data['totalContestadas']=[];
+               $ListaCalidad_data['Si']=[];
+                $ListaCalidad_data['No']=[];
+                $ListaCalidad_data['Na']=[];
+                $ListaCalidad_data['Ns']=[];
+                $ListaCalidad_data['labels']=[];
+                
+                $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                 $total_contestadas =0;
+               
+                if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
+                    //  con las fechas enlistadas 
+                   
+                    foreach($listas_fechas as $fecha){
+                          array_push($ListaCalidad_data['labels'],$fecha);
+                        //obtengo los clientes o proveedores que son de esta fecha hacia atras
+                        $listaClientes= $this->getClientesProveedores($IDEmpresa,$fecha,$Periodo,$Quienes);
+                       // vdebug($listaClientes);
+                        
+                        //ahora tengo que ver por cada cliente cuetas veces hicieron esa pregunta
+                        $total_si=0;
+                        $total_no=0;
+                        $total_na=0;
+                        $total_ns=0;
+                        foreach($listaClientes as $cliente){
+                            $Respuesta =$this-> PreguntaRespondidaFecha($ComoQue,$pregunta,$fecha,$cliente['IDEmpresaB'],$datos_pregunta['Forma'],$Periodo);
+                            $total_contestadas = $total_contestadas +$Respuesta['NumeroTotal'];
+                            if($datos_pregunta['Forma']==='SI/NO'){
+                                $total_si= $total_si + $Respuesta['SI'] ;
+                                $total_no= $total_no + $Respuesta['NO'];
+                            }
+                            if($datos_pregunta['Forma']==='SI/NO/NA'){
+                                $total_si= $total_si + $Respuesta['SI'] ;
+                                $total_no= $total_no + $Respuesta['NO'];
+                                 $total_na=$total_na + $Respuesta['NA'];
+                            }
+                            if($datos_pregunta['Forma']==='SI/NO/NS'){
+                                $total_si= $total_si + $Respuesta['SI'] ;
+                                $total_no= $total_no + $Respuesta['NO'];
+                                $total_ns=$total_ns + $Respuesta['NS'];
+                            }
+                        }
+                        array_push($ListaCalidad_data['totalContestadas'],$total_contestadas);
+                        if($datos_pregunta['Forma']==='SI/NO'){
+                            array_push($ListaCalidad_data['Si'],$total_si);
+                            array_push($ListaCalidad_data['No'],$total_no);
+                        }
+                        if($datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
+                            array_push($ListaCalidad_data['Si'],$total_si);
+                            array_push($ListaCalidad_data['No'],$total_no);
+                            array_push($ListaCalidad_data['Na'],$total_na);
+                        }
+                        if($datos_pregunta['Forma']==='SI/NO/NS'){
+                            array_push($ListaCalidad_data['Si'],$total_si);
+                            array_push($ListaCalidad_data['No'],$total_no);
+                            array_push($ListaCalidad_data['Ns'],$total_ns);
+                        }
+                       
+                        
+                    }
+                   
+                    array_push($ListaSanidad['datospregunta'],array(
+                        "Pregunta"=>$datos_pregunta['Pregunta'],
+                        "labels"=>$ListaCalidad_data['labels'],
+                        "data"=>[
+                            (object)["data"=>$ListaCalidad_data['Si'],"label"=> 'Si',"backgroundColor"=> '#10E0D0'],
+                            (object)["data"=>$ListaCalidad_data['No'],"label"=>'No',"backgroundColor"=> '#F2143F'],
+                             (object)["data"=>$ListaCalidad_data['Na'],"label"=>'Na',"backgroundColor"=> '#8F8F8F'],
+                            (object)["data"=>$ListaCalidad_data['Ns'],"label"=>'NS',"backgroundColor"=> '#8F8F8F'],
+                        ],
+                        "dataTotal"=>[
+                            (object)["data"=>$ListaCalidad_data['totalContestadas'],"label"=> 'Calificaciones Recibidas'],
+                            
+                        ]
+                    ));
+                    
+                }
+                          
+            }
+            // fin de sanidad
+
+
+
+
+            // oferta
+            $ListaOferta['datospregunta']=[];
+            foreach($preguntas_oferta as $pregunta){
+                //vdebug($pregunta);
+                $ListaCalidad_data['totalContestadas']=[];
+               $ListaCalidad_data['Si']=[];
+                $ListaCalidad_data['No']=[];
+                $ListaCalidad_data['Na']=[];
+                $ListaCalidad_data['Ns']=[];
+                $ListaCalidad_data['labels']=[];
+                
+                $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                 $total_contestadas =0;
+               
+                if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
+                    //  con las fechas enlistadas 
+                   
+                    foreach($listas_fechas as $fecha){
+                          array_push($ListaCalidad_data['labels'],$fecha);
+                        //obtengo los clientes o proveedores que son de esta fecha hacia atras
+                        $listaClientes= $this->getClientesProveedores($IDEmpresa,$fecha,$Periodo,$Quienes);
+                       // vdebug($listaClientes);
+                        
+                        //ahora tengo que ver por cada cliente cuetas veces hicieron esa pregunta
+                        $total_si=0;
+                        $total_no=0;
+                        $total_na=0;
+                        $total_ns=0;
+                        foreach($listaClientes as $cliente){
+                            $Respuesta =$this-> PreguntaRespondidaFecha($ComoQue,$pregunta,$fecha,$cliente['IDEmpresaB'],$datos_pregunta['Forma'],$Periodo);
+                            $total_contestadas = $total_contestadas +$Respuesta['NumeroTotal'];
+                            if($datos_pregunta['Forma']==='SI/NO'){
+                                $total_si= $total_si + $Respuesta['SI'] ;
+                                $total_no= $total_no + $Respuesta['NO'];
+                            }
+                            if($datos_pregunta['Forma']==='SI/NO/NA'){
+                                $total_si= $total_si + $Respuesta['SI'] ;
+                                $total_no= $total_no + $Respuesta['NO'];
+                                 $total_na=$total_na + $Respuesta['NA'];
+                            }
+                            if($datos_pregunta['Forma']==='SI/NO/NS'){
+                                $total_si= $total_si + $Respuesta['SI'] ;
+                                $total_no= $total_no + $Respuesta['NO'];
+                                $total_ns=$total_ns + $Respuesta['NS'];
+                            }
+                        }
+                        array_push($ListaCalidad_data['totalContestadas'],$total_contestadas);
+                        if($datos_pregunta['Forma']==='SI/NO'){
+                            array_push($ListaCalidad_data['Si'],$total_si);
+                            array_push($ListaCalidad_data['No'],$total_no);
+                        }
+                        if($datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
+                            array_push($ListaCalidad_data['Si'],$total_si);
+                            array_push($ListaCalidad_data['No'],$total_no);
+                            array_push($ListaCalidad_data['Na'],$total_na);
+                        }
+                        if($datos_pregunta['Forma']==='SI/NO/NS'){
                             array_push($ListaCalidad_data['Si'],$total_si);
                             array_push($ListaCalidad_data['No'],$total_no);
                             array_push($ListaCalidad_data['Ns'],$total_ns);
@@ -309,6 +485,8 @@ class Model_RiesgoN extends CI_Model
             }
             $data["calidad"] = $ListaCalidad;
             $data["cumplimiento"] = $ListaCumplimineto;
+            $data["sanidad"] = $ListaSanidad;
+            $data['socioambiental'] =  $ListaSocioambiental;
             $data["oferta"] = $ListaOferta;
 
            return $data;
@@ -350,20 +528,17 @@ class Model_RiesgoN extends CI_Model
         //vdebug($listado_preguntas);
         $preguntas_cumplimiento=explode(',',$listado_preguntas[0]['Cumplimiento']);
         $preguntas_calidad=explode(',',$listado_preguntas[0]['Calidad']);
+        $preguntas_socioambiental=explode(',',$listado_preguntas[0]['Socioambiental']);
+        $preguntas_sanidad=explode(',',$listado_preguntas[0]['Sanidad']);
         $preguntas_oferta=explode(',',$listado_preguntas[0]['Oferta']);
 
       
-       //vdebug($listas_fechas);
-
-
-
-
-
-
-        
+              
         $cantidad_por_categoria=[];
         $porcentaje_categoria_cumplimiento=[];
         $porcentaje_categoria_calidad = [];
+        $porcentaje_categoria_sanidad = [];
+        $porcentaje_categoria_socioambiental = [];
          $porcentaje_categoria_oferta = [];
         $listas_fechas_ = _fechas_array_List($Periodo);
         //vdebug($listas_fechas_);
@@ -380,18 +555,30 @@ class Model_RiesgoN extends CI_Model
             $data_grafica_Cumplimiento_Mejorados =[];
             $data_grafica_Cumplimiento_Empeorados = [];
 
+            $data_grafica_Socioambiental_SD = [];
+            $data_grafica_Socioambiental_Mejorados =[];
+            $data_grafica_Socioambiental_Empeorados = [];
+
+            $data_grafica_Sanidad_SD = [];
+            $data_grafica_Sanidad_Mejorados =[];
+            $data_grafica_Sanidad_Empeorados = [];
+
             $data_grafica_Oferta_SD = [];
             $data_grafica_Oferta_Mejorados =[];
             $data_grafica_Oferta_Empeorados = [];
             
             $porcentaje_por_clientes["Cumplimiento"]= [];
             $porcentaje_por_clientes["Calidad"] = [];
+            $porcentaje_por_clientes["Sanidad"] = [];
+            $porcentaje_por_clientes["Socioambiental"] = [];
             $porcentaje_por_clientes["Oferta"]= [];
 
              $datos_anterior_general=[];
             
              $Porcentaje_Calidad_General= 0;
              $Porcentaje_Cumplimiento_General= 0;
+             $Porcentaje_Socioambiental_General= 0;
+             $Porcentaje_Sanidad_General= 0;
              $Porcentaje_Oferta_General= 0;
             //$listas_fechas_ = ['2016-12-30','2016-12-31'];
             // ahora obtengo las graficas
@@ -404,12 +591,23 @@ class Model_RiesgoN extends CI_Model
                 $Total_Cumplimiento_SD = 0;
                 $Total_Cumplimiento_Mejorado = 0;
                 $Total_Cumplimiento_Empeorado = 0;
+
                 $Total_Calidad_SD = 0;
                 $Total_Calidad_Mejorado = 0;
                 $Total_Calidad_Empeorado = 0;
+
                 $Total_Oferta_SD = 0;
                 $Total_Oferta_Mejorado = 0;
                 $Total_Oferta_Empeorado = 0;
+
+                $Total_Sanidad_SD = 0;
+                $Total_Sanidad_Mejorado = 0;
+                $Total_Sanidad_Empeorado = 0;
+
+                $Total_Socioambiental_SD = 0;
+                $Total_Socioambiental_Mejorado = 0;
+                $Total_Socioambiental_Empeorado = 0;
+
                 $Total_SD_gen=0;
                 $Total_Empeorado_gen=0;
                 $Total_Mejorado_gen=0;
@@ -419,8 +617,11 @@ class Model_RiesgoN extends CI_Model
                     //vdebug($cliente);
                     $porcentaje_array_pasado = [];
                     $porcentaje_array_actual = [];
+                    
                     $dato_anterior_cumplimiento= [];
                     $dato_anterior_calidad= [];
+                    $dato_anterior_sanidad= [];
+                    $dato_anterior_socioambiental= [];
                     $dato_anterior_oferta= [];
                     
                     $Suma_porcentaje_general_pasado = 0;
@@ -431,7 +632,7 @@ class Model_RiesgoN extends CI_Model
                     // cumplimiento 
                      foreach($preguntas_cumplimiento as $pregunta){
                         $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                        if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                            
                             // para obtener el porcentaje anterior le resto un dia ala fecha actual
                             if($Periodo === "MA" || $Periodo==='A'){
@@ -498,7 +699,158 @@ class Model_RiesgoN extends CI_Model
                     }
 
 
-                   
+
+                    // socioambiental
+
+                    $porcentaje_array_pasado = [];
+                    $porcentaje_array_actual = [];
+
+
+                     foreach($preguntas_socioambiental as $pregunta){
+                        $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                        if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
+                           
+                            // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                            if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                            }else{
+                                 $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                            }
+                          
+                            
+                            // porcentaje pasado
+                            $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                           
+                            if($porcentaje_pasado['Porcentaje'] === null){
+                                $porcentaje_pas = 0;
+                            }else{
+                                $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                            }
+                            
+                             array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                            // porcentaje actual
+                            $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                            if($porcentaje_actual['Porcentaje'] === null){
+                                $porcentaje_actu = 0;
+                            }else{
+                                $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                            }
+                            array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                           
+                        }
+                    }
+                    // ahora obtengo el procentaje pasado y actual para poder comparar
+                    $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                    $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                    
+                    $Porcentaje_Socioambiental_General= $Porcentaje_Socioambiental_General + $_Porcentaje_actual;
+            
+                    $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                    $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                    // guardo el procentaje actual del cliente 
+                    array_push($porcentaje_por_clientes["Socioambiental"],$_Porcentaje_actual);
+
+
+                    if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                        $Total_Socioambiental_SD ++;
+                        array_push($dato_anterior_socioambiental,'SD');
+                    }else if($_Porcentaje_pasado   > $_Porcentaje_actual  ){
+                        $Total_Socioambiental_Empeorado ++;
+                        array_push($dato_anterior_socioambiental,'E');
+                    }else if($_Porcentaje_pasado < $_Porcentaje_actual  ){
+                        $Total_Socioambiental_Mejorado ++;
+                        array_push($dato_anterior_socioambiental,'M');
+                    }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                        if($dato_anterior_socioambiental[count($dato_anterior_socioambiental)-1]==='E'){
+                            $Total_Socioambiental_Empeorado ++;
+                        }
+                        if($dato_anterior_socioambiental[count($dato_anterior_socioambiental)-1]==='SD'){
+                             $Total_Socioambiental_SD++;   
+                        }
+                        if($dato_anterior_socioambiental[count($dato_anterior_socioambiental)-1]==='M'){
+                            $Total_Socioambiental_Mejorado ++;    
+                        }
+                    }
+
+                    // finaliza socioambiental
+
+                   // sanidad
+
+                        $porcentaje_array_pasado = [];
+                        $porcentaje_array_actual = [];
+
+
+                     foreach($preguntas_sanidad as $pregunta){
+                        $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
+                        if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
+                           
+                            // para obtener el porcentaje anterior le resto un dia ala fecha actual
+                            if($Periodo === "MA" || $Periodo==='A'){
+                                 $fechaanterior = date('Y-m', strtotime($fecha . "- 30days"));
+                            }else{
+                                 $fechaanterior = date('Y-m-d', strtotime($fecha . "- 1days"));
+                            }
+                          
+                            
+                            // porcentaje pasado
+                            $porcentaje_pasado=  $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fechaanterior,$pregunta,$Periodo);
+                           
+                            if($porcentaje_pasado['Porcentaje'] === null){
+                                $porcentaje_pas = 0;
+                            }else{
+                                $porcentaje_pas = $porcentaje_pasado['Porcentaje'];
+                            }
+                            
+                             array_push($porcentaje_array_pasado,array("porcentaje"=>$porcentaje_pas,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                            // porcentaje actual
+                            $porcentaje_actual = $this->RiesgoPorcentajeFechaPregunta($cliente['IDEmpresaB'],$fecha,$pregunta,$Periodo);
+                            if($porcentaje_actual['Porcentaje'] === null){
+                                $porcentaje_actu = 0;
+                            }else{
+                                $porcentaje_actu = $porcentaje_actual['Porcentaje'];
+                            }
+                            array_push($porcentaje_array_actual,array("porcentaje"=>$porcentaje_actu,"Peso"=>$datos_pregunta['PorTotal']));
+                            
+                           
+                        }
+                    }
+                    // ahora obtengo el procentaje pasado y actual para poder comparar
+                    $_Porcentaje_pasado= promedio_array_riesgo($porcentaje_array_pasado);
+                    $_Porcentaje_actual= promedio_array_riesgo($porcentaje_array_actual);
+                    
+                    $Porcentaje_Sanidad_General= $Porcentaje_Sanidad_General + $_Porcentaje_actual;
+            
+                    $Suma_porcentaje_general_pasado=$Suma_porcentaje_general_pasado+$_Porcentaje_pasado;
+                    $Suma_porcentaje_general_actual = $Suma_porcentaje_general_actual +$_Porcentaje_actual;
+                    // guardo el procentaje actual del cliente 
+                    array_push($porcentaje_por_clientes["Sanidad"],$_Porcentaje_actual);
+
+
+                    if($_Porcentaje_pasado === 0  && $_Porcentaje_actual === 0 ){
+                        $Total_Sanidad_SD ++;
+                        array_push($dato_anterior_sanidad,'SD');
+                    }else if($_Porcentaje_pasado   > $_Porcentaje_actual  ){
+                        $Total_Sanidad_Empeorado ++;
+                        array_push($dato_anterior_sanidad,'E');
+                    }else if($_Porcentaje_pasado < $_Porcentaje_actual  ){
+                        $Total_Sanidad_Mejorado ++;
+                        array_push($dato_anterior_sanidad,'M');
+                    }else if($_Porcentaje_pasado === $_Porcentaje_actual ){
+                        if($dato_anterior_sanidad[count($dato_anterior_sanidad)-1]==='E'){
+                            $Total_Sanidad_Empeorado ++;
+                        }
+                        if($dato_anterior_sanidad[count($dato_anterior_sanidad)-1]==='SD'){
+                             $Total_Sanidad_SD++;   
+                        }
+                        if($dato_anterior_sanidad[count($dato_anterior_sanidad)-1]==='M'){
+                            $Total_Sanidad_Mejorado ++;    
+                        }
+                    }
+
+                   // finaliza sanidad
                     
                     
                     $porcentaje_array_pasado = [];
@@ -506,7 +858,7 @@ class Model_RiesgoN extends CI_Model
                     // calidad
                          foreach($preguntas_calidad as $pregunta){
                             $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             
                                 // para obtener el porcentaje anterior le resto un dia ala fecha actual
                                 if($Periodo === "MA" || $Periodo==='A'){
@@ -579,7 +931,7 @@ class Model_RiesgoN extends CI_Model
                     // oferta
                         foreach($preguntas_oferta as $pregunta){
                             $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             
                                 // para obtener el porcentaje anterior le resto un dia ala fecha actual
                                 if($Periodo === "MA" || $Periodo==='A'){
@@ -684,6 +1036,15 @@ class Model_RiesgoN extends CI_Model
                 array_push($data_grafica_Cumplimiento_SD,$Total_Cumplimiento_SD);
                 array_push($data_grafica_Cumplimiento_Mejorados,$Total_Cumplimiento_Mejorado);
                 array_push($data_grafica_Cumplimiento_Empeorados,$Total_Cumplimiento_Empeorado);
+                
+                array_push($data_grafica_Socioambiental_SD,$Total_Socioambiental_SD);
+                array_push($data_grafica_Socioambiental_Mejorados,$Total_Socioambiental_Mejorado);
+                array_push($data_grafica_Socioambiental_Empeorados,$Total_Socioambiental_Empeorado);
+
+                array_push($data_grafica_Sanidad_SD,$Total_Sanidad_SD);
+                array_push($data_grafica_Sanidad_Mejorados,$Total_Sanidad_Mejorado);
+                array_push($data_grafica_Sanidad_Empeorados,$Total_Sanidad_Empeorado);
+
 
                 array_push($data_grafica_Oferta_SD,$Total_Oferta_SD);
                 array_push($data_grafica_Oferta_Mejorados,$Total_Oferta_Mejorado);
@@ -701,6 +1062,17 @@ class Model_RiesgoN extends CI_Model
                     "SD"=>$data_grafica_Cumplimiento_SD,
                     "Mejorados"=>$data_grafica_Cumplimiento_Mejorados,
                     "Empeorado"=>$data_grafica_Cumplimiento_Empeorados
+                ),
+                
+                "Sanidad"=>array(
+                    "SD"=>$data_grafica_Sanidad_SD,
+                    "Mejorados"=>$data_grafica_Sanidad_Mejorados,
+                    "Empeorado"=>$data_grafica_Sanidad_Empeorados
+                ),
+                "Socioambiental"=>array(
+                    "SD"=>$data_grafica_Socioambiental_SD,
+                    "Mejorados"=>$data_grafica_Socioambiental_Mejorados,
+                    "Empeorado"=>$data_grafica_Socioambiental_Empeorados
                 ),
                 "Oferta"=>array(
                     "SD"=>$data_grafica_Oferta_SD,
@@ -722,9 +1094,11 @@ class Model_RiesgoN extends CI_Model
             $data["NumEmpeorados"]= $Total_Empeorado_gen;
             $data["NumSD"]= $Total_SD_gen;
             $data["porcentajes"]= array(
-                "General"=>$Porcentaje_Oferta_General+$Porcentaje_Calidad_General+$Porcentaje_Cumplimiento_General,
+                "General"=>$Porcentaje_Oferta_General+$Porcentaje_Calidad_General+$Porcentaje_Cumplimiento_General+$Porcentaje_Sanidad_General+$Porcentaje_Socioambiental_General,
                 "Oferta"=>$Porcentaje_Oferta_General,
                 "Calidad"=>$Porcentaje_Calidad_General,
+                "Socioambiental"=>$Porcentaje_Socioambiental_General,
+                "Sanidad"=>$Porcentaje_Sanidad_General,
                 "Cumplimiento"=>$Porcentaje_Cumplimiento_General
 
             );
@@ -832,7 +1206,7 @@ class Model_RiesgoN extends CI_Model
                     // cumplimiento 
                      foreach($preguntas_cumplimiento as $pregunta){
                         $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                        if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                            
                             // para obtener el porcentaje anterior le resto un dia ala fecha actual
                             if($Periodo === "MA" || $Periodo==='A'){
@@ -907,7 +1281,7 @@ class Model_RiesgoN extends CI_Model
                     // calidad
                          foreach($preguntas_calidad as $pregunta){
                             $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             
                                 // para obtener el porcentaje anterior le resto un dia ala fecha actual
                                 if($Periodo === "MA" || $Periodo==='A'){
@@ -980,7 +1354,7 @@ class Model_RiesgoN extends CI_Model
                     // oferta
                         foreach($preguntas_oferta as $pregunta){
                             $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             
                                 // para obtener el porcentaje anterior le resto un dia ala fecha actual
                                 if($Periodo === "MA" || $Periodo==='A'){
@@ -1232,7 +1606,7 @@ class Model_RiesgoN extends CI_Model
                     // cumplimiento 
                      foreach($preguntas_cumplimiento as $pregunta){
                         $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                        if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                        if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                            
                             // para obtener el porcentaje anterior le resto un dia ala fecha actual
                             if($Periodo === "MA" || $Periodo==='A'){
@@ -1307,7 +1681,7 @@ class Model_RiesgoN extends CI_Model
                     // calidad
                          foreach($preguntas_calidad as $pregunta){
                             $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             
                                 // para obtener el porcentaje anterior le resto un dia ala fecha actual
                                 if($Periodo === "MA" || $Periodo==='A'){
@@ -1380,7 +1754,7 @@ class Model_RiesgoN extends CI_Model
                     // oferta
                         foreach($preguntas_oferta as $pregunta){
                             $datos_pregunta = $this->Model_Preguntas->Datos_Pregunta($pregunta);
-                            if($datos_pregunta['Forma']==='Si/No' || $datos_pregunta['Forma']==='Si/No/NA' || $datos_pregunta['Forma']==='Si/No/Ns'){
+                            if($datos_pregunta['Forma']==='SI/NO' || $datos_pregunta['Forma']==='SI/NO/NA' || $datos_pregunta['Forma']==='SI/NO/NS'){
                             
                                 // para obtener el porcentaje anterior le resto un dia ala fecha actual
                                 if($Periodo === "MA" || $Periodo==='A'){

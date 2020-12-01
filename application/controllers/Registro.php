@@ -72,110 +72,84 @@ class Registro extends REST_Controller
 	//funcion para agregar una empresa
 	public function addempresa_post(){
 	
-		$_POST = json_decode(file_get_contents("php://input"), true);
-		//vdebug($_POST);
-		//vdebug($_POST);
-		$config=array( array(
-			'field'=>'Razon_Social', 
-			'label'=>'Razón Social', 
-			'rules'=>'trim|required|xss_clean|is_unique[empresa.Razon_Social]'					
-		),array(
-			'field'=>'Nombre_Comercial', 
-			'label'=>'Nombre Comercial', 
-			'rules'=>'trim|required|xss_clean'					
-		),array(
-			'field'=>'RFC', 
-			'label'=>'RFC', 
-			'rules'=>'trim|required|xss_clean|is_unique[empresa.RFC]'					
-		),array(
-			'field'=>'Tipo_Persona', 
-			'label'=>'Tipo Persona', 
-			'rules'=>'trim|required|xss_clean'					
-		),array(
-			'field'=>'Sector', 
-			'label'=>'Sector', 
-			'rules'=>'trim|required|xss_clean'					
-		),array(
-			'field'=>'SubSector', 
-			'label'=>'SubSector', 
-			'rules'=>'trim|xss_clean'					
-		),array(
-			'field'=>'Rama', 
-			'label'=>'Rama', 
-			'rules'=>'trim|xss_clean'					
-		),array(
-			'field'=>'Nombre', 
-			'label'=>'Nombre', 
-			'rules'=>'trim|required|xss_clean'					
-		),array(
-			'field'=>'Apellidos', 
-			'label'=>'Apellidos', 
-			'rules'=>'trim|xss_clean'					
-		),array(
-			'field'=>'Correo1', 
-			'label'=>'Correo Electrónico', 
-			'rules'=>'trim|required|xss_clean|is_unique[usuarios.Correo]'					
-		),array(
-			'field'=>'Correo2', 
-			'label'=>'Confirmar Correo Electrónico', 
-			'rules'=>'trim|required|xss_clean|matches[Correo1]'					
-		),array(
-			'field'=>'Clave1', 
-			'label'=>'Contraseña', 
-			'rules'=>'callback_valid_password'					
-		),array(
-			'field'=>'Clave2', 
-			'label'=>'Confirmar Contraseña', 
-			'rules'=>'matches[Clave1]'					
-		));
-		$this->form_validation->set_error_delimiters('<li>', '</li>');
-		$this->form_validation->set_rules($config);
-			$array=array(
-				"required"=>'El campo %s es obligatorio',
-				"valid_email"=>'El campo %s no es valido',
-				"min_length[3]"=>'El campo %s debe ser mayor a 3 Digitos',
-				"min_length[10]"=>'El campo %s debe ser mayor a 10 Digitos',
-				'alpha'=>'El campo %s debe estar compuesto solo por letras',
-				"matches"=>"El campo %s no coinciden",
-				'is_unique'=>'El contenido del campo %s ya esta registrado');
-		$this->form_validation->set_message($array);
-		
-		if($this->form_validation->run() !=false){
-			//;
-			if($_POST["Productoadmyo"]==="gratis"){
-				$_Tipo_Cuenta="basic";
-			}else{
-				$_Tipo_Cuenta=$_POST["Productoadmyo"];
+		$Razon_Social = $this->post('razon_social');
+		$Nombre_Comercial = $this->post('nombre_comercial');
+		$RFC = $this->post('rfc');
+		$Tipopersona = $this->post('tipopersona');
+		$Sector = $this->post('sector');
+		$SubSector = $this->post('subsector');
+		$Rama = $this->post('rama');
+		$data_Usuario = $this->post('usuario');
+		$Nombre = $data_Usuario['nombre'];
+		$Apellidos = $data_Usuario['apellidos'];
+		$Correo = $data_Usuario['correo'];
+		$Clave = $data_Usuario['password'];
+		$_Tipo_Cuenta="basic";
+	
+			// verifico si la empresa no esta registrada si es a si le mando un error
+			$data_empresa = $this->Model_Empresa->getempresaRazon($Razon_Social);
+			 
+			if($data_empresa !== false ){
+				$_data["code"]=0;
+				$_data["ok"]=false;
+				$_data["msj"]="Esta Razon Social ya esta registrada, solicite una aclaración con admyo";
+				return $this->response(array("response"=>$_data),404);
+			}
+
+			// valido el RFC
+			$data_empresa = $this->Model_Empresa->getempresaRFC($RFC);
+			// vdebug($data_empresa);
+			if($data_empresa !== false ){
+				$_data["code"]=0;
+				$_data["ok"]=false;
+				$_data["msj"]="Este RFC ya esta registrado, solicite una aclaración con admyo";
+				return $this->response(array("response"=>$_data),404);
+			}
+
+			// valido el usuario 
+			$data_user = $this->Model_Usuario->DatosUsuarioCorreo($Correo);
+			 //vdebug($data_user);
+			if($data_user !== false ){
+				$_data["code"]=0;
+				$_data["ok"]=false;
+				$_data["msj"]="Esta dirección de correo electrónico ya esta registrado, solicite una aclaración con admyo";
+				return $this->response(array("response"=>$_data),404);
 			}
 			
+
+			// sin todo salio bien agrego la empresa
+
+
 			//ahora agrego la empresa en la base de datos de admyo
-			$ID_Empresa_Admyo=$this->Model_Empresa->preaddempresa($_POST["Tipo_Persona"],$_POST["Razon_Social"],$_POST["Nombre_Comercial"],$_POST["RFC"],$_Tipo_Cuenta,"0");
+			$ID_Empresa_Admyo=$this->Model_Empresa->preaddempresa($Tipopersona,$Razon_Social,$Nombre_Comercial,$RFC,$_Tipo_Cuenta,"0");
 			
 			//agrego al usuario en la base de datos
-			$_Token_Usuario=$this->Model_Usuario->addUsuario($ID_Empresa_Admyo,$_POST["Nombre"],$_POST["Apellidos"],$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"],"Master",'0',"Master");
+			$_Token_Usuario=$this->Model_Usuario->addUsuario($ID_Empresa_Admyo,$Nombre,$Apellidos,$Correo,$Correo,$Clave,"Master",'0',"Master");
+			$data_user = $this->Model_Usuario->DatosUsuarioCorreo($Correo);
 			//ahora agrego el giro a la empresa
-			$this->Model_Empresa->addgiros($ID_Empresa_Admyo,$_POST["Sector"],$_POST["SubSector"],$_POST["Rama"]);
-			$this->Model_Email->Activar_Usuario_registro($_Token_Usuario,$_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_Tipo_Cuenta,$_POST["Correo1"],$_POST["Clave1"]);
+			$this->Model_Empresa->addgiros($ID_Empresa_Admyo,$Sector,$SubSector,$Rama);
+			$this->Model_Email->Activar_Usuario_registro($_Token_Usuario,$Correo,$Nombre,$Apellidos,$_Tipo_Cuenta,$Correo,$Clave);
 
 			//si traigo licencias de qval registro la empresa en qval
-			if($_POST["PrecioQval"]!==0){
+			/*if($_POST["PrecioQval"]!==0){
 				$IDQval=$this->Model_QvalEmpresa->addempresa($_POST["Razon_Social"],$_POST["Nombre_Comercial"],$_POST["RFC"],$_POST["Tipo_Persona"],json_encode(array("Producto"=>$_POST["ProductoQval"],"Precio"=>$_POST["PrecioQval"])),$_POST["NlicenasQval"],$ID_Empresa_Admyo);
 				//ahora inserto el usuario en la tabla de usauarios de qval
 				$Token = $this->Model_QvalEmpresa->addusuario($IDQval,$_POST["Nombre"],$_POST["Apellidos"],'Usuario Master','0',$_POST["Correo1"],$_POST["Correo1"],$_POST["Clave1"]);
 				$this->Model_Email->bienvenida_qval($_POST["Correo1"],$_POST["Nombre"],$_POST["Apellidos"],$_POST["Clave1"],$_POST["Correo1"],$Token);
-			}
+			}*/
 			//apartir de aqui mando los conrreo para qe se actiben las cuentas
+			 // genero una sesion para esta cuenta
+			 // genero un token para la sesion
+			 $Token = md5($Correo.date('Y-m-d HH:ii:ss'));
 			
+			
+
 			$_data["code"]=0;
 			$_data["ok"]="SUCCESS";
-			$_data["result"]=$ID_Empresa_Admyo;
+			$_data["result"]=$Token;
 
-		}else{
-			$_data["code"]=1990;
-			$_data["ok"]="Error";
-			$_data["result"]=validation_errors();
-		}
-		$this->response(array("response"=>$_data));
+		
+		$this->response(array("response"=>$_data),200);
 	}
 	public function pago_post(){
 		$datos=$this->post();
@@ -197,7 +171,7 @@ class Registro extends REST_Controller
 			$_token_admyo=$datos["pago"]["token"];
 			$respuesta=$this->Model_Conecta_admyo->Tarjeta($_nombre,$_correo,$_token_admyo,$_plan_admyo,$_precio_admyo,$_tel,$_tiempo_admyo);
 			//vdebug($respuesta);
-			if(isset($respuesta["status"]==="active")){
+			if(isset($respuesta["status"])){
 				if($datos["pago"]["para"]==='admyo'){
 					$this->Model_Empresa->update_datos_conecta('admyo',$_ID_Empresa,$respuesta["customer_id"],$respuesta["plan_id"]);
 				}
