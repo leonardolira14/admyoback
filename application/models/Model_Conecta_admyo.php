@@ -7,10 +7,13 @@ class Model_Conecta_admyo extends CI_Model{
 		parent::__construct();
 		$this->load->database();
 		$this->constant="vkq4suQesgv6FVvfcWgc2TRQCmAc80iE";
-		$this->apikey="key_wgxJ3a87hr5zUHBcX1yLuA";
+		$this->apikey= "key_wgxJ3a87hr5zUHBcX1yLuA";
 		$this->description="Plan Qval";
 		$this->currency="MXN";
 		$this->load->model("Model_QvalEmpresa");
+		\Conekta\Conekta::setApiKey($this->apikey);
+		\Conekta\Conekta::setLocale('es');
+		\Conekta\Conekta::setApiVersion("2.0.0");
 	}
 	public function DatosEmpresa($IDEmpresa){
 		$this->db->select('*');
@@ -31,6 +34,40 @@ class Model_Conecta_admyo extends CI_Model{
 		$this->db->from('usuarios');
 		$resp=$this->db->get();
 		return $resp->result()[0]->Correo;
+	}
+	public function create_Customer($nombre, $correo, $token){
+		$customer =  \Conekta\Customer::create( [
+			'name'  => $nombre,
+			'email' => $correo,
+			'payment_sources' => array(array('token_id' => $token, 'type' => 'card'))
+		]);		
+		return $customer->id;
+	}
+	// funcion para actualizar el plan
+	public function updateplan($IDToken_cliente, $idplan){
+		try{
+			$customer = \Conekta\Customer::find($IDToken_cliente);
+			$subscription = $customer->subscription->update([
+				'plan' => $idplan
+			]);
+			return $subscription;
+		}
+		catch (Exception $e) {
+			// Catch all exceptions including validation errors.
+		 return $e->getMessage(); 
+		}
+		
+		
+	}
+	// funcion para agregar un cliente a u pago recurrente con el plan
+	public function addplan($IDToken_cliente,$idplan){
+		$customer = \Conekta\Customer::find($IDToken_cliente);
+		$subscription = $customer->createSubscription(
+			[
+				'plan' => $idplan
+			]
+		);
+		return $subscription;
 	}
 	public function Tarjeta($nombre,$correo,$token,$plan,$precio,$tel,$_tiempo){
 		$precio=floatval($precio)*100;

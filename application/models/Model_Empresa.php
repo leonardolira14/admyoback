@@ -10,6 +10,7 @@ class Model_Empresa extends CI_Model
 	{
 		parent::__construct();
 		$this->load->database();
+		
 
 	}
 
@@ -32,6 +33,8 @@ class Model_Empresa extends CI_Model
 		}
 
 	}
+
+ // funcion para encotrar si una empresa tiene ya algun pago
 	//funcion para obter los daros de la empresa 
 	public function getempresaRFC($RFC_Empresa){
 		$respuesta=$this->db->select("*")->where("RFC='$RFC_Empresa'")->get("empresa");

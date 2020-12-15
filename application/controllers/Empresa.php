@@ -17,6 +17,7 @@ class Empresa extends REST_Controller
     	$this->load->model("Model_Usuario");
 		$this->load->model("Model_Empresa");
 		$this->load->model("Model_Conecta_admyo");
+		$this->load->model('Model_Pagos');
 	}
 	public function updatedatgen_post(){
 		$datos=$this->post();
@@ -293,10 +294,10 @@ class Empresa extends REST_Controller
 	}
 	//funcion para cargar plan
 	public function updateplan_post(){
-		$datos=$this->post();
-		
+		$datos=$this->input->post();
+		//vdebug($datos);
 		// si el plan es gratis solo cambio a gratis la empresa y elimino el plan si es que esta subscrito
-		if($datos["plan_selec"]==="gratis"){
+		if($datos["planid"]==="basic"){
 			$this->Model_Empresa->update_plan($datos["IDEmpresa"],"basic");
 			 // ahora elimino el plan si es que tiene plan
 			 if(isset($datos["datos_cargo"]["plan_id"])){
@@ -306,9 +307,40 @@ class Empresa extends REST_Controller
 			$_data["ok"]="SUCCESS";
 			
 		}else{
-			vdebug($datos);
+			$nombre = $datos['nombre']; 
+			$correo = $datos['correo'];  
+			$token = $datos['token'];  
+			$IDEmpresa = $datos['IDEmpresa'];
+			// consultar si el IDEmpresa ya existe una inscripcion
+			$respuesta = $this->Model_Pagos->checkcliente($IDEmpresa);
+			if($respuesta === false){
+				// si es falso entonces ponemos 
+				// creo un cliente en conecta
+				$respuesta = $this->Model_Conecta_admyo->create_Customer($nombre, $correo, $token);
+				// ahora lo guardo en la base de datos
+				$this->Model_Pagos->addcliente($IDEmpresa,$respuesta);
+
+				// ahora al cliente lo agrgo aun plan para el cargo recurrente 
+				$generaSubcription = $this->Model_Conecta_admyo->addplan($respuesta,$datos['planid']);
+				$this->Model_Conecta_admyo->save_pago($IDEmpresa,'Admyo',$datos['costo'],'active',$respuesta,$datos['planid'],'card');
+				$this->Model_Pagos->updatePlan($datos['planid'], $IDEmpresa);
+				$_data["code"]=0;
+				$_data["ok"]="SUCCESS";
+				
+				$this->response($_data,200);
+			}else{
+				// si selecciono otro plan  cancelo l subtcriocion actual y renuevo con el nuevo plan
+				
+				$this->Model_Conecta_admyo->updateplan($respuesta['IDCliente_pasarela'], $datos['planid']);
+				// ahora actualizo los datos;
+				$this->Model_Conecta_admyo->save_pago($IDEmpresa,'Admyo',$datos['costo'],'active',$respuesta['IDCliente_pasarela'],$datos['planid'],'card');
+				$this->Model_Pagos->updatePlan($datos['planid'], $IDEmpresa);
+				$_data["ok"]="SUCCESS";
+				$_data["code"]=0;
+				$this->response($_data,200);
+
+			}
 		}
-		$data["response"]=$_data;
-		$this->response($data);
+		
 	}
 }
