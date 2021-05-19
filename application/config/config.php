@@ -25,7 +25,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 //$config['base_url'] = 'http://localhost/admyo_web/back/';
  // $config['base_url'] = 'http://localhost/admyo/web/admyoback/';
-$config['base_url'] = 'https://backend.admyo.com/';
+$config['base_url'] = 'https://backend.admyo.com/testbackend/';
 /*
 |--------------------------------------------------------------------------
 | Index File
