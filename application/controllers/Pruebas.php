@@ -20,7 +20,7 @@ class Pruebas extends CI_Controller
 	}
 	public function prueva_correo_activar_usuario(){
 		$categorias = ['basic', 'micro', 'micro_anual', 'empresa', 'empresa_anual'];
-		$correos = ['bernardo@admyo.com','lira053@gmail.com','belen.roldal@admyo.com'];
+		$correos = ['bernardo@admyo.com','lira053@gmail.com','belen.roldan@admyo.com'];
 		foreach($categorias as $categoria){
 			//var_dump($categoria);
 			$this->Model_Email->Activar_Usuario_registro('Token para activar', $correos, 'Leonardo', 'Lira ', $categoria, 'usuarioenadmyo', 'passwprd');
