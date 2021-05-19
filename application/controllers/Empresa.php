@@ -239,6 +239,7 @@ class Empresa extends REST_Controller
 	}
 	function checksession($_Token,$_Empresa){
 		//primerocheco el token
+		
 		$_datos_Tocken=$this->Model_Usuario->checktoken($_Token);
 		$_datos_empresa=$this->Model_Empresa->getempresa($_Empresa);
 		if($_datos_Tocken===false){

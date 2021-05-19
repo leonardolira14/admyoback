@@ -92,7 +92,7 @@ class Registro extends REST_Controller
 			if($data_empresa !== false ){
 				$_data["code"]=0;
 				$_data["ok"]=false;
-				$_data["msj"]="Esta Razon Social ya esta registrada, solicite una aclaración con admyo";
+				$_data["msj"]= "Esta Razón social ya esta registrada, solicite una aclaración con admyo";
 				return $this->response(array("response"=>$_data),404);
 			}
 

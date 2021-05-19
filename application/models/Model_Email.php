@@ -9,12 +9,14 @@ class Model_Email extends CI_Model
 	{
 		parent::__construct();
 		$this->load->library('email');
+
+		
 		$this->config = Array(
 			'protocol' => 'smtp',
-			'smtp_host' => 'smtp.ionos.com',
+			'smtp_host' => 'smtp.ionos.es',
 			'smtp_port' => 587,
-			'smtp_user' => 'infoadmyo@admyo.com',
-			'smtp_pass' => 'Ts25_Admyo246*',
+			'smtp_user' => 'postmaster@admyo.com',
+			'smtp_pass' => '995ba0d74d78c072a69762dc674c1256',
 			'mailtype'  => 'html', 
 			'charset' => 'utf-8',
 			'wordwrap' => TRUE,
@@ -29,7 +31,7 @@ class Model_Email extends CI_Model
 
 		);
 		$this->email->initialize($this->config);
-		$this->email->from('infoadmyo@admyo.com', 'InfoAdmyo');
+		$this->email->from('postmaster@admyo.com', 'InfoAdmyo');
 	}
 	//funcion para enviar un correo a las empresas avisandoa que la imgen de un clinte o proveedor cambio
 	public function aviso_cambio_imagen($_correo_envio,$_Razon_Social,$_Razon_social_cambio,$_tipo){
@@ -232,6 +234,8 @@ class Model_Email extends CI_Model
 		
 		$this->email->message($body);
 		$this->email->send();
+		
+		
 	}
 	//funcion para activar a un usuario cuando se registro
 	public function Activar_Usuario_registro($Token,$_Correo_envio,$_Nombre,$_Apellido,$Plan,$usuario,$clave){

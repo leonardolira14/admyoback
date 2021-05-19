@@ -66,6 +66,7 @@ class Usuario extends REST_Controller
 	//funcion para guadar un usuario
 	public function saveususer_post(){
 		 $datos=$this->post();
+		
 		$_Token=$datos["token"];
 		$_ID_Empresa=$datos["IDEmpresa"];
 		if($this->checksession($_Token,$_ID_Empresa)===false){
