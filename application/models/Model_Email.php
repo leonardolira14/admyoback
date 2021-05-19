@@ -239,6 +239,7 @@ class Model_Email extends CI_Model
 	}
 	//funcion para activar a un usuario cuando se registro
 	public function Activar_Usuario_registro($Token,$_Correo_envio,$_Nombre,$_Apellido,$Plan,$usuario,$clave){
+		
 		switch($Plan){
 			case "basic":
 				$leyenda="El paquete gratuito no tiene fecha de vencimiento. Para poder acceder a los servicios premium tendrá que seleccionar el plan que más le convenga.";
@@ -261,6 +262,7 @@ class Model_Email extends CI_Model
 				$leyenda_precio="Empresarial Anual de 8333.33 MXN + IVA";
 				break;
 		}
+		
 		$this->email->to($_Correo_envio);
 		$this->email->subject("Bienvenido ".$_Nombre." ".$_Apellido.", active su cuenta");
 		$body  =
